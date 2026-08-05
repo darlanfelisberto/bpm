@@ -12,121 +12,56 @@
 
         <h2>#{processoDetalheBean.processo.nome}</h2>
         <p>
-            <h:link outcome="/raias/list" value="Gerenciar raias">
-                <f:param name="processoId" value="#{processoDetalheBean.processoId}"/>
-            </h:link>
-            &#160;|&#160;
-            <h:link outcome="/processos/diagrama" value="Ver diagrama">
-                <f:param name="processoId" value="#{processoDetalheBean.processoId}"/>
-            </h:link>
+            <button type="button" id="btn-salvar-diagrama">Salvar diagrama</button>
+            <span id="status-salvar"></span>
         </p>
 
-        <section>
-            <h3>Etapas do processo</h3>
-            <h:form id="formAtividades">
-                <h:dataTable value="#{processoDetalheBean.atividades}" var="a" styleClass="grid">
-                    <h:column>
-                        <f:facet name="header">Ordem</f:facet>
-                        #{a.ordem}
-                    </h:column>
-                    <h:column>
-                        <f:facet name="header">Nome</f:facet>
-                        #{a.nome}
-                    </h:column>
-                    <h:column>
-                        <f:facet name="header">Raia (responsável)</f:facet>
-                        #{a.raia.nome}
-                    </h:column>
-                    <h:column>
-                        <f:facet name="header">Tipo</f:facet>
-                        #{a.tipoElemento.nomeExibicao}
-                    </h:column>
-                    <h:column>
-                        <f:facet name="header">Ações</f:facet>
-                        <h:commandLink value="Excluir" action="#{processoDetalheBean.excluirAtividade(a)}">
-                            <f:ajax render=":formAtividades :formFluxos"/>
-                        </h:commandLink>
-                    </h:column>
-                </h:dataTable>
+        <div id="bpmn-canvas" style="height: 600px; border: 1px solid #cbd2d9;"></div>
 
-                <h4>Nova etapa</h4>
-                <h:panelGrid columns="2">
-                    <h:outputLabel for="nomeAtiv" value="Nome"/>
-                    <h:inputText id="nomeAtiv" value="#{processoDetalheBean.novaAtividade.nome}" required="true"/>
+        <!--
+          bpmn-js Modeler (edicao completa: paleta, context pad, conexoes)
+          via CDN publico (unpkg). Verificar periodicamente se ha versao
+          mais recente em https://unpkg.com/browse/bpmn-js/dist/
+        -->
+        <script src="https://unpkg.com/bpmn-js@17.11.1/dist/bpmn-modeler.production.min.js"></script>
+        <script>
+            (function () {
+                var processoId = #{processoDetalheBean.processoId};
+                var urlDiagrama = '/api/processos/' + processoId + '/diagrama';
+                var modeler = new BpmnJS({ container: '#bpmn-canvas' });
+                var status = document.getElementById('status-salvar');
 
-                    <h:outputLabel for="ordemAtiv" value="Ordem"/>
-                    <h:inputText id="ordemAtiv" value="#{processoDetalheBean.novaAtividade.ordem}"/>
+                function carregar() {
+                    fetch(urlDiagrama)
+                        .then(function (resp) { return resp.text(); })
+                        .then(function (xml) { return modeler.importXML(xml); })
+                        .then(function () { modeler.get('canvas').zoom('fit-viewport'); })
+                        .catch(function (err) {
+                            console.error('Erro ao carregar o diagrama', err);
+                            status.textContent = 'Erro ao carregar o diagrama.';
+                        });
+                }
 
-                    <h:outputLabel for="raiaAtiv" value="Raia"/>
-                    <h:selectOneMenu id="raiaAtiv" value="#{processoDetalheBean.novaAtividadeRaiaId}">
-                        <f:selectItem itemLabel="Selecione..." itemValue="#{null}"/>
-                        <f:selectItems value="#{processoDetalheBean.raias}" var="r"
-                                       itemLabel="#{r.nome}" itemValue="#{r.id}"/>
-                    </h:selectOneMenu>
-
-                    <h:outputLabel for="tipoAtiv" value="Tipo"/>
-                    <h:selectOneMenu id="tipoAtiv" value="#{processoDetalheBean.novaAtividadeTipoElementoId}" required="true">
-                        <f:selectItem itemLabel="Selecione..." itemValue="#{null}"/>
-                        <f:selectItems value="#{processoDetalheBean.tiposElemento}" var="t"
-                                       itemLabel="#{t.nomeExibicao}" itemValue="#{t.id}"/>
-                    </h:selectOneMenu>
-                </h:panelGrid>
-                <h:commandButton value="Adicionar etapa" action="#{processoDetalheBean.salvarAtividade}">
-                    <f:ajax execute="@form" render=":formAtividades :formFluxos"/>
-                </h:commandButton>
-                <h:messages/>
-            </h:form>
-        </section>
-
-        <section>
-            <h3>Fluxos de sequência</h3>
-            <h:form id="formFluxos">
-                <h:dataTable value="#{processoDetalheBean.fluxos}" var="fs" styleClass="grid">
-                    <h:column>
-                        <f:facet name="header">Origem</f:facet>
-                        #{fs.atividadeOrigem.nome}
-                    </h:column>
-                    <h:column>
-                        <f:facet name="header">Destino</f:facet>
-                        #{fs.atividadeDestino.nome}
-                    </h:column>
-                    <h:column>
-                        <f:facet name="header">Condição</f:facet>
-                        #{fs.rotuloCondicao}
-                    </h:column>
-                    <h:column>
-                        <f:facet name="header">Ações</f:facet>
-                        <h:commandLink value="Excluir" action="#{processoDetalheBean.excluirFluxo(fs)}">
-                            <f:ajax render=":formFluxos"/>
-                        </h:commandLink>
-                    </h:column>
-                </h:dataTable>
-
-                <h4>Novo fluxo</h4>
-                <h:panelGrid columns="2">
-                    <h:outputLabel for="origemFluxo" value="Origem"/>
-                    <h:selectOneMenu id="origemFluxo" value="#{processoDetalheBean.novoFluxoOrigemId}" required="true">
-                        <f:selectItem itemLabel="Selecione..." itemValue="#{null}"/>
-                        <f:selectItems value="#{processoDetalheBean.atividades}" var="ao"
-                                       itemLabel="#{ao.nome}" itemValue="#{ao.id}"/>
-                    </h:selectOneMenu>
-
-                    <h:outputLabel for="destinoFluxo" value="Destino"/>
-                    <h:selectOneMenu id="destinoFluxo" value="#{processoDetalheBean.novoFluxoDestinoId}" required="true">
-                        <f:selectItem itemLabel="Selecione..." itemValue="#{null}"/>
-                        <f:selectItems value="#{processoDetalheBean.atividades}" var="ad"
-                                       itemLabel="#{ad.nome}" itemValue="#{ad.id}"/>
-                    </h:selectOneMenu>
-
-                    <h:outputLabel for="condicaoFluxo" value="Condição (opcional, uso em gateways)"/>
-                    <h:inputText id="condicaoFluxo" value="#{processoDetalheBean.novoFluxo.rotuloCondicao}"/>
-                </h:panelGrid>
-                <h:commandButton value="Adicionar fluxo" action="#{processoDetalheBean.salvarFluxo}">
-                    <f:ajax execute="@form" render=":formFluxos"/>
-                </h:commandButton>
-                <h:messages/>
-            </h:form>
-        </section>
+                document.addEventListener('DOMContentLoaded', function () {
+                    carregar();
+                    document.getElementById('btn-salvar-diagrama').addEventListener('click', function () {
+                        status.textContent = 'Salvando...';
+                        modeler.saveXML({ format: true }).then(function (resultado) {
+                            return fetch(urlDiagrama, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/xml' },
+                                body: resultado.xml
+                            });
+                        }).then(function (resp) {
+                            status.textContent = resp.ok ? 'Salvo.' : 'Erro ao salvar.';
+                        }).catch(function (err) {
+                            console.error('Erro ao salvar o diagrama', err);
+                            status.textContent = 'Erro ao salvar.';
+                        });
+                    });
+                });
+            })();
+        </script>
 
     </ui:define>
 </ui:composition>

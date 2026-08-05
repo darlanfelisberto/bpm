@@ -45,6 +45,9 @@ public class Processo implements Serializable {
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
 
+    @Column(name = "xml_bpmn", columnDefinition = "TEXT")
+    private String xmlBpmn;
+
     public Long getId() {
         return id;
     }
@@ -111,5 +114,13 @@ public class Processo implements Serializable {
 
     public void setAtualizadoEm(LocalDateTime atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
+    }
+
+    public String getXmlBpmn() {
+        return xmlBpmn;
+    }
+
+    public void setXmlBpmn(String xmlBpmn) {
+        this.xmlBpmn = xmlBpmn;
     }
 }
