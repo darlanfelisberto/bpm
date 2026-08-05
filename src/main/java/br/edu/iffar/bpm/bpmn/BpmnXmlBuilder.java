@@ -21,10 +21,10 @@ import java.util.Map;
  */
 public class BpmnXmlBuilder {
 
-    private static final String NS_BPMN = "https://www.omg.org/spec/BPMN/20100524/MODEL";
-    private static final String NS_BPMNDI = "https://www.omg.org/spec/BPMN/20100524/DI";
-    private static final String NS_DI = "https://www.omg.org/spec/DD/20100524/DI";
-    private static final String NS_DC = "https://www.omg.org/spec/DD/20100524/DC";
+    private static final String NS_BPMN = "http://www.omg.org/spec/BPMN/20100524/MODEL";
+    private static final String NS_BPMNDI = "http://www.omg.org/spec/BPMN/20100524/DI";
+    private static final String NS_DI = "http://www.omg.org/spec/DD/20100524/DI";
+    private static final String NS_DC = "http://www.omg.org/spec/DD/20100524/DC";
 
     private static final int LANE_HEIGHT = 150;
     private static final int LANE_X = 160;
