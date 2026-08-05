@@ -13,6 +13,10 @@
              e sem os icones (fonte bpmn-embedded), parecendo inexistentes. -->
         <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.11.1/dist/assets/diagram-js.css"/>
         <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.11.1/dist/assets/bpmn-font/css/bpmn-embedded.css"/>
+        <!-- CSS do painel de propriedades: mora no pacote @bpmn-io/properties-panel
+             (dependencia da qual bpmn-js-properties-panel depende), nao no
+             proprio bpmn-js-properties-panel. -->
+        <link rel="stylesheet" href="https://unpkg.com/@bpmn-io/properties-panel@3.48.0/dist/assets/properties-panel.css"/>
     </ui:define>
     <ui:define name="conteudo">
 
@@ -22,26 +26,43 @@
             <span id="status-salvar"></span>
         </p>
 
-        <div id="bpmn-canvas" style="height: 600px; border: 1px solid #cbd2d9;"></div>
+        <div style="display: flex; gap: 0.5rem;">
+            <div id="bpmn-canvas" style="flex: 1; height: 600px; border: 1px solid #cbd2d9;"></div>
+            <div id="bpmn-properties" style="width: 300px; height: 600px; border: 1px solid #cbd2d9; overflow: auto;"></div>
+        </div>
 
         <!--
-          bpmn-js Modeler (edicao completa: paleta, context pad, conexoes)
-          via CDN publico (unpkg). Verificar periodicamente se ha versao
-          mais recente em https://unpkg.com/browse/bpmn-js/dist/
+          bpmn-js Modeler (edicao completa: paleta, context pad, conexoes) +
+          painel de propriedades, ambos via CDN publico (unpkg). Verificar
+          periodicamente se ha versao mais recente em
+          https://unpkg.com/browse/bpmn-js/dist/ e
+          https://unpkg.com/browse/bpmn-js-properties-panel/dist/
         -->
         <script src="https://unpkg.com/bpmn-js@17.11.1/dist/bpmn-modeler.production.min.js"></script>
+        <script src="https://unpkg.com/bpmn-js-properties-panel@5.63.0/dist/bpmn-js-properties-panel.umd.js"></script>
         <script>
             (function () {
                 var processoId = #{processoDetalheBean.processoId};
                 var urlDiagrama = '/api/processos/' + processoId + '/diagrama';
-                var modeler = new BpmnJS({ container: '#bpmn-canvas' });
                 var status = document.getElementById('status-salvar');
+
+                var painelPropriedades = window.BpmnJSPropertiesPanel;
+                var modeler = new BpmnJS({
+                    container: '#bpmn-canvas',
+                    additionalModules: [
+                        painelPropriedades.BpmnPropertiesPanelModule,
+                        painelPropriedades.BpmnPropertiesProviderModule
+                    ]
+                });
 
                 function carregar() {
                     fetch(urlDiagrama)
                         .then(function (resp) { return resp.text(); })
                         .then(function (xml) { return modeler.importXML(xml); })
-                        .then(function () { modeler.get('canvas').zoom('fit-viewport'); })
+                        .then(function () {
+                            modeler.get('canvas').zoom('fit-viewport');
+                            modeler.get('propertiesPanel').attachTo('#bpmn-properties');
+                        })
                         .catch(function (err) {
                             console.error('Erro ao carregar o diagrama', err);
                             status.textContent = 'Erro ao carregar o diagrama.';
