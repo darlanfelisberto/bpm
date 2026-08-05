@@ -8,6 +8,12 @@
 </f:metadata>
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
     <ui:define name="titulo">Modelagem do processo</ui:define>
+    <ui:define name="head-extra">
+        <!-- CSS do bpmn-js: sem isso a paleta/context pad ficam sem estilo
+             e sem os icones (fonte bpmn-embedded), parecendo inexistentes. -->
+        <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.11.1/dist/assets/diagram-js.css"/>
+        <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.11.1/dist/assets/bpmn-font/css/bpmn-embedded.css"/>
+    </ui:define>
     <ui:define name="conteudo">
 
         <h2>#{processoDetalheBean.processo.nome}</h2>
