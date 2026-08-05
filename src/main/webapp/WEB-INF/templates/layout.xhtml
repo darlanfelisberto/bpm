@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title><ui:insert name="titulo">BPM IFFar</ui:insert></title>
+    <h:outputStylesheet library="css" name="app.css"/>
+</h:head>
+<h:body>
+    <header class="app-header">
+        <h1>BPM IFFar</h1>
+        <nav>
+            <h:link outcome="/index" value="Início"/>
+            <h:link outcome="/macroprocessos/list" value="Macroprocessos"/>
+        </nav>
+    </header>
+    <main class="app-content">
+        <ui:insert name="conteudo"/>
+    </main>
+</h:body>
+</html>

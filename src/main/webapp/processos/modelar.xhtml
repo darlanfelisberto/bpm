@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+<f:metadata>
+    <f:viewParam name="processoId" value="#{processoDetalheBean.processoId}" required="true"/>
+</f:metadata>
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">Modelagem do processo</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>#{processoDetalheBean.processo.nome}</h2>
+        <p>
+            <h:link outcome="/raias/list" value="Gerenciar raias">
+                <f:param name="processoId" value="#{processoDetalheBean.processoId}"/>
+            </h:link>
+            &#160;|&#160;
+            <h:link outcome="/processos/diagrama" value="Ver diagrama">
+                <f:param name="processoId" value="#{processoDetalheBean.processoId}"/>
+            </h:link>
+        </p>
+
+        <section>
+            <h3>Etapas do processo</h3>
+            <h:form id="formAtividades">
+                <h:dataTable value="#{processoDetalheBean.atividades}" var="a" styleClass="grid">
+                    <h:column>
+                        <f:facet name="header">Ordem</f:facet>
+                        #{a.ordem}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Nome</f:facet>
+                        #{a.nome}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Raia (responsável)</f:facet>
+                        #{a.raia.nome}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Tipo</f:facet>
+                        #{a.tipoElemento.nomeExibicao}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Ações</f:facet>
+                        <h:commandLink value="Excluir" action="#{processoDetalheBean.excluirAtividade(a)}">
+                            <f:ajax render=":formAtividades :formFluxos"/>
+                        </h:commandLink>
+                    </h:column>
+                </h:dataTable>
+
+                <h4>Nova etapa</h4>
+                <h:panelGrid columns="2">
+                    <h:outputLabel for="nomeAtiv" value="Nome"/>
+                    <h:inputText id="nomeAtiv" value="#{processoDetalheBean.novaAtividade.nome}" required="true"/>
+
+                    <h:outputLabel for="ordemAtiv" value="Ordem"/>
+                    <h:inputText id="ordemAtiv" value="#{processoDetalheBean.novaAtividade.ordem}"/>
+
+                    <h:outputLabel for="raiaAtiv" value="Raia"/>
+                    <h:selectOneMenu id="raiaAtiv" value="#{processoDetalheBean.novaAtividadeRaiaId}">
+                        <f:selectItem itemLabel="Selecione..." itemValue="#{null}"/>
+                        <f:selectItems value="#{processoDetalheBean.raias}" var="r"
+                                       itemLabel="#{r.nome}" itemValue="#{r.id}"/>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="tipoAtiv" value="Tipo"/>
+                    <h:selectOneMenu id="tipoAtiv" value="#{processoDetalheBean.novaAtividadeTipoElementoId}" required="true">
+                        <f:selectItem itemLabel="Selecione..." itemValue="#{null}"/>
+                        <f:selectItems value="#{processoDetalheBean.tiposElemento}" var="t"
+                                       itemLabel="#{t.nomeExibicao}" itemValue="#{t.id}"/>
+                    </h:selectOneMenu>
+                </h:panelGrid>
+                <h:commandButton value="Adicionar etapa" action="#{processoDetalheBean.salvarAtividade}">
+                    <f:ajax execute="@form" render=":formAtividades :formFluxos"/>
+                </h:commandButton>
+                <h:messages/>
+            </h:form>
+        </section>
+
+        <section>
+            <h3>Fluxos de sequência</h3>
+            <h:form id="formFluxos">
+                <h:dataTable value="#{processoDetalheBean.fluxos}" var="fs" styleClass="grid">
+                    <h:column>
+                        <f:facet name="header">Origem</f:facet>
+                        #{fs.atividadeOrigem.nome}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Destino</f:facet>
+                        #{fs.atividadeDestino.nome}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Condição</f:facet>
+                        #{fs.rotuloCondicao}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Ações</f:facet>
+                        <h:commandLink value="Excluir" action="#{processoDetalheBean.excluirFluxo(fs)}">
+                            <f:ajax render=":formFluxos"/>
+                        </h:commandLink>
+                    </h:column>
+                </h:dataTable>
+
+                <h4>Novo fluxo</h4>
+                <h:panelGrid columns="2">
+                    <h:outputLabel for="origemFluxo" value="Origem"/>
+                    <h:selectOneMenu id="origemFluxo" value="#{processoDetalheBean.novoFluxoOrigemId}" required="true">
+                        <f:selectItem itemLabel="Selecione..." itemValue="#{null}"/>
+                        <f:selectItems value="#{processoDetalheBean.atividades}" var="ao"
+                                       itemLabel="#{ao.nome}" itemValue="#{ao.id}"/>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="destinoFluxo" value="Destino"/>
+                    <h:selectOneMenu id="destinoFluxo" value="#{processoDetalheBean.novoFluxoDestinoId}" required="true">
+                        <f:selectItem itemLabel="Selecione..." itemValue="#{null}"/>
+                        <f:selectItems value="#{processoDetalheBean.atividades}" var="ad"
+                                       itemLabel="#{ad.nome}" itemValue="#{ad.id}"/>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="condicaoFluxo" value="Condição (opcional, uso em gateways)"/>
+                    <h:inputText id="condicaoFluxo" value="#{processoDetalheBean.novoFluxo.rotuloCondicao}"/>
+                </h:panelGrid>
+                <h:commandButton value="Adicionar fluxo" action="#{processoDetalheBean.salvarFluxo}">
+                    <f:ajax execute="@form" render=":formFluxos"/>
+                </h:commandButton>
+                <h:messages/>
+            </h:form>
+        </section>
+
+    </ui:define>
+</ui:composition>
+</html>

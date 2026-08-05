@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+<f:metadata>
+    <f:viewParam name="macroprocessoId" value="#{processoBean.macroprocessoId}" required="true"/>
+</f:metadata>
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">Processos</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>Processos de #{processoBean.macroprocesso.nome}</h2>
+
+        <h:form id="formLista">
+            <h:dataTable value="#{processoBean.lista}" var="p" styleClass="grid">
+                <h:column>
+                    <f:facet name="header">Nome</f:facet>
+                    #{p.nome}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Status</f:facet>
+                    #{p.status}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Ações</f:facet>
+                    <h:link outcome="/processos/modelar" value="Modelar">
+                        <f:param name="processoId" value="#{p.id}"/>
+                    </h:link>
+                    &#160;|&#160;
+                    <h:commandLink value="Excluir" action="#{processoBean.excluir(p)}">
+                        <f:ajax render=":formLista"/>
+                    </h:commandLink>
+                </h:column>
+            </h:dataTable>
+        </h:form>
+
+        <h:form id="formNovo">
+            <h3>Novo processo</h3>
+            <h:panelGrid columns="2">
+                <h:outputLabel for="nome" value="Nome"/>
+                <h:inputText id="nome" value="#{processoBean.novo.nome}" required="true"/>
+
+                <h:outputLabel for="descricao" value="Descrição"/>
+                <h:inputTextarea id="descricao" value="#{processoBean.novo.descricao}"/>
+            </h:panelGrid>
+            <h:commandButton value="Salvar" action="#{processoBean.salvar}">
+                <f:ajax execute="@form" render=":formLista :formNovo"/>
+            </h:commandButton>
+            <h:messages/>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>
