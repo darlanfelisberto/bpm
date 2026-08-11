@@ -24,22 +24,34 @@
         }
     }
 
+    // Posiciona o popup centralizado no botão (empurrando pra dentro da
+    // viewport quando necessário) e aponta a seta (::before/::after em CSS)
+    // para o centro do botão, mesmo quando o popup precisou ser deslocado.
     function posicionar(popup, elemento) {
         var retanguloLink = elemento.getBoundingClientRect();
         var retanguloPopup = popup.getBoundingClientRect();
+        var margemSeta = 14;
+
         var espacoAbaixo = window.innerHeight - retanguloLink.bottom;
+        var ficaAbaixo = espacoAbaixo >= retanguloPopup.height + 10;
 
-        var topo = espacoAbaixo >= retanguloPopup.height + 8
-            ? window.scrollY + retanguloLink.bottom + 6
-            : window.scrollY + retanguloLink.top - retanguloPopup.height - 6;
+        var topo = ficaAbaixo
+            ? window.scrollY + retanguloLink.bottom + 10
+            : window.scrollY + retanguloLink.top - retanguloPopup.height - 10;
 
-        var esquerda = Math.min(
-            window.scrollX + retanguloLink.left,
-            window.scrollX + document.documentElement.clientWidth - retanguloPopup.width - 8
-        );
+        var centroBotao = window.scrollX + retanguloLink.left + retanguloLink.width / 2;
+        var esquerdaIdeal = centroBotao - retanguloPopup.width / 2;
+        var esquerdaMin = window.scrollX + 8;
+        var esquerdaMax = window.scrollX + document.documentElement.clientWidth - retanguloPopup.width - 8;
+        var esquerda = Math.min(Math.max(esquerdaIdeal, esquerdaMin), esquerdaMax);
 
         popup.style.top = topo + 'px';
-        popup.style.left = Math.max(8, esquerda) + 'px';
+        popup.style.left = esquerda + 'px';
+        popup.classList.add(ficaAbaixo ? 'box-confirmar-popup--abaixo' : 'box-confirmar-popup--acima');
+
+        var setaEsquerda = centroBotao - esquerda;
+        setaEsquerda = Math.min(Math.max(setaEsquerda, margemSeta), retanguloPopup.width - margemSeta);
+        popup.style.setProperty('--box-seta', setaEsquerda + 'px');
     }
 
     // Confirmação inline (popup perto do elemento), sem bloquear a thread

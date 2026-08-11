@@ -11,6 +11,39 @@
     font-family: inherit;
 }
 
+/* Seta apontando para o botão que abriu o popup: um quadrado de 12px rotacionado
+   45° (mesma cor de fundo/borda do popup), com metade escondida atrás do corpo
+   do popup e as duas bordas "internas" removidas — sobra só a pontinha, que
+   herda borda e sombra corretamente (o truque clássico de triângulo com
+   border-color ficava sem contraste num fundo de página tão claro quanto
+   --color-border). --box-seta é a distância da borda esquerda do popup até o
+   centro do botão, calculada em JS a cada abertura. */
+
+.box-confirmar-popup::after {
+    content: "";
+    position: absolute;
+    left: var(--box-seta, 16px);
+    width: 12px;
+    height: 12px;
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border, #dfe4ea);
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.box-confirmar-popup--abaixo::after {
+    top: -6px;
+    border-right: none;
+    border-bottom: none;
+    box-shadow: -2px -2px 3px -1px rgba(16, 24, 32, 0.1);
+}
+
+.box-confirmar-popup--acima::after {
+    bottom: -6px;
+    border-left: none;
+    border-top: none;
+    box-shadow: 2px 2px 3px -1px rgba(16, 24, 32, 0.1);
+}
+
 .box-confirmar-popup p {
     margin: 0 0 0.65rem 0;
     color: var(--color-text, #1f2933);
