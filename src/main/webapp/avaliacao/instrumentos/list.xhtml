@@ -37,9 +37,10 @@
                             <f:param name="instrumentoId" value="#{i.id}"/>
                         </h:link>
                         &#160;|&#160;
-                        <h:link outcome="/avaliacao/instrumentos/responder" value="Responder">
+                        <h:outputLink value="/responder/index.html">
                             <f:param name="instrumentoId" value="#{i.id}"/>
-                        </h:link>
+                            Responder
+                        </h:outputLink>
                         &#160;|&#160;
                         <h:link outcome="/avaliacao/instrumentos/relatorio" value="Relatório">
                             <f:param name="instrumentoId" value="#{i.id}"/>
