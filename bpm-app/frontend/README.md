@@ -8,11 +8,13 @@ instrumento avaliativo. Consome a API REST em `/api/avaliacao/instrumentos/...`
 ## Pré-requisitos
 
 Para **desenvolver** com hot-reload, é preciso ter Node instalado na máquina
-(recomendado: mesma versão do `<version.node>` no `pom.xml` da raiz, hoje
+(recomendado: mesma versão do `<version.node>` no `bpm-app/pom.xml`, hoje
 `v22.17.0`). Para apenas **buildar via Maven**, não precisa de nada: o
 `frontend-maven-plugin` baixa seu próprio Node em `target/` durante o build.
 
 ## Desenvolvimento (hot-reload)
+
+A partir de `bpm-app/` (esta pasta é `bpm-app/frontend/`):
 
 ```bash
 cd frontend
@@ -24,11 +26,17 @@ Abre em `http://localhost:5173/responder/` (o `/responder/` no final vem do
 `base` configurado em `vite.config.ts`, que precisa bater com o contexto onde
 o WAR serve a SPA em produção). O mesmo arquivo já tem um proxy de `/api` para
 `http://localhost:9080`, então as chamadas à API funcionam desde que o backend
-esteja rodando (em outro terminal, na raiz do projeto):
+esteja rodando (em outro terminal, dentro de `bpm-app/`):
 
 ```bash
+cd bpm-app
 set -a && source .env && set +a && mvn -o liberty:run
 ```
+
+Este projeto é multi-módulo (`box` + `bpm-app`, ver `pom.xml` da raiz). Se
+`mvn liberty:run` reclamar que não encontra o artefato `br.edu.iffar:box`,
+rode `mvn install` uma vez a partir da raiz do repositório (não de `bpm-app/`)
+para publicar `box` no repositório Maven local.
 
 Para abrir uma tela específica em dev, use os mesmos parâmetros de URL do app
 em produção, por exemplo:
@@ -42,6 +50,8 @@ para o exemplo já cadastrado). O parâmetro `ref` é preenchido automaticamente
 pelo próprio app (token anônimo ou identificação, ver `src/token.ts`).
 
 ## Build de produção
+
+A partir de `bpm-app/`:
 
 ```bash
 cd frontend
@@ -57,7 +67,7 @@ projeto (abaixo) já faz isso.
 
 ## Build completo (Maven, o caminho normal)
 
-Na raiz do projeto:
+Na raiz do repositório (constrói `box` e `bpm-app` juntos, na ordem certa):
 
 ```bash
 mvn clean package

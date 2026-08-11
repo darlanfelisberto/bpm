@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="jakarta.faces.facelets"
       xmlns:h="jakarta.faces.html"
-      xmlns:f="jakarta.faces.core">
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
 <f:metadata>
     <f:viewParam name="macroprocessoId" value="#{processoBean.macroprocessoId}" required="true"/>
 </f:metadata>
@@ -12,7 +13,7 @@
 
         <h2>Processos de #{processoBean.macroprocesso.nome}</h2>
 
-        <div class="card">
+        <b:panel>
             <h:form id="formLista">
                 <h:dataTable value="#{processoBean.lista}" var="p" styleClass="grid">
                     <h:column>
@@ -35,24 +36,27 @@
                     </h:column>
                 </h:dataTable>
             </h:form>
-        </div>
+        </b:panel>
 
-        <div class="card">
+        <b:panel header="Novo processo">
             <h:form id="formNovo">
-                <h3>Novo processo</h3>
-                <h:panelGrid columns="2" styleClass="form-grid">
-                    <h:outputLabel for="nome" value="Nome"/>
-                    <h:inputText id="nome" value="#{processoBean.novo.nome}" required="true"/>
+                <div class="grid-12">
+                    <div class="campo col-6">
+                        <h:outputLabel for="nome" value="Nome"/>
+                        <h:inputText id="nome" value="#{processoBean.novo.nome}" required="true"/>
+                    </div>
 
-                    <h:outputLabel for="descricao" value="Descrição"/>
-                    <h:inputTextarea id="descricao" value="#{processoBean.novo.descricao}"/>
-                </h:panelGrid>
+                    <div class="campo col-12">
+                        <h:outputLabel for="descricao" value="Descrição"/>
+                        <h:inputTextarea id="descricao" value="#{processoBean.novo.descricao}"/>
+                    </div>
+                </div>
                 <h:commandButton value="Salvar" action="#{processoBean.salvar}">
                     <f:ajax execute="@form" render=":formLista :formNovo"/>
                 </h:commandButton>
                 <h:messages errorClass="msg-error" infoClass="msg-info"/>
             </h:form>
-        </div>
+        </b:panel>
 
     </ui:define>
 </ui:composition>

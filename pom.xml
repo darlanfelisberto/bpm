@@ -5,180 +5,45 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>br.edu.iffar</groupId>
-    <artifactId>bpm</artifactId>
+    <artifactId>bpm-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>pom</packaging>
 
-    <name>IFFar BPM</name>
-    <description>Modelagem assistida de processos organizacionais com geracao automatica de diagrama BPMN</description>
+    <name>IFFar BPM (reactor)</name>
+    <description>Agregador Maven: biblioteca de componentes JSF reutilizavel (box) + aplicacao web (bpm-app)</description>
+
+    <modules>
+        <module>box</module>
+        <module>bpm-app</module>
+    </modules>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
 
         <!-- Verificar no Maven Central se ha versoes mais recentes antes do build -->
         <version.jakartaee-api>11.0.0</version.jakartaee-api>
         <version.faces-api>4.1.0</version.faces-api>
-        <version.liberty-maven-plugin>3.11.2</version.liberty-maven-plugin>
-        <version.flyway>10.20.1</version.flyway>
-        <version.postgresql>42.7.4</version.postgresql>
-        <version.frontend-maven-plugin>1.15.1</version.frontend-maven-plugin>
-        <version.node>v22.17.0</version.node>
-
-        <liberty.var.default.http.port>9080</liberty.var.default.http.port>
-        <liberty.var.default.https.port>9443</liberty.var.default.https.port>
     </properties>
 
-    <dependencies>
-        <!-- Jakarta EE 11 Web Profile: CDI, JPA, JAX-RS, Bean Validation, Faces, etc. -->
-        <!-- Fornecido em runtime pelo Open Liberty; usado apenas para compilacao. -->
-        <dependency>
-            <groupId>jakarta.platform</groupId>
-            <artifactId>jakarta.jakartaee-web-api</artifactId>
-            <version>${version.jakartaee-api}</version>
-            <scope>provided</scope>
-        </dependency>
+    <dependencyManagement>
+        <dependencies>
+            <!-- box: biblioteca de componentes Jakarta Faces deste reactor -->
+            <dependency>
+                <groupId>br.edu.iffar</groupId>
+                <artifactId>box</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
-        <!-- Jakarta Faces 4.1 (parte administrativa) -->
-        <dependency>
-            <groupId>jakarta.faces</groupId>
-            <artifactId>jakarta.faces-api</artifactId>
-            <version>${version.faces-api}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Driver JDBC do banco relacional (schema em src/main/resources/db/migration usa sintaxe PostgreSQL).
-             scope=provided: o jar e copiado para lib/global do servidor pelo liberty-maven-plugin
-             (copyDependencies), nao precisa ir empacotado dentro do WAR. -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${version.postgresql}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Flyway: aplica as migrations em src/main/resources/db/migration -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>${version.flyway}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-            <version>${version.flyway}</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <finalName>bpm</finalName>
-        <plugins>
-            <!-- Compila o app TypeScript/Vite em frontend/ (tela do respondente) antes
-                 do empacotamento, gerando frontend/../target/responder-dist (ver
-                 frontend/vite.config.ts). Baixa seu proprio Node, nao depende do
-                 Node instalado na maquina. -->
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>${version.frontend-maven-plugin}</version>
-                <configuration>
-                    <workingDirectory>frontend</workingDirectory>
-                    <installDirectory>${project.build.directory}</installDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-node-and-npm</id>
-                        <goals>
-                            <goal>install-node-and-npm</goal>
-                        </goals>
-                        <configuration>
-                            <nodeVersion>${version.node}</nodeVersion>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>npm-install</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>install</arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>npm-build</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>run build</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Empacota o build do frontend (target/responder-dist) dentro do WAR,
-                 servido no contexto /responder. -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <webResources>
-                        <resource>
-                            <directory>${project.build.directory}/responder-dist</directory>
-                            <targetPath>responder</targetPath>
-                        </resource>
-                    </webResources>
-                </configuration>
-            </plugin>
-
-            <!-- Executa/empacota a aplicacao no Open Liberty (mvn liberty:dev / liberty:run) -->
-            <plugin>
-                <groupId>io.openliberty.tools</groupId>
-                <artifactId>liberty-maven-plugin</artifactId>
-                <version>${version.liberty-maven-plugin}</version>
-                <configuration>
-                    <!-- Copia o driver JDBC para lib/global do servidor antes de iniciar,
-                         no local referenciado pelo <library> em server.xml -->
-                    <copyDependencies>
-                        <dependencyGroup>
-                            <location>lib/global</location>
-                            <dependency>
-                                <groupId>org.postgresql</groupId>
-                                <artifactId>postgresql</artifactId>
-                            </dependency>
-                        </dependencyGroup>
-                    </copyDependencies>
-                </configuration>
-            </plugin>
-
-            <!-- Aplica as migrations do banco durante o build (mvn flyway:migrate) -->
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>${version.flyway}</version>
-                <configuration>
-                    <url>jdbc:postgresql://localhost:5432/bpm</url>
-                    <user>${APP_DB_USER}</user>
-                    <password>${APP_DB_PASSWORD}</password>
-                    <locations>
-                        <location>classpath:db/migration</location>
-                    </locations>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${version.postgresql}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.flywaydb</groupId>
-                        <artifactId>flyway-database-postgresql</artifactId>
-                        <version>${version.flyway}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
+            <!-- Jakarta Faces 4.1: fornecido em runtime pelo Open Liberty, usado
+                 apenas para compilacao (tanto em box quanto em bpm-app). -->
+            <dependency>
+                <groupId>jakarta.faces</groupId>
+                <artifactId>jakarta.faces-api</artifactId>
+                <version>${version.faces-api}</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

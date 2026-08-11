@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="jakarta.faces.facelets"
-      xmlns:h="jakarta.faces.html">
+      xmlns:h="jakarta.faces.html"
+      xmlns:b="http://iffar.edu.br/box">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
     <ui:define name="conteudo">
 
@@ -9,16 +10,14 @@
         <p>Sistema de apoio à modelagem de processos organizacionais e à aplicação de instrumentos de avaliação do IFFar.</p>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
-            <div class="card">
-                <h3>Modelagem de processos</h3>
+            <b:panel header="Modelagem de processos">
                 <p>Cadastre macroprocessos e modele o fluxo de trabalho diretamente no diagrama BPMN.</p>
                 <h:link outcome="/macroprocessos/list" value="Ver macroprocessos"/>
-            </div>
-            <div class="card">
-                <h3>Avaliações</h3>
+            </b:panel>
+            <b:panel header="Avaliações">
                 <p>Cadastre instrumentos avaliativos, colete respostas e acompanhe relatórios de participação.</p>
                 <h:link outcome="/avaliacao/instrumentos/list" value="Ver instrumentos"/>
-            </div>
+            </b:panel>
         </div>
 
     </ui:define>

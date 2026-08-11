@@ -3,14 +3,15 @@
       xmlns:ui="jakarta.faces.facelets"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:p="jakarta.faces.passthrough">
+      xmlns:p="jakarta.faces.passthrough"
+      xmlns:b="http://iffar.edu.br/box">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
     <ui:define name="titulo">Instrumentos avaliativos</ui:define>
     <ui:define name="conteudo">
 
         <h2>Instrumentos avaliativos</h2>
 
-        <div class="card">
+        <b:panel>
             <h:form id="formLista">
                 <h:dataTable value="#{instrumentoBean.lista}" var="i" styleClass="grid">
                     <h:column>
@@ -52,49 +53,62 @@
                     </h:column>
                 </h:dataTable>
             </h:form>
-        </div>
+        </b:panel>
 
-        <div class="card">
+        <b:panel header="Novo instrumento">
             <h:form id="formNovo">
-                <h3>Novo instrumento</h3>
-                <h:panelGrid columns="2" styleClass="form-grid">
-                    <h:outputLabel for="titulo" value="Título"/>
-                    <h:inputText id="titulo" value="#{instrumentoBean.novo.titulo}" required="true"/>
+                <div class="grid-12">
+                    <div class="campo col-12">
+                        <h:outputLabel for="titulo" value="Título"/>
+                        <h:inputText id="titulo" value="#{instrumentoBean.novo.titulo}" required="true"/>
+                    </div>
 
-                    <h:outputLabel for="descricao" value="Descrição"/>
-                    <h:inputTextarea id="descricao" value="#{instrumentoBean.novo.descricao}"/>
+                    <div class="campo col-12">
+                        <h:outputLabel for="descricao" value="Descrição"/>
+                        <h:inputTextarea id="descricao" value="#{instrumentoBean.novo.descricao}"/>
+                    </div>
 
-                    <h:outputLabel for="dataInicio" value="Início"/>
-                    <h:inputText id="dataInicio" value="#{instrumentoBean.novo.dataInicio}" required="true" p:type="datetime-local">
-                        <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
-                    </h:inputText>
+                    <div class="campo col-6">
+                        <h:outputLabel for="dataInicio" value="Início"/>
+                        <h:inputText id="dataInicio" value="#{instrumentoBean.novo.dataInicio}" required="true" p:type="datetime-local">
+                            <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
+                        </h:inputText>
+                    </div>
 
-                    <h:outputLabel for="dataFim" value="Término"/>
-                    <h:inputText id="dataFim" value="#{instrumentoBean.novo.dataFim}" required="true" p:type="datetime-local">
-                        <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
-                    </h:inputText>
+                    <div class="campo col-6">
+                        <h:outputLabel for="dataFim" value="Término"/>
+                        <h:inputText id="dataFim" value="#{instrumentoBean.novo.dataFim}" required="true" p:type="datetime-local">
+                            <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
+                        </h:inputText>
+                    </div>
 
-                    <h:outputLabel for="publicoAlvoTipo" value="Público-alvo"/>
-                    <h:selectOneMenu id="publicoAlvoTipo" value="#{instrumentoBean.novo.publicoAlvoTipo}" required="true">
-                        <f:selectItem itemLabel="Indivíduo" itemValue="INDIVIDUO"/>
-                        <f:selectItem itemLabel="Turma" itemValue="TURMA"/>
-                        <f:selectItem itemLabel="Curso" itemValue="CURSO"/>
-                        <f:selectItem itemLabel="Campus" itemValue="CAMPUS"/>
-                        <f:selectItem itemLabel="Instituição" itemValue="INSTITUICAO"/>
-                    </h:selectOneMenu>
+                    <div class="campo col-6">
+                        <h:outputLabel for="publicoAlvoTipo" value="Público-alvo"/>
+                        <h:selectOneMenu id="publicoAlvoTipo" value="#{instrumentoBean.novo.publicoAlvoTipo}" required="true">
+                            <f:selectItem itemLabel="Indivíduo" itemValue="INDIVIDUO"/>
+                            <f:selectItem itemLabel="Turma" itemValue="TURMA"/>
+                            <f:selectItem itemLabel="Curso" itemValue="CURSO"/>
+                            <f:selectItem itemLabel="Campus" itemValue="CAMPUS"/>
+                            <f:selectItem itemLabel="Instituição" itemValue="INSTITUICAO"/>
+                        </h:selectOneMenu>
+                    </div>
 
-                    <h:outputLabel for="publicoAlvoDescricao" value="Detalhe do público-alvo"/>
-                    <h:inputText id="publicoAlvoDescricao" value="#{instrumentoBean.novo.publicoAlvoDescricao}"/>
+                    <div class="campo col-6">
+                        <h:outputLabel for="publicoAlvoDescricao" value="Detalhe do público-alvo"/>
+                        <h:inputText id="publicoAlvoDescricao" value="#{instrumentoBean.novo.publicoAlvoDescricao}"/>
+                    </div>
 
-                    <h:outputLabel for="anonimo" value="Respostas anônimas"/>
-                    <h:selectBooleanCheckbox id="anonimo" value="#{instrumentoBean.novo.anonimo}"/>
-                </h:panelGrid>
+                    <div class="campo col-6">
+                        <h:outputLabel for="anonimo" value="Respostas anônimas"/>
+                        <h:selectBooleanCheckbox id="anonimo" value="#{instrumentoBean.novo.anonimo}"/>
+                    </div>
+                </div>
                 <h:commandButton value="Salvar" action="#{instrumentoBean.salvar}">
                     <f:ajax execute="@form" render=":formLista :formNovo"/>
                 </h:commandButton>
                 <h:messages errorClass="msg-error" infoClass="msg-info"/>
             </h:form>
-        </div>
+        </b:panel>
 
     </ui:define>
 </ui:composition>

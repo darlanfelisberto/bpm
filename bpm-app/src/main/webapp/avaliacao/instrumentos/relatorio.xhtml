@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="jakarta.faces.facelets"
       xmlns:h="jakarta.faces.html"
-      xmlns:f="jakarta.faces.core">
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
 <f:metadata>
     <f:viewParam name="instrumentoId" value="#{relatorioBean.instrumentoId}" required="true"/>
 </f:metadata>
@@ -12,15 +13,15 @@
 
         <h2>#{relatorioBean.instrumento.titulo}</h2>
 
-        <div class="card">
+        <b:panel>
             <p>
                 Respostas completas: <strong>#{relatorioBean.totalCompletas}</strong>
                 &#160;|&#160;
                 Rascunhos em andamento: <strong>#{relatorioBean.totalParciais}</strong>
             </p>
-        </div>
+        </b:panel>
 
-        <div class="card">
+        <b:panel>
             <ui:repeat value="#{relatorioBean.instrumento.grupos}" var="g">
                 <h3>#{g.titulo}</h3>
 
@@ -46,7 +47,7 @@
                     </p>
                 </ui:repeat>
             </ui:repeat>
-        </div>
+        </b:panel>
 
     </ui:define>
 </ui:composition>
