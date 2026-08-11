@@ -108,4 +108,26 @@
 
         return false;
     };
+
+    // Alternativa sem nenhum componente/behavior do Faces: qualquer link ou
+    // botão com o atributo data-box-confirm já ganha a confirmação, só
+    // renderizando o atributo (ex.: p:data-box-confirm="Excluir X?" em cima
+    // de um h:commandLink comum). Um único listener delegado no document,
+    // na fase de captura — roda ANTES do onclick do próprio elemento (o
+    // gerado pelo JSF pra ajax, se houver), então dá pra bloquear com
+    // stopImmediatePropagation() no primeiro clique e deixar passar
+    // normalmente depois de confirmado, sem precisar de tag/behavior nenhuma
+    // do lado do Java. Convive sem conflito com b:confirm: um usa este
+    // listener, o outro usa o onclick que o próprio behavior gera; nunca os
+    // dois ao mesmo tempo no mesmo elemento.
+    document.addEventListener('click', function (evento) {
+        var elemento = evento.target.closest('[data-box-confirm]');
+        if (!elemento) {
+            return;
+        }
+        var prossegue = window.boxConfirmar(elemento, evento, elemento.getAttribute('data-box-confirm'));
+        if (!prossegue) {
+            evento.stopImmediatePropagation();
+        }
+    }, true);
 })();

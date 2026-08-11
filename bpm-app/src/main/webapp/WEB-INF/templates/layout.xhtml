@@ -10,6 +10,13 @@
          referencias relativas a fonts/ dentro do CSS funcionarem sem ajuste. -->
     <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.css"/>
     <h:outputStylesheet library="css" name="app.css"/>
+    <!-- confirmar.js/css (lib box): quando usado via b:confirm, o proprio
+         componente puxa esses recursos sozinho (@ResourceDependency). Quando
+         usado via atributo puro data-box-confirm (sem nenhum componente
+         Faces), ninguem mais pede o recurso pra JSF incluir - por isso
+         inclui aqui manualmente, uma vez, pra toda a aplicacao. -->
+    <h:outputStylesheet library="box" name="confirmar.css"/>
+    <h:outputScript library="box" name="confirmar.js"/>
     <ui:insert name="head-extra"/>
 </h:head>
 <h:body>
