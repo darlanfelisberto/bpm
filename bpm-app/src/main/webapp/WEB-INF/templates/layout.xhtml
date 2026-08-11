@@ -5,6 +5,10 @@
       xmlns:ui="jakarta.faces.facelets">
 <h:head>
     <title><ui:insert name="titulo">BPM IFFar</ui:insert></title>
+    <!-- Bootstrap Icons auto-hospedada (webapp/vendor/bootstrap-icons/), servida
+         como arquivo estatico comum (fora do resource handler do JSF) para as
+         referencias relativas a fonts/ dentro do CSS funcionarem sem ajuste. -->
+    <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.css"/>
     <h:outputStylesheet library="css" name="app.css"/>
     <ui:insert name="head-extra"/>
 </h:head>

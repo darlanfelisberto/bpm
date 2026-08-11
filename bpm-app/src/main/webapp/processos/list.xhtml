@@ -3,7 +3,8 @@
       xmlns:ui="jakarta.faces.facelets"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:b="http://iffar.edu.br/box">
+      xmlns:b="http://iffar.edu.br/box"
+      xmlns:p="jakarta.faces.passthrough">
 <f:metadata>
     <f:viewParam name="macroprocessoId" value="#{processoBean.macroprocessoId}" required="true"/>
 </f:metadata>
@@ -30,9 +31,12 @@
                             <f:param name="processoId" value="#{p.id}"/>
                         </h:link>
                         &#160;|&#160;
-                        <h:commandLink value="Excluir" action="#{processoBean.excluir(p)}" styleClass="link-danger">
+                        <b:confirmarLink action="#{processoBean.excluir(p)}" styleClass="link-danger"
+                                          mensagem="Excluir o processo #{p.nome}?"
+                                          p:aria-label="Excluir #{p.nome}" title="Excluir">
+                            <i class="bi bi-trash"/>
                             <f:ajax render=":formLista"/>
-                        </h:commandLink>
+                        </b:confirmarLink>
                     </h:column>
                 </h:dataTable>
             </h:form>

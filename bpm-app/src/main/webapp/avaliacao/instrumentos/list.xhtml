@@ -34,9 +34,16 @@
                     </h:column>
                     <h:column>
                         <f:facet name="header">Ações</f:facet>
-                        <h:link outcome="/avaliacao/instrumentos/editar" value="Editar questões">
+                        <h:link outcome="/avaliacao/instrumentos/editar" p:aria-label="Editar questões: #{i.titulo}" title="Editar questões">
+                            <i class="bi bi-pencil-square"/>
                             <f:param name="instrumentoId" value="#{i.id}"/>
                         </h:link>
+                        <b:confirmarLink action="#{instrumentoBean.excluir(i)}" styleClass="link-danger"
+                                          mensagem="Excluir o instrumento #{i.titulo}? As respostas recebidas também serão apagadas."
+                                          p:aria-label="Excluir #{i.titulo}" title="Excluir">
+                            <i class="bi bi-trash"/>
+                            <f:ajax render=":formLista"/>
+                        </b:confirmarLink>
                         &#160;|&#160;
                         <h:outputLink value="/responder/index.html">
                             <f:param name="instrumentoId" value="#{i.id}"/>
@@ -47,9 +54,7 @@
                             <f:param name="instrumentoId" value="#{i.id}"/>
                         </h:link>
                         &#160;|&#160;
-                        <h:commandLink value="Excluir" action="#{instrumentoBean.excluir(i)}" styleClass="link-danger">
-                            <f:ajax render=":formLista"/>
-                        </h:commandLink>
+                        
                     </h:column>
                 </h:dataTable>
             </h:form>
