@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="jakarta.faces.passthrough">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">Instrumentos avaliativos</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>Instrumentos avaliativos</h2>
+
+        <div class="card">
+            <h:form id="formLista">
+                <h:dataTable value="#{instrumentoBean.lista}" var="i" styleClass="grid">
+                    <h:column>
+                        <f:facet name="header">Título</f:facet>
+                        #{i.titulo}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Período</f:facet>
+                        <h:outputText value="#{i.dataInicio}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
+                        </h:outputText>
+                        &#160;a&#160;
+                        <h:outputText value="#{i.dataFim}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
+                        </h:outputText>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Anônimo</f:facet>
+                        #{i.anonimo ? 'Sim' : 'Não'}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Ações</f:facet>
+                        <h:link outcome="/avaliacao/instrumentos/editar" value="Editar questões">
+                            <f:param name="instrumentoId" value="#{i.id}"/>
+                        </h:link>
+                        &#160;|&#160;
+                        <h:link outcome="/avaliacao/instrumentos/responder" value="Responder">
+                            <f:param name="instrumentoId" value="#{i.id}"/>
+                        </h:link>
+                        &#160;|&#160;
+                        <h:link outcome="/avaliacao/instrumentos/relatorio" value="Relatório">
+                            <f:param name="instrumentoId" value="#{i.id}"/>
+                        </h:link>
+                        &#160;|&#160;
+                        <h:commandLink value="Excluir" action="#{instrumentoBean.excluir(i)}" styleClass="link-danger">
+                            <f:ajax render=":formLista"/>
+                        </h:commandLink>
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+        </div>
+
+        <div class="card">
+            <h:form id="formNovo">
+                <h3>Novo instrumento</h3>
+                <h:panelGrid columns="2" styleClass="form-grid">
+                    <h:outputLabel for="titulo" value="Título"/>
+                    <h:inputText id="titulo" value="#{instrumentoBean.novo.titulo}" required="true"/>
+
+                    <h:outputLabel for="descricao" value="Descrição"/>
+                    <h:inputTextarea id="descricao" value="#{instrumentoBean.novo.descricao}"/>
+
+                    <h:outputLabel for="dataInicio" value="Início"/>
+                    <h:inputText id="dataInicio" value="#{instrumentoBean.novo.dataInicio}" required="true" p:type="datetime-local">
+                        <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
+                    </h:inputText>
+
+                    <h:outputLabel for="dataFim" value="Término"/>
+                    <h:inputText id="dataFim" value="#{instrumentoBean.novo.dataFim}" required="true" p:type="datetime-local">
+                        <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
+                    </h:inputText>
+
+                    <h:outputLabel for="publicoAlvoTipo" value="Público-alvo"/>
+                    <h:selectOneMenu id="publicoAlvoTipo" value="#{instrumentoBean.novo.publicoAlvoTipo}" required="true">
+                        <f:selectItem itemLabel="Indivíduo" itemValue="INDIVIDUO"/>
+                        <f:selectItem itemLabel="Turma" itemValue="TURMA"/>
+                        <f:selectItem itemLabel="Curso" itemValue="CURSO"/>
+                        <f:selectItem itemLabel="Campus" itemValue="CAMPUS"/>
+                        <f:selectItem itemLabel="Instituição" itemValue="INSTITUICAO"/>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="publicoAlvoDescricao" value="Detalhe do público-alvo"/>
+                    <h:inputText id="publicoAlvoDescricao" value="#{instrumentoBean.novo.publicoAlvoDescricao}"/>
+
+                    <h:outputLabel for="anonimo" value="Respostas anônimas"/>
+                    <h:selectBooleanCheckbox id="anonimo" value="#{instrumentoBean.novo.anonimo}"/>
+                </h:panelGrid>
+                <h:commandButton value="Salvar" action="#{instrumentoBean.salvar}">
+                    <f:ajax execute="@form" render=":formLista :formNovo"/>
+                </h:commandButton>
+                <h:messages errorClass="msg-error" infoClass="msg-info"/>
+            </h:form>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</html>

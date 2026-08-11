@@ -4,8 +4,23 @@
       xmlns:h="jakarta.faces.html">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
     <ui:define name="conteudo">
-        <p>Bem-vindo ao sistema de modelagem de processos organizacionais.</p>
-        <h:link outcome="/macroprocessos/list" value="Ver macroprocessos"/>
+
+        <h2>Bem-vindo</h2>
+        <p>Sistema de apoio à modelagem de processos organizacionais e à aplicação de instrumentos de avaliação do IFFar.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+            <div class="card">
+                <h3>Modelagem de processos</h3>
+                <p>Cadastre macroprocessos e modele o fluxo de trabalho diretamente no diagrama BPMN.</p>
+                <h:link outcome="/macroprocessos/list" value="Ver macroprocessos"/>
+            </div>
+            <div class="card">
+                <h3>Avaliações</h3>
+                <p>Cadastre instrumentos avaliativos, colete respostas e acompanhe relatórios de participação.</p>
+                <h:link outcome="/avaliacao/instrumentos/list" value="Ver instrumentos"/>
+            </div>
+        </div>
+
     </ui:define>
 </ui:composition>
 </html>

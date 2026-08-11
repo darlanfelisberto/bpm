@@ -7,43 +7,49 @@
     <ui:define name="titulo">Macroprocessos</ui:define>
     <ui:define name="conteudo">
 
-        <h:form id="formLista">
-            <h:dataTable value="#{macroprocessoBean.lista}" var="m" styleClass="grid">
-                <h:column>
-                    <f:facet name="header">Nome</f:facet>
-                    #{m.nome}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">Objetivo</f:facet>
-                    #{m.objetivo}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">Ações</f:facet>
-                    <h:link outcome="/processos/list" value="Processos">
-                        <f:param name="macroprocessoId" value="#{m.id}"/>
-                    </h:link>
-                    &#160;|&#160;
-                    <h:commandLink value="Excluir" action="#{macroprocessoBean.excluir(m)}">
-                        <f:ajax render=":formLista"/>
-                    </h:commandLink>
-                </h:column>
-            </h:dataTable>
-        </h:form>
+        <h2>Macroprocessos</h2>
 
-        <h:form id="formNovo">
-            <h3>Novo macroprocesso</h3>
-            <h:panelGrid columns="2">
-                <h:outputLabel for="nome" value="Nome"/>
-                <h:inputText id="nome" value="#{macroprocessoBean.novo.nome}" required="true"/>
+        <div class="card">
+            <h:form id="formLista">
+                <h:dataTable value="#{macroprocessoBean.lista}" var="m" styleClass="grid">
+                    <h:column>
+                        <f:facet name="header">Nome</f:facet>
+                        #{m.nome}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Objetivo</f:facet>
+                        #{m.objetivo}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Ações</f:facet>
+                        <h:link outcome="/processos/list" value="Processos">
+                            <f:param name="macroprocessoId" value="#{m.id}"/>
+                        </h:link>
+                        &#160;|&#160;
+                        <h:commandLink value="Excluir" action="#{macroprocessoBean.excluir(m)}" styleClass="link-danger">
+                            <f:ajax render=":formLista"/>
+                        </h:commandLink>
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+        </div>
 
-                <h:outputLabel for="objetivo" value="Objetivo"/>
-                <h:inputTextarea id="objetivo" value="#{macroprocessoBean.novo.objetivo}"/>
-            </h:panelGrid>
-            <h:commandButton value="Salvar" action="#{macroprocessoBean.salvar}">
-                <f:ajax execute="@form" render=":formLista :formNovo"/>
-            </h:commandButton>
-            <h:messages/>
-        </h:form>
+        <div class="card">
+            <h:form id="formNovo">
+                <h3>Novo macroprocesso</h3>
+                <h:panelGrid columns="2" styleClass="form-grid">
+                    <h:outputLabel for="nome" value="Nome"/>
+                    <h:inputText id="nome" value="#{macroprocessoBean.novo.nome}" required="true"/>
+
+                    <h:outputLabel for="objetivo" value="Objetivo"/>
+                    <h:inputTextarea id="objetivo" value="#{macroprocessoBean.novo.objetivo}"/>
+                </h:panelGrid>
+                <h:commandButton value="Salvar" action="#{macroprocessoBean.salvar}">
+                    <f:ajax execute="@form" render=":formLista :formNovo"/>
+                </h:commandButton>
+                <h:messages errorClass="msg-error" infoClass="msg-info"/>
+            </h:form>
+        </div>
 
     </ui:define>
 </ui:composition>

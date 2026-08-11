@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+<f:metadata>
+    <f:viewParam name="instrumentoId" value="#{relatorioBean.instrumentoId}" required="true"/>
+</f:metadata>
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">Relatório</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>#{relatorioBean.instrumento.titulo}</h2>
+
+        <div class="card">
+            <p>
+                Respostas completas: <strong>#{relatorioBean.totalCompletas}</strong>
+                &#160;|&#160;
+                Rascunhos em andamento: <strong>#{relatorioBean.totalParciais}</strong>
+            </p>
+        </div>
+
+        <div class="card">
+            <ui:repeat value="#{relatorioBean.instrumento.grupos}" var="g">
+                <h3>#{g.titulo}</h3>
+
+                <ui:repeat value="#{g.questoes}" var="q">
+                    <p>
+                        <strong>#{q.enunciado}</strong><br/>
+
+                        <ui:fragment rendered="#{q.tipo == 'ESCALA'}">
+                            Média: #{relatorioBean.mediaQuestao(q)}
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{q.tipo == 'MULTIPLA_ESCOLHA'}">
+                            <ui:repeat value="#{relatorioBean.contagemOpcoes(q)}" var="entrada">
+                                #{entrada.key}: #{entrada.value}<br/>
+                            </ui:repeat>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{q.tipo == 'TEXTO_LIVRE'}">
+                            <ui:repeat value="#{relatorioBean.respostasTexto(q)}" var="texto">
+                                &#8226; #{texto}<br/>
+                            </ui:repeat>
+                        </ui:fragment>
+                    </p>
+                </ui:repeat>
+            </ui:repeat>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</html>

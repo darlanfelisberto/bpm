@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+<f:metadata>
+    <f:viewParam name="instrumentoId" value="#{respostaBean.instrumentoId}" required="true"/>
+    <f:viewParam name="ref" value="#{respostaBean.respondenteRef}"/>
+    <f:event type="preRenderView" listener="#{respostaBean.carregar}"/>
+</f:metadata>
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">Responder instrumento</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>#{respostaBean.instrumento.titulo}</h2>
+        <p>#{respostaBean.instrumento.descricao}</p>
+
+        <div class="card">
+            <ui:fragment rendered="#{empty respostaBean.respondenteRef}">
+                <!-- Sem token na URL ainda: se o instrumento é anônimo, geramos um
+                     identificador aleatório só para permitir retomar o preenchimento
+                     depois (sem ligação com a pessoa); senão pedimos um identificador. -->
+                <ui:fragment rendered="#{respostaBean.instrumento.anonimo}">
+                    <button type="button" id="btn-iniciar-anonimo">Iniciar avaliação anônima</button>
+                    <script>
+                        document.getElementById('btn-iniciar-anonimo').addEventListener('click', function () {
+                            var token = 'anon-' + crypto.randomUUID();
+                            localStorage.setItem('avaliacao-token-#{respostaBean.instrumentoId}', token);
+                            window.location.search = '?instrumentoId=#{respostaBean.instrumentoId}&amp;ref=' + encodeURIComponent(token);
+                        });
+                    </script>
+                </ui:fragment>
+
+                <h:form rendered="#{not respostaBean.instrumento.anonimo}">
+                    <h:panelGrid columns="2" styleClass="form-grid">
+                        <h:outputLabel for="ref" value="Identificação (e-mail ou matrícula)"/>
+                        <h:inputText id="ref" value="#{respostaBean.respondenteRef}" required="true"/>
+                    </h:panelGrid>
+                    <h:commandButton value="Continuar" action="#{respostaBean.carregar}">
+                        <f:ajax execute="@form" render="@form"/>
+                    </h:commandButton>
+                </h:form>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{not empty respostaBean.respondenteRef}">
+
+                <ui:fragment rendered="#{respostaBean.jaEnviada}">
+                    <p class="msg-info"><strong>Resposta já enviada.</strong> Enquanto o período de aplicação estiver aberto, você pode
+                        ajustar suas respostas e enviar novamente.</p>
+                </ui:fragment>
+
+                <h:form id="formResposta">
+                    <ui:repeat value="#{respostaBean.instrumento.grupos}" var="g">
+                        <h3>#{g.titulo}</h3>
+                        <p>#{g.descricao}</p>
+
+                        <ui:repeat value="#{g.questoes}" var="q">
+                            <p>
+                                <strong>#{q.enunciado}</strong>
+                                <ui:fragment rendered="#{q.obrigatoria}"> *</ui:fragment>
+                                <br/>
+
+                                <ui:fragment rendered="#{q.tipo == 'TEXTO_LIVRE'}">
+                                    <h:inputTextarea value="#{respostaBean.textoLivre[q.id]}"/>
+                                </ui:fragment>
+
+                                <ui:fragment rendered="#{q.tipo != 'TEXTO_LIVRE'}">
+                                    <h:selectOneRadio value="#{respostaBean.opcaoEscolhida[q.id]}">
+                                        <f:selectItems value="#{q.opcoes}" var="o" itemLabel="#{o.texto}" itemValue="#{o.id}"/>
+                                    </h:selectOneRadio>
+                                </ui:fragment>
+                            </p>
+                        </ui:repeat>
+                    </ui:repeat>
+
+                    <h:commandButton value="Salvar rascunho" styleClass="btn-secondary" action="#{respostaBean.salvarRascunho}">
+                        <f:ajax execute="@form" render="@form"/>
+                    </h:commandButton>
+                    <h:commandButton value="Enviar" action="#{respostaBean.enviar}">
+                        <f:ajax execute="@form" render="@form"/>
+                    </h:commandButton>
+                    <h:messages errorClass="msg-error" infoClass="msg-info"/>
+                </h:form>
+            </ui:fragment>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</html>

@@ -6,6 +6,7 @@
 
     <persistence-unit name="bpmPU" transaction-type="JTA">
         <jta-data-source>jdbc/bpmDS</jta-data-source>
+        <shared-cache-mode>NONE</shared-cache-mode>
         <properties>
             <!-- O schema é responsabilidade do Flyway (src/main/resources/db/migration) -->
             <property name="jakarta.persistence.schema-generation.database.action" value="none"/>

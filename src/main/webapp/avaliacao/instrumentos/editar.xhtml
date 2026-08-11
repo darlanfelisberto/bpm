@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+<f:metadata>
+    <f:viewParam name="instrumentoId" value="#{instrumentoDetalheBean.instrumentoId}" required="true"/>
+</f:metadata>
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">Editar questões</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>#{instrumentoDetalheBean.instrumento.titulo}</h2>
+
+        <div class="card">
+            <h:form id="formGrupos">
+                <h:dataTable value="#{instrumentoDetalheBean.instrumento.grupos}" var="g" styleClass="grid">
+                    <h:column>
+                        <f:facet name="header">Grupo</f:facet>
+                        <strong>#{g.titulo}</strong> — #{g.descricao}
+
+                        <h:dataTable value="#{g.questoes}" var="q" styleClass="grid">
+                            <h:column>
+                                <f:facet name="header">Questão</f:facet>
+                                #{q.enunciado}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Tipo</f:facet>
+                                #{q.tipo}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Obrigatória</f:facet>
+                                #{q.obrigatoria ? 'Sim' : 'Não'}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Opções</f:facet>
+                                <ui:repeat value="#{q.opcoes}" var="o">
+                                    #{o.texto} (#{o.valor})&#160;
+                                    <h:commandLink value="[remover]" action="#{instrumentoDetalheBean.excluirOpcao(o)}" styleClass="link-danger">
+                                        <f:ajax render=":formGrupos"/>
+                                    </h:commandLink>
+                                    <br/>
+                                </ui:repeat>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Ações</f:facet>
+                                <h:commandLink value="Excluir questão" action="#{instrumentoDetalheBean.excluirQuestao(q)}" styleClass="link-danger">
+                                    <f:ajax render=":formGrupos"/>
+                                </h:commandLink>
+                            </h:column>
+                        </h:dataTable>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Ações</f:facet>
+                        <h:commandLink value="Excluir grupo" action="#{instrumentoDetalheBean.excluirGrupo(g)}" styleClass="link-danger">
+                            <f:ajax render=":formGrupos"/>
+                        </h:commandLink>
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+        </div>
+
+        <div class="card">
+            <h:form id="formNovoGrupo">
+                <h3>Novo grupo de questões</h3>
+                <h:panelGrid columns="2" styleClass="form-grid">
+                    <h:outputLabel for="titulo" value="Título"/>
+                    <h:inputText id="titulo" value="#{instrumentoDetalheBean.novoGrupo.titulo}" required="true"/>
+
+                    <h:outputLabel for="descricao" value="Descrição"/>
+                    <h:inputTextarea id="descricao" value="#{instrumentoDetalheBean.novoGrupo.descricao}"/>
+                </h:panelGrid>
+                <h:commandButton value="Adicionar grupo" action="#{instrumentoDetalheBean.salvarGrupo}">
+                    <f:ajax execute="@form" render=":formGrupos :formNovoGrupo :formNovaQuestao"/>
+                </h:commandButton>
+            </h:form>
+        </div>
+
+        <div class="card">
+            <h:form id="formNovaQuestao">
+                <h3>Nova questão</h3>
+                <h:panelGrid columns="2" styleClass="form-grid">
+                    <h:outputLabel for="grupo" value="Grupo"/>
+                    <h:selectOneMenu id="grupo" value="#{instrumentoDetalheBean.grupoSelecionadoId}" required="true">
+                        <f:selectItems value="#{instrumentoDetalheBean.instrumento.grupos}" var="g"
+                                       itemLabel="#{g.titulo}" itemValue="#{g.id}"/>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="enunciado" value="Enunciado"/>
+                    <h:inputTextarea id="enunciado" value="#{instrumentoDetalheBean.novaQuestao.enunciado}" required="true"/>
+
+                    <h:outputLabel for="tipo" value="Tipo"/>
+                    <h:selectOneMenu id="tipo" value="#{instrumentoDetalheBean.novaQuestao.tipo}" required="true">
+                        <f:selectItems value="#{instrumentoDetalheBean.tiposQuestao}"/>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="obrigatoria" value="Obrigatória"/>
+                    <h:selectBooleanCheckbox id="obrigatoria" value="#{instrumentoDetalheBean.novaQuestao.obrigatoria}"/>
+                </h:panelGrid>
+                <h:commandButton value="Adicionar questão" action="#{instrumentoDetalheBean.salvarQuestao}">
+                    <f:ajax execute="@form" render=":formGrupos :formNovaQuestao :formNovaOpcao"/>
+                </h:commandButton>
+                <h:messages errorClass="msg-error" infoClass="msg-info"/>
+            </h:form>
+        </div>
+
+        <div class="card">
+            <h:form id="formNovaOpcao">
+                <h3>Nova opção (para questões de escala/múltipla escolha)</h3>
+                <h:panelGrid columns="2" styleClass="form-grid">
+                    <h:outputLabel for="questao" value="Questão"/>
+                    <h:selectOneMenu id="questao" value="#{instrumentoDetalheBean.questaoSelecionadaId}" required="true">
+                        <ui:repeat value="#{instrumentoDetalheBean.instrumento.grupos}" var="g">
+                            <f:selectItems value="#{g.questoes}" var="q" itemLabel="#{q.enunciado}" itemValue="#{q.id}"/>
+                        </ui:repeat>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="texto" value="Texto da opção"/>
+                    <h:inputText id="texto" value="#{instrumentoDetalheBean.novaOpcao.texto}" required="true"/>
+
+                    <h:outputLabel for="valor" value="Valor (para cálculo de médias)"/>
+                    <h:inputText id="valor" value="#{instrumentoDetalheBean.novaOpcao.valor}"/>
+                </h:panelGrid>
+                <h:commandButton value="Adicionar opção" action="#{instrumentoDetalheBean.salvarOpcao}">
+                    <f:ajax execute="@form" render=":formGrupos :formNovaOpcao"/>
+                </h:commandButton>
+            </h:form>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</html>
