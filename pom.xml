@@ -25,6 +25,7 @@
         <!-- Verificar no Maven Central se ha versoes mais recentes antes do build -->
         <version.jakartaee-api>11.0.0</version.jakartaee-api>
         <version.faces-api>4.1.0</version.faces-api>
+        <version.el-api>6.0.1</version.el-api>
     </properties>
 
     <dependencyManagement>

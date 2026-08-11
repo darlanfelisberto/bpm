@@ -14,12 +14,18 @@
     <packaging>jar</packaging>
 
     <name>box</name>
-    <description>Componentes Jakarta Faces nativos (sem composite, sem taglib.xml manual), reutilizaveis entre projetos do IFFar</description>
+    <description>Componentes e behaviors Jakarta Faces nativos, reutilizaveis entre projetos do IFFar</description>
 
     <dependencies>
         <dependency>
             <groupId>jakarta.faces</groupId>
             <artifactId>jakarta.faces-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.el</groupId>
+            <artifactId>jakarta.el-api</artifactId>
+            <version>${version.el-api}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

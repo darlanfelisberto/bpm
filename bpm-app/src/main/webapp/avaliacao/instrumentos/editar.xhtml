@@ -38,34 +38,34 @@
                                 <f:facet name="header">Opções</f:facet>
                                 <ui:repeat value="#{q.opcoes}" var="o">
                                     #{o.texto} (#{o.valor})&#160;
-                                    <b:confirmarLink action="#{instrumentoDetalheBean.excluirOpcao(o)}" styleClass="link-danger"
-                                                      mensagem="Remover a opção #{o.texto}?"
-                                                      p:aria-label="Remover opção #{o.texto}" title="Remover opção">
+                                    <h:commandLink action="#{instrumentoDetalheBean.excluirOpcao(o)}" styleClass="link-danger"
+                                                   p:aria-label="Remover opção #{o.texto}" title="Remover opção">
                                         <i class="bi bi-trash"/>
+                                        <b:confirm mensagem="Remover a opção #{o.texto}?"/>
                                         <f:ajax render=":formGrupos"/>
-                                    </b:confirmarLink>
+                                    </h:commandLink>
                                     <br/>
                                 </ui:repeat>
                             </h:column>
                             <h:column>
                                 <f:facet name="header">Ações</f:facet>
-                                <b:confirmarLink action="#{instrumentoDetalheBean.excluirQuestao(q)}" styleClass="link-danger"
-                                                  mensagem="Excluir a questão #{q.enunciado}? As opções e respostas dela também serão apagadas."
-                                                  p:aria-label="Excluir questão #{q.enunciado}" title="Excluir questão">
+                                <h:commandLink action="#{instrumentoDetalheBean.excluirQuestao(q)}" styleClass="link-danger"
+                                               p:aria-label="Excluir questão #{q.enunciado}" title="Excluir questão">
                                     <i class="bi bi-trash"/>
+                                    <b:confirm mensagem="Excluir a questão #{q.enunciado}? As opções e respostas dela também serão apagadas."/>
                                     <f:ajax render=":formGrupos"/>
-                                </b:confirmarLink>
+                                </h:commandLink>
                             </h:column>
                         </h:dataTable>
                     </h:column>
                     <h:column>
                         <f:facet name="header">Ações</f:facet>
-                        <b:confirmarLink action="#{instrumentoDetalheBean.excluirGrupo(g)}" styleClass="link-danger"
-                                          mensagem="Excluir o grupo #{g.titulo}? Todas as questões dele também serão apagadas."
-                                          p:aria-label="Excluir grupo #{g.titulo}" title="Excluir grupo">
+                        <h:commandLink action="#{instrumentoDetalheBean.excluirGrupo(g)}" styleClass="link-danger"
+                                       p:aria-label="Excluir grupo #{g.titulo}" title="Excluir grupo">
                             <i class="bi bi-trash"/>
+                            <b:confirm mensagem="Excluir o grupo #{g.titulo}? Todas as questões dele também serão apagadas."/>
                             <f:ajax render=":formGrupos"/>
-                        </b:confirmarLink>
+                        </h:commandLink>
                     </h:column>
                 </h:dataTable>
             </h:form>

@@ -38,12 +38,12 @@
                             <i class="bi bi-pencil-square"/>
                             <f:param name="instrumentoId" value="#{i.id}"/>
                         </h:link>
-                        <b:confirmarLink action="#{instrumentoBean.excluir(i)}" styleClass="link-danger"
-                                          mensagem="Excluir o instrumento #{i.titulo}? As respostas recebidas também serão apagadas."
-                                          p:aria-label="Excluir #{i.titulo}" title="Excluir">
+                        <h:commandLink action="#{instrumentoBean.excluir(i)}" styleClass="link-danger"
+                                       p:aria-label="Excluir #{i.titulo}" title="Excluir">
                             <i class="bi bi-trash"/>
+                            <b:confirm mensagem="Excluir o instrumento #{i.titulo}? As respostas recebidas também serão apagadas."/>
                             <f:ajax render=":formLista"/>
-                        </b:confirmarLink>
+                        </h:commandLink>
                         &#160;|&#160;
                         <h:outputLink value="/responder/index.html">
                             <f:param name="instrumentoId" value="#{i.id}"/>

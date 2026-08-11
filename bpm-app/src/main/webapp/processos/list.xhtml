@@ -31,12 +31,12 @@
                             <f:param name="processoId" value="#{p.id}"/>
                         </h:link>
                         &#160;|&#160;
-                        <b:confirmarLink action="#{processoBean.excluir(p)}" styleClass="link-danger"
-                                          mensagem="Excluir o processo #{p.nome}?"
-                                          p:aria-label="Excluir #{p.nome}" title="Excluir">
+                        <h:commandLink action="#{processoBean.excluir(p)}" styleClass="link-danger"
+                                       p:aria-label="Excluir #{p.nome}" title="Excluir">
                             <i class="bi bi-trash"/>
+                            <b:confirm mensagem="Excluir o processo #{p.nome}?"/>
                             <f:ajax render=":formLista"/>
-                        </b:confirmarLink>
+                        </h:commandLink>
                     </h:column>
                 </h:dataTable>
             </h:form>

@@ -28,12 +28,12 @@
                             <f:param name="macroprocessoId" value="#{m.id}"/>
                         </h:link>
                         &#160;|&#160;
-                        <b:confirmarLink action="#{macroprocessoBean.excluir(m)}" styleClass="link-danger"
-                                          mensagem="Excluir o macroprocesso #{m.nome}?"
-                                          p:aria-label="Excluir #{m.nome}" title="Excluir">
+                        <h:commandLink action="#{macroprocessoBean.excluir(m)}" styleClass="link-danger"
+                                       p:aria-label="Excluir #{m.nome}" title="Excluir">
                             <i class="bi bi-trash"/>
+                            <b:confirm mensagem="Excluir o macroprocesso #{m.nome}?"/>
                             <f:ajax render=":formLista"/>
-                        </b:confirmarLink>
+                        </h:commandLink>
                     </h:column>
                 </h:dataTable>
             </h:form>
