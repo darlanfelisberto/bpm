@@ -1,0 +1,83 @@
+.box-editor {
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: inherit;
+    background: var(--color-surface, #ffffff);
+}
+
+.box-editor-barra {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.5rem;
+    background: var(--color-bg, #f4f6f8);
+    border-bottom: 1px solid var(--color-border, #dfe4ea);
+}
+
+.box-editor-btn {
+    width: 1.8rem;
+    height: 1.8rem;
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: 6px;
+    background: var(--color-surface, #ffffff);
+    color: var(--color-text, #1f2933);
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    font-family: inherit;
+}
+
+.box-editor-btn:hover {
+    background: var(--color-border, #dfe4ea);
+}
+
+.box-editor-btn-bold {
+    font-weight: 700;
+}
+
+.box-editor-btn-italic {
+    font-style: italic;
+}
+
+.box-editor-btn-underline {
+    text-decoration: underline;
+}
+
+.box-editor-fonte {
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.4rem;
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: 6px;
+    background: var(--color-surface, #ffffff);
+    color: var(--color-text, #1f2933);
+}
+
+.box-editor-cor {
+    width: 1.8rem;
+    height: 1.8rem;
+    padding: 0.1rem;
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: 6px;
+    background: var(--color-surface, #ffffff);
+    cursor: pointer;
+}
+
+.box-editor-conteudo {
+    min-height: 6rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.92rem;
+    color: var(--color-text, #1f2933);
+    outline: none;
+    overflow-y: auto;
+}
+
+.box-editor-conteudo img {
+    max-width: 100%;
+    height: auto;
+}
+
+.box-editor-valor {
+    display: none;
+}

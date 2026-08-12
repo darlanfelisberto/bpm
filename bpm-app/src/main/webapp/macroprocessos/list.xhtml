@@ -20,7 +20,9 @@
                     </h:column>
                     <h:column>
                         <f:facet name="header">Objetivo</f:facet>
-                        #{m.objetivo}
+                        <!-- escape=false: objetivo agora guarda HTML (b:editor).
+                             Conteúdo só é escrito por quem administra macroprocessos. -->
+                        <h:outputText value="#{m.objetivo}" escape="false"/>
                     </h:column>
                     <h:column>
                         <f:facet name="header">Ações</f:facet>
@@ -51,7 +53,7 @@
 
                     <div class="campo col-12">
                         <h:outputLabel for="objetivo" value="Objetivo"/>
-                        <h:inputTextarea id="objetivo" value="#{macroprocessoBean.novo.objetivo}"/>
+                        <b:editor id="objetivo" value="#{macroprocessoBean.novo.objetivo}"/>
                     </div>
                 </div>
                 <h:commandButton value="Salvar" action="#{macroprocessoBean.salvar}">

@@ -26,6 +26,7 @@
         <version.jakartaee-api>11.0.0</version.jakartaee-api>
         <version.faces-api>4.1.0</version.faces-api>
         <version.el-api>6.0.1</version.el-api>
+        <version.jsoup>1.18.1</version.jsoup>
     </properties>
 
     <dependencyManagement>
@@ -44,6 +45,14 @@
                 <artifactId>jakarta.faces-api</artifactId>
                 <version>${version.faces-api}</version>
                 <scope>provided</scope>
+            </dependency>
+
+            <!-- Jsoup: sanitizacao de HTML (box:editor), unico ponto de
+                 defesa contra XSS armazenado no conteudo submetido. -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${version.jsoup}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
