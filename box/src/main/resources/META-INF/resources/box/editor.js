@@ -1,26 +1,26 @@
 (function () {
     'use strict';
 
-    function sincronizar(area) {
-        var wrapper = area.closest('.box-editor');
-        var campoValor = wrapper.querySelector('.box-editor-valor');
-        campoValor.value = area.innerHTML;
+    var FONTES = ['arial', 'georgia', 'times-new-roman', 'courier-new', 'verdana', 'trebuchet-ms'];
+
+    var fontesRegistradas = false;
+
+    function registrarFontes() {
+        if (fontesRegistradas || !window.Quill) {
+            return;
+        }
+        var Font = window.Quill.import('formats/font');
+        Font.whitelist = FONTES;
+        window.Quill.register(Font, true);
+        fontesRegistradas = true;
     }
 
-    function executarComando(area, comando, valor) {
-        area.focus();
-        document.execCommand(comando, false, valor || null);
-        sincronizar(area);
-    }
-
-    function inserirImagem(area, arquivo) {
-        var leitor = new FileReader();
-        leitor.onload = function () {
-            area.focus();
-            document.execCommand('insertImage', false, leitor.result);
-            sincronizar(area);
-        };
-        leitor.readAsDataURL(arquivo);
+    function sincronizar(quill, wrapper) {
+        // getSemanticHTML() em vez de quill.root.innerHTML: gera <ul>/<ol>
+        // e <pre> de verdade e não inclui os marcadores internos do editor
+        // (ex.: <span class="ql-ui" contenteditable="false"> dos itens de
+        // lista), que não fazem sentido fora do Quill.
+        wrapper.querySelector('.box-editor-valor').value = quill.getSemanticHTML();
     }
 
     function iniciarEditor(wrapper) {
@@ -29,47 +29,40 @@
         }
         wrapper.dataset.boxEditorIniciado = 'true';
 
-        var area = wrapper.querySelector('.box-editor-conteudo');
-
-        wrapper.querySelectorAll('[data-box-editor-cmd]').forEach(function (controle) {
-            var comando = controle.getAttribute('data-box-editor-cmd');
-            if (controle.tagName === 'BUTTON') {
-                // mousedown+preventDefault em vez de click: evita que o botão
-                // roube o foco/seleção de texto do contenteditable antes do
-                // comando rodar (senão o execCommand perde onde aplicar).
-                controle.addEventListener('mousedown', function (evento) {
-                    evento.preventDefault();
-                    executarComando(area, comando);
-                });
-            } else {
-                controle.addEventListener('input', function () {
-                    executarComando(area, comando, controle.value);
-                });
+        var quill = new window.Quill(wrapper.querySelector('.box-editor-quill'), {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{header: [1, 2, 3, false]}],
+                    [{font: FONTES}],
+                    [{size: ['small', false, 'large', 'huge']}],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{color: []}, {background: []}],
+                    [{script: 'sub'}, {script: 'super'}],
+                    ['blockquote', 'code-block'],
+                    [{list: 'ordered'}, {list: 'bullet'}],
+                    [{indent: '-1'}, {indent: '+1'}],
+                    [{align: []}],
+                    [{direction: 'rtl'}],
+                    // "video" fora de propósito: geraria um <iframe
+                    // src="..."> com URL livre, fora do controle da lista
+                    // de permissão do sanitizador (ver Editor.java).
+                    ['link', 'image'],
+                    ['clean']
+                ]
             }
         });
 
-        area.addEventListener('input', function () {
-            sincronizar(area);
-        });
-
-        area.addEventListener('paste', function (evento) {
-            var itens = (evento.clipboardData || window.clipboardData).items;
-            for (var i = 0; i < itens.length; i++) {
-                if (itens[i].type.indexOf('image') === 0) {
-                    evento.preventDefault();
-                    inserirImagem(area, itens[i].getAsFile());
-                    return;
-                }
-            }
-            // sem imagem: deixa o paste padrão do navegador acontecer, só
-            // sincroniza o valor logo em seguida.
-            window.setTimeout(function () {
-                sincronizar(area);
-            }, 0);
+        quill.on('text-change', function () {
+            sincronizar(quill, wrapper);
         });
     }
 
     function iniciarTodos(raiz) {
+        if (!window.Quill) {
+            return;
+        }
+        registrarFontes();
         (raiz || document).querySelectorAll('.box-editor').forEach(iniciarEditor);
     }
 
