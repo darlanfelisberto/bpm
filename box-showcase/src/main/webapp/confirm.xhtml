@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box"
+      xmlns:p="jakarta.faces.passthrough">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">b:confirm</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>b:confirm</h2>
+        <p>Confirmação inline (popup perto do elemento clicado, sem bloquear
+            a thread como o <code>confirm()</code> nativo do navegador) antes
+            de seguir com uma ação. Duas formas de usar, sem conflito entre
+            elas na mesma página.</p>
+
+        <h3>1. Como behavior, aninhado num h:commandLink</h3>
+        <p><code>b:confirm</code> é um <code>ClientBehavior</code>: entra
+            dentro de qualquer <code>ActionSource2</code>
+            (<code>h:commandLink</code>, <code>h:commandButton</code>), igual
+            ao <code>f:ajax</code>. Suporta EL — a mensagem pode referenciar a
+            variável da linha (<code>\#{item}</code> abaixo), reavaliada a cada
+            linha mesmo dentro de <code>h:dataTable</code>.</p>
+
+        <h4>Atributos</h4>
+        <table class="descricao-atributos">
+            <tr><th>Atributo</th><th>Obrigatório</th><th>Descrição</th></tr>
+            <tr><td><code>mensagem</code></td><td>Sim</td><td>Texto exibido no popup. Aceita EL.</td></tr>
+        </table>
+
+        <pre class="exemplo-codigo">&lt;h:commandLink action="\#{bean.excluir(item)}" styleClass="link-danger"&gt;
+    Excluir
+    &lt;b:confirm mensagem="Excluir \#{item}?"/&gt;
+    &lt;f:ajax render=":formBehavior"/&gt;
+&lt;/h:commandLink&gt;</pre>
+
+        <h:form id="formBehavior">
+            <table class="grid">
+                <tr><th>Item</th><th>Ações</th></tr>
+                <ui:repeat value="#{confirmDemoBean.itensBehavior}" var="item">
+                    <tr>
+                        <td>#{item}</td>
+                        <td>
+                            <h:commandLink action="#{confirmDemoBean.excluirBehavior(item)}" styleClass="link-danger"
+                                           p:aria-label="Excluir #{item}">
+                                Excluir
+                                <b:confirm mensagem="Excluir #{item}?"/>
+                                <f:ajax render=":formBehavior"/>
+                            </h:commandLink>
+                        </td>
+                    </tr>
+                </ui:repeat>
+            </table>
+        </h:form>
+
+        <h3>2. Como atributo puro, sem componente Faces</h3>
+        <p>Pra quando nem faz sentido ter um componente/behavior Faces: só o
+            atributo <code>data-box-confirm</code> em qualquer link ou botão
+            já ganha a confirmação, pego por um listener genérico já incluído
+            na página (<code>confirmar.js</code>). Menos recurso de servidor
+            (nenhum estado extra de componente), mas não aceita EL direto no
+            atributo — passe o texto já resolvido via <code>p:data-box-confirm</code>.</p>
+
+        <pre class="exemplo-codigo">&lt;h:commandLink action="\#{bean.excluir(item)}" styleClass="link-danger"
+               p:data-box-confirm="Excluir \#{item}?"&gt;
+    Excluir
+    &lt;f:ajax render=":formAtributo"/&gt;
+&lt;/h:commandLink&gt;</pre>
+
+        <h:form id="formAtributo">
+            <table class="grid">
+                <tr><th>Item</th><th>Ações</th></tr>
+                <ui:repeat value="#{confirmDemoBean.itensAtributo}" var="item">
+                    <tr>
+                        <td>#{item}</td>
+                        <td>
+                            <h:commandLink action="#{confirmDemoBean.excluirAtributo(item)}" styleClass="link-danger"
+                                           p:aria-label="Excluir #{item}"
+                                           p:data-box-confirm="Excluir #{item}?">
+                                Excluir
+                                <f:ajax render=":formAtributo"/>
+                            </h:commandLink>
+                        </td>
+                    </tr>
+                </ui:repeat>
+            </table>
+        </h:form>
+
+        <h:form id="formRestaurar">
+            <h:commandButton value="Restaurar listas" action="#{confirmDemoBean.restaurar}">
+                <f:ajax render=":formBehavior :formAtributo"/>
+            </h:commandButton>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

@@ -10,10 +10,12 @@
     <packaging>pom</packaging>
 
     <name>IFFar BPM (reactor)</name>
-    <description>Agregador Maven: biblioteca de componentes JSF reutilizavel (box) + aplicacao web (bpm-app)</description>
+    <description>Agregador Maven: biblioteca de componentes JSF reutilizavel (box), vitrine/documentacao/testes
+        E2E dos componentes (box-showcase) e aplicacao web (bpm-app)</description>
 
     <modules>
         <module>box</module>
+        <module>box-showcase</module>
         <module>bpm-app</module>
     </modules>
 

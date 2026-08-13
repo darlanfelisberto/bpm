@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:b="http://iffar.edu.br/box">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">b:panel</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>b:panel</h2>
+        <p>Quadro com título opcional (equivalente a um card). Componente
+            nativo (<code>UIComponentBase</code>), sem <code>Renderer</code>
+            separado nem <code>*.taglib.xml</code> — a tag é gerada
+            automaticamente por <code>createTag</code>/<code>namespace</code>/
+            <code>tagName</code> na própria classe Java.</p>
+
+        <h4>Atributos</h4>
+        <table class="descricao-atributos">
+            <tr><th>Atributo</th><th>Obrigatório</th><th>Descrição</th></tr>
+            <tr><td><code>header</code></td><td>Não</td><td>Título exibido no topo do quadro. Omitido, o quadro fica sem título.</td></tr>
+        </table>
+
+        <h4>Exemplo — com título</h4>
+        <pre class="exemplo-codigo">&lt;b:panel header="Novo item"&gt;
+    Conteúdo qualquer aqui dentro.
+&lt;/b:panel&gt;</pre>
+        <b:panel header="Novo item">
+            Conteúdo qualquer aqui dentro.
+        </b:panel>
+
+        <h4>Exemplo — sem título</h4>
+        <pre class="exemplo-codigo">&lt;b:panel&gt;
+    Quadro sem título, só o card.
+&lt;/b:panel&gt;</pre>
+        <b:panel>
+            Quadro sem título, só o card.
+        </b:panel>
+
+    </ui:define>
+</ui:composition>
+</html>

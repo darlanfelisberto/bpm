@@ -1,0 +1,16 @@
+<server description="box-showcase">
+
+    <!-- webProfile-11.0 ja inclui Jakarta Faces 4.1 e CDI - so o que os
+         componentes do box e as paginas de demonstracao precisam. Sem
+         dataSource: nenhum componente do box usa banco de dados. -->
+    <featureManager>
+        <feature>webProfile-11.0</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  httpPort="${default.http.port}"
+                  httpsPort="${default.https.port}"/>
+
+    <webApplication location="box-showcase.war" contextRoot="/"/>
+
+</server>

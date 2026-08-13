@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">box-showcase</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>box-showcase</h2>
+        <p>
+            Vitrine dos componentes Jakarta Faces nativos da lib <code>box</code>
+            (módulo <code>br.edu.iffar:box</code>, reutilizável entre projetos do
+            IFFar). Cada página abaixo mostra o componente funcionando de verdade
+            e o trecho de código XHTML pra reproduzi-lo.
+        </p>
+
+        <div class="card">
+            <h3><h:link outcome="/panel" value="b:panel"/></h3>
+            <p>Quadro com título opcional (equivalente a um card).</p>
+        </div>
+
+        <div class="card">
+            <h3><h:link outcome="/confirm" value="b:confirm"/></h3>
+            <p>Confirmação inline antes de uma ação (ex.: excluir), nas duas
+                formas: aninhado num <code>h:commandLink</code>/<code>h:commandButton</code>
+                ou via atributo <code>data-box-confirm</code>, sem nenhum componente Faces.</p>
+        </div>
+
+        <div class="card">
+            <h3><h:link outcome="/editor" value="b:editor"/></h3>
+            <p>Editor de texto rico (Quill): negrito, itálico, sublinhado,
+                tachado, fonte, tamanho, cor, alinhamento, listas, citação,
+                código, link, colar imagens.</p>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</html>

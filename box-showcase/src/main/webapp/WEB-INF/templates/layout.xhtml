@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title><ui:insert name="titulo">box-showcase</ui:insert></title>
+    <h:outputStylesheet library="css" name="app.css"/>
+    <!-- confirmar.js/css (lib box): quando usado via b:confirm, o proprio
+         componente puxa esses recursos sozinho (@ResourceDependency). Quando
+         usado via atributo puro data-box-confirm (sem nenhum componente
+         Faces), ninguem mais pede o recurso pra JSF incluir - por isso
+         inclui aqui manualmente, uma vez, pra toda a aplicacao (mesmo
+         padrao do bpm-app). -->
+    <h:outputStylesheet library="box" name="confirmar.css"/>
+    <h:outputScript library="box" name="confirmar.js"/>
+    <ui:insert name="head-extra"/>
+</h:head>
+<h:body>
+    <header class="app-header">
+        <h1><h:link outcome="/index" value="box-showcase" style="color: inherit; text-decoration: none;"/></h1>
+        <nav>
+            <h:link outcome="/index" value="Início"/>
+            <h:link outcome="/panel" value="b:panel"/>
+            <h:link outcome="/confirm" value="b:confirm"/>
+            <h:link outcome="/editor" value="b:editor"/>
+        </nav>
+    </header>
+    <main class="app-content">
+        <ui:insert name="conteudo"/>
+    </main>
+</h:body>
+</html>

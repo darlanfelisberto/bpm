@@ -7,7 +7,7 @@ Guia para compilar e rodar o BPM IFFar localmente.
 | Ferramenta | Versão usada no desenvolvimento | Observação |
 |---|---|---|
 | JDK | 25 | `maven.compiler.source/target` no `pom.xml` raiz |
-| Maven | 3.9+ | reactor multi-módulo (`box` + `bpm-app`) |
+| Maven | 3.9+ | reactor multi-módulo (`box` + `box-showcase` + `bpm-app`) |
 | PostgreSQL | 17 | banco `bpm`, aplicado via Flyway |
 
 Node/npm **não** precisam ser instalados manualmente: o `frontend-maven-plugin`
@@ -19,12 +19,15 @@ estiver instalado na máquina.
 
 ```
 bpm-parent (pom, agregador)
-├── box       - biblioteca de componentes Jakarta Faces reutilizável (jar)
-└── bpm-app   - aplicação web (war), roda no Open Liberty
+├── box            - biblioteca de componentes Jakarta Faces reutilizável (jar)
+├── box-showcase   - vitrine/documentação de uso dos componentes do box (war,
+│                    sem banco) + onde ficam os testes end-to-end deles
+└── bpm-app        - aplicação web (war), roda no Open Liberty
 ```
 
-`bpm-app` depende de `box`; o Maven resolve isso automaticamente dentro do
-mesmo reactor (não precisa instalar `box` à parte antes).
+`box-showcase` e `bpm-app` dependem de `box`; o Maven resolve isso
+automaticamente dentro do mesmo reactor (não precisa instalar `box` à
+parte antes).
 
 ## 1. Banco de dados
 
@@ -119,7 +122,25 @@ mvn -o flyway:info      # mostra o estado atual das migrations
 mvn -o flyway:migrate   # aplica as pendentes
 ```
 
-## 6. Testes
+## 6. box-showcase: vitrine e documentação dos componentes do box
+
+Uma página de demonstração por componente (`b:panel`, `b:confirm`,
+`b:editor`) — exemplo ao vivo + trecho de código XHTML pra reproduzi-lo +
+descrição dos atributos. É também onde ficam os testes end-to-end que
+garantem que os componentes do `box` continuam funcionando (ver seção 7).
+
+Sem banco de dados — nenhum componente do `box` precisa de persistência.
+
+```bash
+cd box-showcase
+mvn -o liberty:run
+```
+
+- Vitrine: http://localhost:9081
+- Porta diferente da do `bpm-app` (9080): dá pra rodar os dois ao mesmo
+  tempo sem conflito.
+
+## 7. Testes
 
 Duas camadas, que rodam em momentos diferentes do build:
 
@@ -130,11 +151,14 @@ qualquer `mvn test`/`install`/`package` (fase `test`, `maven-surefire-plugin`).
 Cobrem hoje a sanitização do `b:editor` (`Editor.sanitizar()`), o único
 ponto de defesa contra XSS armazenado desse componente.
 
-### End-to-end (`mvn verify -Pe2e`)
+### End-to-end (`mvn verify -Pe2e`, em box-showcase)
 
-`bpm-app/src/e2e-test/java/.../e2e/*IT.java` — Playwright (Java), dirigindo
-um browser real contra a aplicação real. Cobrem fluxos que só existem em
-JS/browser (editor Quill, popups de confirmação, round-trip salvar/exibir).
+`box-showcase/src/e2e-test/java/.../e2e/*IT.java` — Playwright (Java),
+dirigindo um browser real contra a vitrine (não contra o `bpm-app`: os
+testes de componente ficam desacoplados de qualquer regra de negócio,
+rodando direto contra as páginas de demonstração). Cobrem fluxos que só
+existem em JS/browser (editor Quill continuar editável depois de um ajax,
+popups de confirmação nas duas formas de uso, round-trip salvar/exibir).
 
 Isolados no profile Maven `e2e` (**não** ativo por padrão): a fase `verify`
 onde o `maven-failsafe-plugin` roda vem *antes* de `install` no ciclo de
@@ -143,16 +167,12 @@ derrubaria um Liberty de verdade só pra compilar. Pelo mesmo motivo o
 código fonte fica fora de `src/test/java` (sempre compilado, e sem o
 profile faltariam os pacotes `junit-jupiter`/`playwright` no classpath).
 
-Precisa do Postgres local rodando (mesmo banco `bpm` do dia a dia — os
-testes criam e apagam os próprios dados). `mvn verify -Pe2e` cuida do
-resto sozinho: aplica as migrations, cria/instala as features/implanta o
-WAR/sobe o servidor Liberty em background, roda os testes, derruba o
-servidor.
+Sem banco de dados (diferente do `bpm-app`) — `mvn verify -Pe2e` cuida de
+tudo sozinho: cria/instala as features/implanta o WAR/sobe o servidor
+Liberty em background, roda os testes, derruba o servidor.
 
 ```bash
-cd bpm-app
-set -a && source .env && set +a
-cd ..
+cd box-showcase
 mvn -o verify -Pe2e
 ```
 
@@ -161,7 +181,7 @@ mvn -o verify -Pe2e
 padrão de "baixa uma vez, cacheia" das outras libs deste projeto):
 
 ```bash
-cd bpm-app
+cd box-showcase
 mvn -o dependency:build-classpath -Dmdep.outputFile=/tmp/cp.txt -Dmdep.includeScope=test -Pe2e
 java -cp "target/test-classes:target/classes:$(cat /tmp/cp.txt)" \
      com.microsoft.playwright.CLI install chromium
@@ -170,8 +190,8 @@ java -cp "target/test-classes:target/classes:$(cat /tmp/cp.txt)" \
 Em container/CI sem suporte a sandbox de processo (sintoma: `net::ERR_CONNECTION_REFUSED`
 logo na primeira navegação, mesmo com o servidor no ar) o Chromium já é
 iniciado com `--no-sandbox` pelo próprio teste
-(`MacroprocessoEditorIT.iniciarBrowser()`) — não deveria precisar de
-ajuste manual.
+(`PlaywrightSuporte.iniciarBrowser()`) — não deveria precisar de ajuste
+manual.
 
 ## Resumo rápido (depois do primeiro setup)
 

@@ -25,7 +25,6 @@
         <version.postgresql>42.7.4</version.postgresql>
         <version.frontend-maven-plugin>1.15.1</version.frontend-maven-plugin>
         <version.node>v22.17.0</version.node>
-        <version.build-helper-plugin>3.6.1</version.build-helper-plugin>
 
         <liberty.var.default.http.port>9080</liberty.var.default.http.port>
         <liberty.var.default.https.port>9443</liberty.var.default.https.port>
@@ -193,9 +192,7 @@
                 </executions>
             </plugin>
 
-            <!-- Aplica as migrations do banco (mvn flyway:migrate manual, ou
-                 automaticamente dentro do profile e2e - ver <profiles>
-                 abaixo). -->
+            <!-- Aplica as migrations do banco durante o build (mvn flyway:migrate) -->
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
@@ -222,10 +219,7 @@
                 </dependencies>
             </plugin>
 
-            <!-- Executa/empacota a aplicacao no Open Liberty (mvn liberty:dev /
-                 liberty:run pra uso manual, primeiro plano). O profile e2e
-                 (ver <profiles> abaixo) adiciona execucoes start/stop pros
-                 testes end-to-end. -->
+            <!-- Executa/empacota a aplicacao no Open Liberty (mvn liberty:dev / liberty:run) -->
             <plugin>
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
@@ -246,139 +240,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <!-- Testes end-to-end (src/e2e-test/java/.../e2e/*IT.java, Playwright):
-             isolados num profile em vez de ligados direto no build, porque
-             a fase verify (onde o maven-failsafe-plugin roda) vem ANTES de
-             install no ciclo de vida padrao do Maven - sem isolar, todo
-             "mvn install" (inclusive com -DskipTests, que so pula a
-             EXECUCAO dos testes, nao as fases) subiria/derrubaria um
-             Liberty de verdade e exigiria Postgres, so pra compilar. Pelo
-             mesmo motivo o codigo fonte fica fora de src/test/java (sempre
-             compilado): sem isso, so *compilar* o projeto sem o profile
-             ja falharia por falta dos pacotes junit-jupiter/playwright
-             (dependencias abaixo, so presentes com o profile ativo).
-             Ativar com "mvn verify -Pe2e" (ver BUILD.md). Precisa do
-             Postgres local rodando e de APP_DB_USER/APP_DB_PASSWORD no
-             ambiente, igual ao liberty:run manual. -->
-        <profile>
-            <id>e2e</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter</artifactId>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.playwright</groupId>
-                    <artifactId>playwright</artifactId>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>${version.build-helper-plugin}</version>
-                        <executions>
-                            <execution>
-                                <id>adicionar-fonte-dos-testes-e2e</id>
-                                <phase>generate-test-sources</phase>
-                                <goals>
-                                    <goal>add-test-source</goal>
-                                </goals>
-                                <configuration>
-                                    <sources>
-                                        <source>src/e2e-test/java</source>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.flywaydb</groupId>
-                        <artifactId>flyway-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>migrar-antes-dos-testes-e2e</id>
-                                <!-- pre-integration-test, antes do liberty:start
-                                     logo abaixo: precisa do schema pronto antes
-                                     da aplicacao subir. Idempotente. -->
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>migrate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>io.openliberty.tools</groupId>
-                        <artifactId>liberty-maven-plugin</artifactId>
-                        <executions>
-                            <!-- liberty:start sozinho nao cria o servidor, nao
-                                 resolve as features do server.xml nem copia o
-                                 bpm.war pro servidor (diferente de liberty:run/
-                                 dev, que encadeiam create + install-feature +
-                                 deploy por baixo dos panos) - sem estes passos
-                                 o servidor "inicia" sem feature nenhuma
-                                 instalada (webProfile-11.0 incluso) e/ou sem a
-                                 aplicacao implantada (CWWKZ0014W: aplicativo
-                                 nao encontrado em bpm.war, mesmo com a porta
-                                 HTTP respondendo), apesar do log dizer
-                                 "pronto". -->
-                            <execution>
-                                <id>criar-servidor-antes-dos-testes-e2e</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>create</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>resolver-features-antes-dos-testes-e2e</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>install-feature</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>implantar-war-antes-dos-testes-e2e</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>deploy</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>subir-servidor-antes-dos-testes-e2e</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>start</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>derrubar-servidor-depois-dos-testes-e2e</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
