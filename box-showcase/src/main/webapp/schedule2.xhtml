@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">b:schedule2</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>b:schedule2</h2>
+        <p>Mesma ideia do <h:link outcome="/schedule" value="b:schedule"/> (agenda
+            de eventos), mas <strong>sem nenhuma lib externa</strong> — pra comparar
+            o resultado. A grade do mês, a navegação entre meses e o
+            arrastar-e-soltar são escritos na mão em JS vanilla, usando o
+            Drag and Drop nativo do HTML5 (<code>draggable</code>/
+            <code>dragstart</code>/<code>dragover</code>/<code>drop</code>).</p>
+
+        <h4>O que fica de fora, comparado ao b:schedule</h4>
+        <table class="descricao-atributos">
+            <tr><th>Recurso</th><th>b:schedule (FullCalendar)</th><th>b:schedule2 (vanilla)</th></tr>
+            <tr><td>Visão mês</td><td>Sim</td><td>Sim</td></tr>
+            <tr><td>Visão semana/dia (grade de horas)</td><td>Sim</td><td>Não</td></tr>
+            <tr><td>Redimensionar evento</td><td>Sim</td><td>Não</td></tr>
+            <tr><td>Evento de vários dias (barra contínua)</td><td>Sim</td><td>Não — repete o evento em cada dia que ele toca</td></tr>
+            <tr><td>Tamanho do JS carregado</td><td>~80KB (gzip)</td><td>0 — só o schedule2.js daqui</td></tr>
+        </table>
+
+        <h4>Client behaviors (f:ajax aninhado)</h4>
+        <table class="descricao-atributos">
+            <tr><th>Evento</th><th>Dispara quando</th></tr>
+            <tr><td><code>select</code></td><td>clica num dia vazio</td></tr>
+            <tr><td><code>move</code></td><td>arrasta um evento pra outro dia</td></tr>
+            <tr><td><code>click</code></td><td>clica num evento existente</td></tr>
+        </table>
+
+        <h4>Exemplo</h4>
+        <pre class="exemplo-codigo">&lt;b:schedule2 events="\#{bean.eventos}"&gt;
+    &lt;f:ajax event="select" listener="\#{bean.aoSelecionar}" render=":resultado"/&gt;
+    &lt;f:ajax event="move" listener="\#{bean.aoMover}" render=":resultado"/&gt;
+    &lt;f:ajax event="click" listener="\#{bean.aoClicar}" render=":resultado"/&gt;
+&lt;/b:schedule2&gt;</pre>
+
+        <h:form id="formSchedule2">
+            <b:schedule2 events="#{schedule2DemoBean.eventos}">
+                <f:ajax event="select" listener="#{schedule2DemoBean.aoSelecionar}" render=":resultado"/>
+                <f:ajax event="move" listener="#{schedule2DemoBean.aoMover}" render=":resultado"/>
+                <f:ajax event="click" listener="#{schedule2DemoBean.aoClicar}" render=":resultado"/>
+            </b:schedule2>
+        </h:form>
+
+        <h4>Última ação reportada pelo componente</h4>
+        <h:panelGroup id="resultado" layout="block" styleClass="card">
+            <span id="ultima-acao">#{schedule2DemoBean.ultimaAcao}</span>
+        </h:panelGroup>
+
+    </ui:define>
+</ui:composition>
+</html>
