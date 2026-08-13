@@ -119,6 +119,60 @@ mvn -o flyway:info      # mostra o estado atual das migrations
 mvn -o flyway:migrate   # aplica as pendentes
 ```
 
+## 6. Testes
+
+Duas camadas, que rodam em momentos diferentes do build:
+
+### Unitários (`mvn test`)
+
+`box/src/test/` — JUnit 5, sem banco/servidor. Rodam automaticamente em
+qualquer `mvn test`/`install`/`package` (fase `test`, `maven-surefire-plugin`).
+Cobrem hoje a sanitização do `b:editor` (`Editor.sanitizar()`), o único
+ponto de defesa contra XSS armazenado desse componente.
+
+### End-to-end (`mvn verify -Pe2e`)
+
+`bpm-app/src/e2e-test/java/.../e2e/*IT.java` — Playwright (Java), dirigindo
+um browser real contra a aplicação real. Cobrem fluxos que só existem em
+JS/browser (editor Quill, popups de confirmação, round-trip salvar/exibir).
+
+Isolados no profile Maven `e2e` (**não** ativo por padrão): a fase `verify`
+onde o `maven-failsafe-plugin` roda vem *antes* de `install` no ciclo de
+vida do Maven, então sem isolar, todo `mvn install`/`package` subiria e
+derrubaria um Liberty de verdade só pra compilar. Pelo mesmo motivo o
+código fonte fica fora de `src/test/java` (sempre compilado, e sem o
+profile faltariam os pacotes `junit-jupiter`/`playwright` no classpath).
+
+Precisa do Postgres local rodando (mesmo banco `bpm` do dia a dia — os
+testes criam e apagam os próprios dados). `mvn verify -Pe2e` cuida do
+resto sozinho: aplica as migrations, cria/instala as features/implanta o
+WAR/sobe o servidor Liberty em background, roda os testes, derruba o
+servidor.
+
+```bash
+cd bpm-app
+set -a && source .env && set +a
+cd ..
+mvn -o verify -Pe2e
+```
+
+**Primeiro uso**: o Playwright precisa dos binários do Chromium
+(baixados/cacheados em `~/.cache/ms-playwright/`, fora do git — mesmo
+padrão de "baixa uma vez, cacheia" das outras libs deste projeto):
+
+```bash
+cd bpm-app
+mvn -o dependency:build-classpath -Dmdep.outputFile=/tmp/cp.txt -Dmdep.includeScope=test -Pe2e
+java -cp "target/test-classes:target/classes:$(cat /tmp/cp.txt)" \
+     com.microsoft.playwright.CLI install chromium
+```
+
+Em container/CI sem suporte a sandbox de processo (sintoma: `net::ERR_CONNECTION_REFUSED`
+logo na primeira navegação, mesmo com o servidor no ar) o Chromium já é
+iniciado com `--no-sandbox` pelo próprio teste
+(`MacroprocessoEditorIT.iniciarBrowser()`) — não deveria precisar de
+ajuste manual.
+
 ## Resumo rápido (depois do primeiro setup)
 
 ```bash

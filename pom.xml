@@ -30,6 +30,8 @@
         <version.download-maven-plugin>1.13.0</version.download-maven-plugin>
         <version.junit-bom>6.1.3</version.junit-bom>
         <version.surefire-plugin>3.5.6</version.surefire-plugin>
+        <version.failsafe-plugin>3.5.6</version.failsafe-plugin>
+        <version.playwright>1.62.0</version.playwright>
 
         <!-- Bibliotecas JS/CSS de terceiros baixadas no build (nao versionadas -
              ver plugin download-maven-plugin em box/pom.xml e bpm-app/pom.xml).
@@ -82,6 +84,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- Playwright: testes end-to-end (bpm-app/src/test, sufixo *IT,
+                 rodam via maven-failsafe-plugin contra a aplicacao real no
+                 Open Liberty). Baixa os binarios de browser (Chromium) na
+                 primeira execucao, cacheados depois em ~/.cache/ms-playwright -
+                 mesmo padrao de "baixa uma vez, cacheia" do download-maven-plugin
+                 (Quill/Bootstrap Icons). -->
+            <dependency>
+                <groupId>com.microsoft.playwright</groupId>
+                <artifactId>playwright</artifactId>
+                <version>${version.playwright}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -92,6 +106,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${version.surefire-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${version.failsafe-plugin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
