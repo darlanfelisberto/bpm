@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">b:growl</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>b:growl</h2>
+        <p>Mensagens (<code>FacesMessage</code>) exibidas como toasts
+            flutuantes no canto da tela, equivalente ao <code>p:growl</code>
+            do PrimeFaces. Passivo como o <code>h:messages</code>: só lê e
+            exibe as mensagens que já foram adicionadas
+            (<code>FacesContext.addMessage</code>) — quem decide o quê e
+            quando é sempre o bean. Por isso precisa estar no
+            <code>render</code> da ação que adicionou a mensagem, senão ela
+            fica na fila mas nunca aparece.</p>
+
+        <h4>Atributos</h4>
+        <table class="descricao-atributos">
+            <tr><th>Atributo</th><th>Obrigatório</th><th>Descrição</th></tr>
+            <tr><td><code>for</code></td><td>Não</td><td>ClientId cujas mensagens exibir. Omitido, mostra todas (globais e de qualquer componente).</td></tr>
+            <tr><td><code>life</code></td><td>Não</td><td>Milissegundos até o toast sumir sozinho. Padrão <code>3000</code>.</td></tr>
+            <tr><td><code>sticky</code></td><td>Não</td><td>Se <code>true</code>, o toast só some quando o usuário clicar em fechar. Padrão <code>false</code>.</td></tr>
+        </table>
+
+        <h4>Exemplo</h4>
+        <pre class="exemplo-codigo">&lt;b:growl/&gt;
+
+&lt;h:commandButton value="Salvar" action="\#{bean.salvar}"&gt;
+    &lt;f:ajax render=":growl"/&gt;
+&lt;/h:commandButton&gt;</pre>
+
+        <h:form id="formGrowl">
+            <b:growl id="growl"/>
+            <b:growl id="growlFixo" sticky="true"/>
+
+            <div class="acoes">
+                <h:commandButton value="Sucesso (info)" action="#{growlDemoBean.avisarInfo}">
+                    <f:ajax render=":formGrowl:growl"/>
+                </h:commandButton>
+                <h:commandButton value="Alerta (warn)" action="#{growlDemoBean.avisarAlerta}">
+                    <f:ajax render=":formGrowl:growl"/>
+                </h:commandButton>
+                <h:commandButton value="Erro" action="#{growlDemoBean.avisarErro}">
+                    <f:ajax render=":formGrowl:growl"/>
+                </h:commandButton>
+                <h:commandButton value="Fixo (sticky)" action="#{growlDemoBean.avisarFixo}">
+                    <f:ajax render=":formGrowl:growlFixo"/>
+                </h:commandButton>
+            </div>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

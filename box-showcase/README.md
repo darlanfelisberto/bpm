@@ -51,6 +51,7 @@ do repositório para mais detalhes sobre esse mecanismo.)
 | `/panel.xhtml` | `b:panel` | Quadro com título opcional |
 | `/confirm.xhtml` | `b:confirm` | Confirmação inline antes de uma ação, como behavior aninhado num `h:commandLink` e como atributo puro `data-box-confirm` (sem componente Faces) |
 | `/editor.xhtml` | `b:editor` | Editor de texto rico (Quill): negrito, itálico, fonte, cor, listas, colar imagens, etc. |
+| `/growl.xhtml` | `b:growl` | Mensagens (`FacesMessage`) exibidas como toasts flutuantes, equivalente ao `p:growl` |
 | `/schedule.xhtml` | `b:schedule` | Agenda de eventos (FullCalendar): mês/semana/dia, criar/mover/redimensionar evento, clicar num evento |
 | `/schedule2.xhtml` | `b:schedule2` | Mesma ideia do `b:schedule`, sem nenhuma lib externa (só visão de mês, sem redimensionar) — pra comparar |
 
