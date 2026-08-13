@@ -32,4 +32,59 @@
             <artifactId>jsoup</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <!-- src/main/resources continua valendo (comportamento padrao do Maven
+             some se <resources> for declarado, por isso listado aqui de novo)
+             + o vendor/quill baixado pelo download-maven-plugin abaixo, gerado
+             em target/ a cada build (nunca versionado). -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.build.directory}/vendor-download</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- Baixa o Quill (JS/CSS) direto do jsdelivr a cada build, em vez
+                 de versionar os arquivos no git. Pra atualizar: mudar
+                 version.quill no pom.xml raiz e o sha256 correspondente (o
+                 build falha se o arquivo baixado nao bater com o hash
+                 esperado, evitando trocar a lib por engano/adulteracao). -->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>${version.download-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>baixar-quill-js</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://cdn.jsdelivr.net/npm/quill@${version.quill}/dist/quill.js</url>
+                            <outputDirectory>${project.build.directory}/vendor-download/META-INF/resources/box/vendor/quill</outputDirectory>
+                            <outputFileName>quill.js</outputFileName>
+                            <sha256>${quill.js.sha256}</sha256>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>baixar-quill-css</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://cdn.jsdelivr.net/npm/quill@${version.quill}/dist/quill.snow.css</url>
+                            <outputDirectory>${project.build.directory}/vendor-download/META-INF/resources/box/vendor/quill</outputDirectory>
+                            <outputFileName>quill.snow.css</outputFileName>
+                            <sha256>${quill.css.sha256}</sha256>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

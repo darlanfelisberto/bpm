@@ -121,8 +121,9 @@
                 </executions>
             </plugin>
 
-            <!-- Empacota o build do frontend (target/responder-dist) dentro do WAR,
-                 servido no contexto /responder. -->
+            <!-- Empacota o build do frontend (target/responder-dist) e o
+                 Bootstrap Icons baixado pelo download-maven-plugin (ver
+                 abaixo) dentro do WAR. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -132,8 +133,63 @@
                             <directory>${project.build.directory}/responder-dist</directory>
                             <targetPath>responder</targetPath>
                         </resource>
+                        <resource>
+                            <directory>${project.build.directory}/vendor-download</directory>
+                        </resource>
                     </webResources>
                 </configuration>
+            </plugin>
+
+            <!-- Baixa o Bootstrap Icons (CSS + fontes) direto do jsdelivr a
+                 cada build, em vez de versionar os arquivos no git. Pra
+                 atualizar: mudar version.bootstrap-icons no pom.xml raiz e
+                 os sha256 correspondentes (o build falha se o arquivo
+                 baixado nao bater com o hash esperado). -->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>${version.download-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>baixar-bootstrap-icons-css</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://cdn.jsdelivr.net/npm/bootstrap-icons@${version.bootstrap-icons}/font/bootstrap-icons.css</url>
+                            <outputDirectory>${project.build.directory}/vendor-download/vendor/bootstrap-icons</outputDirectory>
+                            <outputFileName>bootstrap-icons.css</outputFileName>
+                            <sha256>${bootstrap-icons.css.sha256}</sha256>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>baixar-bootstrap-icons-woff</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://cdn.jsdelivr.net/npm/bootstrap-icons@${version.bootstrap-icons}/font/fonts/bootstrap-icons.woff</url>
+                            <outputDirectory>${project.build.directory}/vendor-download/vendor/bootstrap-icons/fonts</outputDirectory>
+                            <outputFileName>bootstrap-icons.woff</outputFileName>
+                            <sha256>${bootstrap-icons.woff.sha256}</sha256>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>baixar-bootstrap-icons-woff2</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://cdn.jsdelivr.net/npm/bootstrap-icons@${version.bootstrap-icons}/font/fonts/bootstrap-icons.woff2</url>
+                            <outputDirectory>${project.build.directory}/vendor-download/vendor/bootstrap-icons/fonts</outputDirectory>
+                            <outputFileName>bootstrap-icons.woff2</outputFileName>
+                            <sha256>${bootstrap-icons.woff2.sha256}</sha256>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Executa/empacota a aplicacao no Open Liberty (mvn liberty:dev / liberty:run) -->
