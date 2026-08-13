@@ -63,11 +63,20 @@ automaticamente dentro do reactor.
 - **Antes de escrever testes novos (unitários ou E2E), confirme com o
   usuário.** Nem sempre é o momento certo — pergunte antes de assumir.
 
+## Fluxo de trabalho com o Claude
+
+- **Depois de implementar algo, não sair testando por conta própria nem
+  declarar a tarefa concluída sem validação.** Avisar que está pronto e
+  perguntar se o usuário quer testar e dar feedback, ou se prefere que o
+  Claude teste (ex.: subindo o `box-showcase` e usando browser
+  automation).
+- **Commit/push são só do usuário.** O Claude redige o texto da mensagem
+  de commit (seguindo o padrão abaixo) e entrega pronto — quem roda
+  `git add`/`git commit`/`git push` é o usuário. Não executar esses
+  comandos a menos que o usuário peça explicitamente naquela conversa.
+
 ## Git
 
-- **Nunca dê `git push` sem perguntar antes**, mesmo que o usuário já
-  tenha aprovado pushes anteriores na mesma conversa — confirme a cada
-  novo commit.
 - Commits novos, nunca `--amend` a menos que pedido explicitamente.
 - Mensagens de commit em português, curtas, focadas no "porquê".
 
