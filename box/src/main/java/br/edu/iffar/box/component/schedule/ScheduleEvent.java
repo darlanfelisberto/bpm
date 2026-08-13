@@ -1,4 +1,4 @@
-package br.edu.iffar.box.component;
+package br.edu.iffar.box.component.schedule;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

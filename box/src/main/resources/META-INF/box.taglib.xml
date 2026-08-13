@@ -13,7 +13,7 @@
          no build da view, o que quebra dentro de h:dataTable/ui:repeat. -->
     <tag>
         <tag-name>confirm</tag-name>
-        <handler-class>br.edu.iffar.box.component.ConfirmHandler</handler-class>
+        <handler-class>br.edu.iffar.box.component.confirm.ConfirmHandler</handler-class>
         <attribute>
             <name>mensagem</name>
             <required>false</required>

@@ -1,4 +1,4 @@
-package br.edu.iffar.box.component;
+package br.edu.iffar.box.component.confirm;
 
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.ResourceDependencies;
@@ -36,8 +36,8 @@ import java.util.Map;
  */
 @FacesBehavior(value = Confirm.BEHAVIOR_ID)
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "confirmar.css", target = "head"),
-        @ResourceDependency(library = "box", name = "confirmar.js", target = "head")
+        @ResourceDependency(library = "box", name = "confirm/confirmar.css", target = "head"),
+        @ResourceDependency(library = "box", name = "confirm/confirmar.js", target = "head")
 })
 public class Confirm extends ClientBehaviorBase {
 

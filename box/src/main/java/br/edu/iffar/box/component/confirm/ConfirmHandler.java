@@ -1,4 +1,4 @@
-package br.edu.iffar.box.component;
+package br.edu.iffar.box.component.confirm;
 
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.Application;

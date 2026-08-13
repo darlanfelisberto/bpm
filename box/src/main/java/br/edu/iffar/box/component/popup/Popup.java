@@ -1,4 +1,4 @@
-package br.edu.iffar.box.component;
+package br.edu.iffar.box.component.popup;
 
 import jakarta.faces.application.ResourceDependencies;
 import jakarta.faces.application.ResourceDependency;
@@ -52,9 +52,9 @@ import java.io.IOException;
         tagName = "popup",
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "popup.css", target = "head"),
-        @ResourceDependency(library = "box", name = "box-core.js", target = "head"),
-        @ResourceDependency(library = "box", name = "popup.js", target = "head")
+        @ResourceDependency(library = "box", name = "popup/popup.css", target = "head"),
+        @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
+        @ResourceDependency(library = "box", name = "popup/popup.js", target = "head")
 })
 public class Popup extends UIComponentBase {
 

@@ -1,4 +1,6 @@
-package br.edu.iffar.box.component;
+package br.edu.iffar.box.component.schedule2;
+
+import br.edu.iffar.box.component.schedule.ScheduleEvent;
 
 import jakarta.faces.application.ResourceDependencies;
 import jakarta.faces.application.ResourceDependency;
@@ -51,9 +53,9 @@ import java.util.Map;
         tagName = "schedule2",
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "schedule2.css", target = "head"),
-        @ResourceDependency(library = "box", name = "box-core.js", target = "head"),
-        @ResourceDependency(library = "box", name = "schedule2.js", target = "head")
+        @ResourceDependency(library = "box", name = "schedule2/schedule2.css", target = "head"),
+        @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
+        @ResourceDependency(library = "box", name = "schedule2/schedule2.js", target = "head")
 })
 public class Schedule2 extends UIComponentBase implements ClientBehaviorHolder {
 

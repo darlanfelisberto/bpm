@@ -1,4 +1,4 @@
-package br.edu.iffar.box.component;
+package br.edu.iffar.box.component.panel;
 
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponentBase;

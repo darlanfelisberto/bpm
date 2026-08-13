@@ -1,4 +1,4 @@
-package br.edu.iffar.box.component;
+package br.edu.iffar.box.component.growl;
 
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.application.ResourceDependencies;
@@ -32,9 +32,9 @@ import java.util.Iterator;
         tagName = "growl",
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "growl.css", target = "head"),
-        @ResourceDependency(library = "box", name = "box-core.js", target = "head"),
-        @ResourceDependency(library = "box", name = "growl.js", target = "head")
+        @ResourceDependency(library = "box", name = "growl/growl.css", target = "head"),
+        @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
+        @ResourceDependency(library = "box", name = "growl/growl.js", target = "head")
 })
 public class Growl extends UIComponentBase {
 

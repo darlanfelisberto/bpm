@@ -1,7 +1,7 @@
 package br.edu.iffar.showcase.bean;
 
-import br.edu.iffar.box.component.Schedule;
-import br.edu.iffar.box.component.ScheduleEvent;
+import br.edu.iffar.box.component.schedule.Schedule;
+import br.edu.iffar.box.component.schedule.ScheduleEvent;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.event.AjaxBehaviorEvent;
