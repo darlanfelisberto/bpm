@@ -27,6 +27,16 @@
             <version>${version.el-api}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- JSON-P: serializa os eventos do b:schedule pro JSON que o
+             FullCalendar le, com escaping correto (nao hand-rolled) -
+             fornecido em runtime pelo Open Liberty (parte do
+             webProfile-11.0/jsonp-2.1), so usado pra compilar. -->
+        <dependency>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
+            <version>${version.json-api}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
@@ -87,6 +97,19 @@
                             <outputDirectory>${project.build.directory}/vendor-download/META-INF/resources/box/vendor/quill</outputDirectory>
                             <outputFileName>quill.snow.css</outputFileName>
                             <sha256>${quill.css.sha256}</sha256>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>baixar-fullcalendar-js</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://cdn.jsdelivr.net/npm/fullcalendar@${version.fullcalendar}/index.global.min.js</url>
+                            <outputDirectory>${project.build.directory}/vendor-download/META-INF/resources/box/vendor/fullcalendar</outputDirectory>
+                            <outputFileName>fullcalendar.js</outputFileName>
+                            <sha256>${fullcalendar.js.sha256}</sha256>
                         </configuration>
                     </execution>
                 </executions>

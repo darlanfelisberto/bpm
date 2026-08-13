@@ -55,7 +55,10 @@ abstract class PlaywrightSuporte {
 
     @BeforeEach
     void novaAba() {
-        context = browser.newContext();
+        // Viewport fixo (nao o default do Playwright): testes que calculam
+        // coordenadas de drag a partir de bounding boxes (ex.: ScheduleIT)
+        // precisam de um tamanho de tela previsivel.
+        context = browser.newContext(new Browser.NewContextOptions().setViewportSize(1280, 900));
         page = context.newPage();
     }
 
