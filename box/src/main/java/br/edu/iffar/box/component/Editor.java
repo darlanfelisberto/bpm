@@ -84,13 +84,16 @@ public class Editor extends UIInput {
     private static final Pattern ESTILO_SEGURO = Pattern.compile(
             "(color|background-color):\\s*(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|rgb\\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*\\))\\s*;?\\s*");
 
-    private static String sanitizar(String html) {
+    // Pacote-privado (nao private) de proposito: permite teste unitario
+    // direto (EditorSanitizarTest, mesmo pacote) sem reflection.
+    static String sanitizar(String html) {
         if (html == null) {
             return null;
         }
         Document.OutputSettings semFormatacao = new Document.OutputSettings().prettyPrint(false);
         String limpo = Jsoup.clean(html, "", SAFELIST, semFormatacao);
         Document doc = Jsoup.parseBodyFragment(limpo);
+        doc.outputSettings(semFormatacao);
         for (Element elemento : doc.select("[style]")) {
             if (!ESTILO_SEGURO.matcher(elemento.attr("style").trim()).matches()) {
                 elemento.removeAttr("style");
