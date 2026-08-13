@@ -87,16 +87,5 @@
         (raiz || document).querySelectorAll('.box-growl').forEach(processarWrapper);
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        iniciarTodos(document);
-
-        // Ver editor.js pro motivo desta checagem ficar aqui dentro.
-        if (window.faces && window.faces.ajax && window.faces.ajax.addOnEvent) {
-            window.faces.ajax.addOnEvent(function (dados) {
-                if (dados.status === 'success') {
-                    iniciarTodos(document);
-                }
-            });
-        }
-    });
+    window.Box.aoProntoOuAjax(iniciarTodos);
 })();

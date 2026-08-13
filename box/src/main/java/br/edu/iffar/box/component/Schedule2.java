@@ -52,6 +52,7 @@ import java.util.Map;
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
         @ResourceDependency(library = "box", name = "schedule2.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "schedule2.js", target = "head")
 })
 public class Schedule2 extends UIComponentBase implements ClientBehaviorHolder {

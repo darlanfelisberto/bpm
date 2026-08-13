@@ -13,15 +13,6 @@
         return script ? JSON.parse(script.textContent) : [];
     }
 
-    function disparar(wrapper, nomeEvento, dados) {
-        var opcoes = Object.assign({
-            execute: '@this',
-            render: wrapper.dataset['render' + nomeEvento[0].toUpperCase() + nomeEvento.slice(1)] || '@none',
-            'jakarta.faces.behavior.event': nomeEvento
-        }, dados);
-        window.faces.ajax.request(wrapper.id, null, opcoes);
-    }
-
     function doisDigitos(n) {
         return n < 10 ? '0' + n : '' + n;
     }
@@ -63,163 +54,178 @@
         return semanas;
     }
 
-    function eventosNoDia(eventos, dia) {
-        return eventos.filter(function (evento) {
-            if (!evento.start) {
-                return false;
-            }
-            var inicio = somenteData(new Date(evento.start));
-            var fim = evento.end ? somenteData(new Date(evento.end)) : inicio;
-            return dia >= inicio && dia <= fim;
-        });
-    }
-
-    function moverEvento(estado, eventoId, novoDia) {
-        var evento = estado.eventos.find(function (e) { return e.id === eventoId; });
-        if (!evento) {
-            return;
-        }
-        var inicioOriginal = new Date(evento.start);
-        var diasDeDiferenca = Math.round((novoDia - somenteData(inicioOriginal)) / 86400000);
-        if (diasDeDiferenca === 0) {
-            return;
-        }
-        var novoInicio = somarDias(inicioOriginal, diasDeDiferenca);
-        evento.start = formatarDataHora(novoInicio);
-        var novoFimTexto = evento.start;
-        if (evento.end) {
-            var novoFim = somarDias(new Date(evento.end), diasDeDiferenca);
-            evento.end = formatarDataHora(novoFim);
-            novoFimTexto = evento.end;
+    // Um Schedule2Grade por wrapper .box-schedule2 - guarda o mes/ano em
+    // exibicao e os eventos, e sabe (re)desenhar a grade a partir desse
+    // estado.
+    class Schedule2Grade {
+        constructor(wrapper) {
+            this.wrapper = wrapper;
+            this.eventos = lerEventos(wrapper);
+            var hoje = new Date();
+            this.ano = hoje.getFullYear();
+            this.mes = hoje.getMonth();
         }
 
-        renderizarGrade(estado);
-
-        var dados = {};
-        dados[estado.wrapper.id + '_eventoId'] = eventoId;
-        dados[estado.wrapper.id + '_inicio'] = evento.start;
-        dados[estado.wrapper.id + '_fim'] = novoFimTexto;
-        disparar(estado.wrapper, 'move', dados);
-    }
-
-    function criarCelula(estado, dia) {
-        var celula = document.createElement('div');
-        celula.className = 'box-schedule2-dia';
-        if (dia.getMonth() !== estado.mes) {
-            celula.classList.add('box-schedule2-dia-fora');
-        }
-        var hoje = somenteData(new Date());
-        if (dia.getTime() === hoje.getTime()) {
-            celula.classList.add('box-schedule2-dia-hoje');
-        }
-
-        var numero = document.createElement('span');
-        numero.className = 'box-schedule2-dia-numero';
-        numero.textContent = dia.getDate();
-        celula.appendChild(numero);
-
-        eventosNoDia(estado.eventos, dia).forEach(function (evento) {
-            var chip = document.createElement('div');
-            chip.className = 'box-schedule2-evento';
-            chip.textContent = evento.title;
-            chip.draggable = true;
-            if (evento.color) {
-                chip.style.backgroundColor = evento.color;
-            }
-            chip.addEventListener('dragstart', function (dragEvent) {
-                dragEvent.dataTransfer.setData('text/plain', evento.id);
-                dragEvent.dataTransfer.effectAllowed = 'move';
+        eventosNoDia(dia) {
+            return this.eventos.filter(function (evento) {
+                if (!evento.start) {
+                    return false;
+                }
+                var inicio = somenteData(new Date(evento.start));
+                var fim = evento.end ? somenteData(new Date(evento.end)) : inicio;
+                return dia >= inicio && dia <= fim;
             });
-            chip.addEventListener('click', function (clickEvent) {
-                clickEvent.stopPropagation();
-                var dados = {};
-                dados[estado.wrapper.id + '_eventoId'] = evento.id;
-                disparar(estado.wrapper, 'click', dados);
-            });
-            celula.appendChild(chip);
-        });
+        }
 
-        celula.addEventListener('dragover', function (dragEvent) {
-            dragEvent.preventDefault();
-            dragEvent.dataTransfer.dropEffect = 'move';
-        });
-        celula.addEventListener('drop', function (dropEvent) {
-            dropEvent.preventDefault();
-            var eventoId = dropEvent.dataTransfer.getData('text/plain');
-            moverEvento(estado, eventoId, dia);
-        });
-        celula.addEventListener('click', function () {
+        moverEvento(eventoId, novoDia) {
+            var evento = this.eventos.find(function (e) { return e.id === eventoId; });
+            if (!evento) {
+                return;
+            }
+            var inicioOriginal = new Date(evento.start);
+            var diasDeDiferenca = Math.round((novoDia - somenteData(inicioOriginal)) / 86400000);
+            if (diasDeDiferenca === 0) {
+                return;
+            }
+            var novoInicio = somarDias(inicioOriginal, diasDeDiferenca);
+            evento.start = formatarDataHora(novoInicio);
+            var novoFimTexto = evento.start;
+            if (evento.end) {
+                var novoFim = somarDias(new Date(evento.end), diasDeDiferenca);
+                evento.end = formatarDataHora(novoFim);
+                novoFimTexto = evento.end;
+            }
+
+            this.renderizarGrade();
+
             var dados = {};
-            dados[estado.wrapper.id + '_inicio'] = formatarData(dia);
-            dados[estado.wrapper.id + '_fim'] = formatarData(somarDias(dia, 1));
-            disparar(estado.wrapper, 'select', dados);
-        });
-
-        return celula;
-    }
-
-    function renderizarGrade(estado) {
-        var alvo = estado.wrapper.querySelector('.box-schedule2-calendario');
-        alvo.replaceChildren();
-
-        var cabecalho = document.createElement('div');
-        cabecalho.className = 'box-schedule2-cabecalho';
-
-        var botaoAnterior = document.createElement('button');
-        botaoAnterior.type = 'button';
-        botaoAnterior.textContent = '‹';
-        botaoAnterior.addEventListener('click', function () {
-            estado.mes -= 1;
-            if (estado.mes < 0) {
-                estado.mes = 11;
-                estado.ano -= 1;
-            }
-            renderizarGrade(estado);
-        });
-
-        var botaoProximo = document.createElement('button');
-        botaoProximo.type = 'button';
-        botaoProximo.textContent = '›';
-        botaoProximo.addEventListener('click', function () {
-            estado.mes += 1;
-            if (estado.mes > 11) {
-                estado.mes = 0;
-                estado.ano += 1;
-            }
-            renderizarGrade(estado);
-        });
-
-        var titulo = document.createElement('span');
-        titulo.className = 'box-schedule2-titulo';
-        var textoTitulo = new Date(estado.ano, estado.mes, 1)
-                .toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
-        // so a primeira letra maiuscula ("Agosto de 2026") - text-transform:
-        // capitalize maiusculizaria cada palavra ("Agosto De 2026").
-        titulo.textContent = textoTitulo.charAt(0).toUpperCase() + textoTitulo.slice(1);
-
-        cabecalho.appendChild(botaoAnterior);
-        cabecalho.appendChild(titulo);
-        cabecalho.appendChild(botaoProximo);
-        alvo.appendChild(cabecalho);
-
-        var grade = document.createElement('div');
-        grade.className = 'box-schedule2-grade';
-
-        var formatadorDiaSemana = new Intl.DateTimeFormat('pt-BR', {weekday: 'short'});
-        for (var i = 0; i < 7; i++) {
-            var cabecalhoDia = document.createElement('div');
-            cabecalhoDia.className = 'box-schedule2-cabecalho-dia';
-            cabecalhoDia.textContent = formatadorDiaSemana.format(new Date(2026, 0, 4 + i));
-            grade.appendChild(cabecalhoDia);
+            dados[this.wrapper.id + '_eventoId'] = eventoId;
+            dados[this.wrapper.id + '_inicio'] = evento.start;
+            dados[this.wrapper.id + '_fim'] = novoFimTexto;
+            window.Box.disparar(this.wrapper, 'move', dados);
         }
 
-        gerarSemanas(estado.ano, estado.mes).forEach(function (semana) {
-            semana.forEach(function (dia) {
-                grade.appendChild(criarCelula(estado, dia));
-            });
-        });
+        criarCelula(dia) {
+            var self = this;
+            var celula = document.createElement('div');
+            celula.className = 'box-schedule2-dia';
+            if (dia.getMonth() !== this.mes) {
+                celula.classList.add('box-schedule2-dia-fora');
+            }
+            var hoje = somenteData(new Date());
+            if (dia.getTime() === hoje.getTime()) {
+                celula.classList.add('box-schedule2-dia-hoje');
+            }
 
-        alvo.appendChild(grade);
+            var numero = document.createElement('span');
+            numero.className = 'box-schedule2-dia-numero';
+            numero.textContent = dia.getDate();
+            celula.appendChild(numero);
+
+            this.eventosNoDia(dia).forEach(function (evento) {
+                var chip = document.createElement('div');
+                chip.className = 'box-schedule2-evento';
+                chip.textContent = evento.title;
+                chip.draggable = true;
+                if (evento.color) {
+                    chip.style.backgroundColor = evento.color;
+                }
+                chip.addEventListener('dragstart', function (dragEvent) {
+                    dragEvent.dataTransfer.setData('text/plain', evento.id);
+                    dragEvent.dataTransfer.effectAllowed = 'move';
+                });
+                chip.addEventListener('click', function (clickEvent) {
+                    clickEvent.stopPropagation();
+                    var dados = {};
+                    dados[self.wrapper.id + '_eventoId'] = evento.id;
+                    window.Box.disparar(self.wrapper, 'click', dados);
+                });
+                celula.appendChild(chip);
+            });
+
+            celula.addEventListener('dragover', function (dragEvent) {
+                dragEvent.preventDefault();
+                dragEvent.dataTransfer.dropEffect = 'move';
+            });
+            celula.addEventListener('drop', function (dropEvent) {
+                dropEvent.preventDefault();
+                var eventoId = dropEvent.dataTransfer.getData('text/plain');
+                self.moverEvento(eventoId, dia);
+            });
+            celula.addEventListener('click', function () {
+                var dados = {};
+                dados[self.wrapper.id + '_inicio'] = formatarData(dia);
+                dados[self.wrapper.id + '_fim'] = formatarData(somarDias(dia, 1));
+                window.Box.disparar(self.wrapper, 'select', dados);
+            });
+
+            return celula;
+        }
+
+        renderizarGrade() {
+            var self = this;
+            var alvo = this.wrapper.querySelector('.box-schedule2-calendario');
+            alvo.replaceChildren();
+
+            var cabecalho = document.createElement('div');
+            cabecalho.className = 'box-schedule2-cabecalho';
+
+            var botaoAnterior = document.createElement('button');
+            botaoAnterior.type = 'button';
+            botaoAnterior.textContent = '‹';
+            botaoAnterior.addEventListener('click', function () {
+                self.mes -= 1;
+                if (self.mes < 0) {
+                    self.mes = 11;
+                    self.ano -= 1;
+                }
+                self.renderizarGrade();
+            });
+
+            var botaoProximo = document.createElement('button');
+            botaoProximo.type = 'button';
+            botaoProximo.textContent = '›';
+            botaoProximo.addEventListener('click', function () {
+                self.mes += 1;
+                if (self.mes > 11) {
+                    self.mes = 0;
+                    self.ano += 1;
+                }
+                self.renderizarGrade();
+            });
+
+            var titulo = document.createElement('span');
+            titulo.className = 'box-schedule2-titulo';
+            var textoTitulo = new Date(this.ano, this.mes, 1)
+                    .toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
+            // so a primeira letra maiuscula ("Agosto de 2026") - text-transform:
+            // capitalize maiusculizaria cada palavra ("Agosto De 2026").
+            titulo.textContent = textoTitulo.charAt(0).toUpperCase() + textoTitulo.slice(1);
+
+            cabecalho.appendChild(botaoAnterior);
+            cabecalho.appendChild(titulo);
+            cabecalho.appendChild(botaoProximo);
+            alvo.appendChild(cabecalho);
+
+            var grade = document.createElement('div');
+            grade.className = 'box-schedule2-grade';
+
+            var formatadorDiaSemana = new Intl.DateTimeFormat('pt-BR', {weekday: 'short'});
+            for (var i = 0; i < 7; i++) {
+                var cabecalhoDia = document.createElement('div');
+                cabecalhoDia.className = 'box-schedule2-cabecalho-dia';
+                cabecalhoDia.textContent = formatadorDiaSemana.format(new Date(2026, 0, 4 + i));
+                grade.appendChild(cabecalhoDia);
+            }
+
+            gerarSemanas(this.ano, this.mes).forEach(function (semana) {
+                semana.forEach(function (dia) {
+                    grade.appendChild(self.criarCelula(dia));
+                });
+            });
+
+            alvo.appendChild(grade);
+        }
     }
 
     function iniciarSchedule2(wrapper) {
@@ -228,30 +234,12 @@
         }
         wrapper.dataset.boxSchedule2Iniciado = 'true';
 
-        var hoje = new Date();
-        var estado = {
-            wrapper: wrapper,
-            eventos: lerEventos(wrapper),
-            ano: hoje.getFullYear(),
-            mes: hoje.getMonth()
-        };
-        renderizarGrade(estado);
+        new Schedule2Grade(wrapper).renderizarGrade();
     }
 
     function iniciarTodos(raiz) {
         (raiz || document).querySelectorAll('.box-schedule2').forEach(iniciarSchedule2);
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        iniciarTodos(document);
-
-        // Ver editor.js pro motivo desta checagem ficar aqui dentro.
-        if (window.faces && window.faces.ajax && window.faces.ajax.addOnEvent) {
-            window.faces.ajax.addOnEvent(function (dados) {
-                if (dados.status === 'success') {
-                    iniciarTodos(document);
-                }
-            });
-        }
-    });
+    window.Box.aoProntoOuAjax(iniciarTodos);
 })();

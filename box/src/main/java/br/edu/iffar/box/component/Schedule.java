@@ -54,6 +54,7 @@ import java.util.Map;
 @ResourceDependencies({
         @ResourceDependency(library = "box", name = "vendor/fullcalendar/fullcalendar.js", target = "head"),
         @ResourceDependency(library = "box", name = "schedule.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "schedule.js", target = "head")
 })
 public class Schedule extends UIComponentBase implements ClientBehaviorHolder {

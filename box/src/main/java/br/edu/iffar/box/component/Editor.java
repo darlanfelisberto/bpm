@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
         @ResourceDependency(library = "box", name = "vendor/quill/quill.snow.css", target = "head"),
         @ResourceDependency(library = "box", name = "editor.css", target = "head"),
         @ResourceDependency(library = "box", name = "vendor/quill/quill.js", target = "head"),
+        @ResourceDependency(library = "box", name = "box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "editor.js", target = "head")
 })
 public class Editor extends UIInput {

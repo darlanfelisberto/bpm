@@ -33,6 +33,7 @@ import java.util.Iterator;
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
         @ResourceDependency(library = "box", name = "growl.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "growl.js", target = "head")
 })
 public class Growl extends UIComponentBase {
