@@ -118,6 +118,10 @@ public class Growl extends UIComponentBase {
             objeto.add("resumo", mensagem.getSummary() != null ? mensagem.getSummary() : "");
             objeto.add("detalhe", mensagem.getDetail() != null ? mensagem.getDetail() : "");
             array.add(objeto);
+            // Marca como exibida, senao o MyFaces (RenderResponseExecutor) loga
+            // "unhandled FacesMessages" no final do RENDER_RESPONSE - o mesmo
+            // flag que h:message/h:messages setam ao renderizar.
+            mensagem.rendered();
         }
         return array.build().toString();
     }
