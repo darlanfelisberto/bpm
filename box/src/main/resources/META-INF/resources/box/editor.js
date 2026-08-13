@@ -68,15 +68,22 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         iniciarTodos(document);
-    });
 
-    // Reinicializa editores que apareceram numa atualização parcial (ajax) -
-    // iniciarEditor() já ignora os que já estavam prontos.
-    if (window.jsf && window.jsf.ajax && window.jsf.ajax.addOnEvent) {
-        window.jsf.ajax.addOnEvent(function (dados) {
-            if (dados.status === 'success') {
-                iniciarTodos(document);
-            }
-        });
-    }
+        // Reinicializa editores que apareceram numa atualização parcial
+        // (ajax) - iniciarEditor() já ignora os que já estavam prontos.
+        // A checagem de window.faces fica aqui dentro (não solta no fim do
+        // arquivo) de propósito: o próprio faces.js do Jakarta Faces é
+        // incluído DEPOIS de editor.js na página (ver
+        // @ResourceDependencies em Editor.java), então checar antes do
+        // DOMContentLoaded sempre falhava, silenciosamente, mesmo com o
+        // nome certo. Jakarta Faces 4.x também renomeou o objeto global de
+        // "jsf" pra "faces" - "jsf" não existe mais nesta versão.
+        if (window.faces && window.faces.ajax && window.faces.ajax.addOnEvent) {
+            window.faces.ajax.addOnEvent(function (dados) {
+                if (dados.status === 'success') {
+                    iniciarTodos(document);
+                }
+            });
+        }
+    });
 })();
