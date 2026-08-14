@@ -26,10 +26,13 @@ automaticamente dentro do reactor.
 
 ## Convenções de código
 
-- **Nomes em português**: classes, métodos, variáveis, mensagens de commit
-  e comentários usam português (ex.: `Schedule.parseDataHora`,
-  `renderizarGrade`, `ScheduleDemoBean`). Siga esse padrão em código novo —
-  não misture inglês.
+- **Idioma do código depende do módulo**: `box` e `box-showcase` usam
+  **inglês** (classes, métodos, variáveis, comentários) — ex.:
+  `Schedule.parseDateTime`, `Datatable.currentPage`, `Person.getHireDate`.
+  `bpm-app` continua em **português** (regra de negócio do IFFar) — ex.:
+  `ProcessoBean`, `MacroprocessoBean`. Siga o idioma do módulo que você
+  está mexendo em código novo — não misture os dois dentro do mesmo
+  módulo.
 - **Sem comentários óbvios**: só comente o "porquê" quando não for óbvio
   (uma decisão contra-intuitiva, um workaround, uma armadilha conhecida).
   Não descreva o que o código já deixa claro pelo nome.
@@ -78,7 +81,9 @@ automaticamente dentro do reactor.
 ## Git
 
 - Commits novos, nunca `--amend` a menos que pedido explicitamente.
-- Mensagens de commit em português, curtas, focadas no "porquê".
+- Mensagens de commit curtas, focadas no "porquê". Idioma segue o módulo
+  tocado pelo commit: só `box`/`box-showcase` → inglês; qualquer commit
+  que toque `bpm-app` (mesmo que também toque outro módulo) → português.
 
 ## Onde documentar o quê
 
