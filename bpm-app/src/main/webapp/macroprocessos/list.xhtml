@@ -30,12 +30,10 @@
                             <f:param name="macroprocessoId" value="#{m.id}"/>
                         </h:link>
                         &#160;|&#160;
-                        <!-- Confirmação sem b:confirm: só o atributo data-box-confirm,
-                             pego pelo listener genérico em confirm.js. -->
                         <h:commandLink action="#{macroprocessoBean.excluir(m)}" styleClass="link-danger"
-                                       p:aria-label="Excluir #{m.nome}" title="Excluir"
-                                       p:data-box-confirm="Excluir o macroprocesso #{m.nome}?">
+                                       p:aria-label="Excluir #{m.nome}" title="Excluir">
                             <i class="bi bi-trash"/>
+                            <box-confirm message="Excluir o macroprocesso #{m.nome}?"/>
                             <f:ajax render=":formLista"/>
                         </h:commandLink>
                     </h:column>

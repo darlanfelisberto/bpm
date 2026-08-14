@@ -3,85 +3,53 @@
       xmlns:ui="jakarta.faces.facelets"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:b="http://iffar.edu.br/box"
       xmlns:p="jakarta.faces.passthrough">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
-    <ui:define name="title">b:confirm</ui:define>
+    <ui:define name="title">box-confirm</ui:define>
     <ui:define name="content">
 
-        <h2>b:confirm</h2>
+        <h2>box-confirm</h2>
         <p>Inline confirmation (popup near the clicked element, without
             blocking the thread like the browser's native <code>confirm()</code>)
-            before proceeding with an action. Two ways to use it, without
-            conflict between them on the same page.</p>
-
-        <h3>1. As a behavior, nested inside an h:commandLink</h3>
-        <p><code>b:confirm</code> is a <code>ClientBehavior</code>: it goes
-            inside any <code>ActionSource2</code>
-            (<code>h:commandLink</code>, <code>h:commandButton</code>), just
-            like <code>f:ajax</code>. Supports EL — the message can
-            reference the row variable (<code>\#{item}</code> below),
-            re-evaluated for each row even inside <code>h:dataTable</code>.</p>
+            before proceeding with an action. A real custom element
+            (<code>customElements.define</code>), nested as a plain child
+            inside any link or button — no Faces component/behavior and no
+            <code>p:namespace</code> passthrough needed, since it's an
+            ordinary HTML tag and Facelets resolves EL in its attributes
+            like any other literal markup. It hides itself and carries its
+            configuration for a single document-level click listener
+            (<code>confirm.js</code>) that reads it when the trigger is
+            clicked. Must be nested inside an actual container element
+            (<code>h:commandLink</code>, which renders <code>&lt;a&gt;</code>)
+            — not <code>h:commandButton</code>, which renders a void
+            <code>&lt;input&gt;</code> that can't hold children.</p>
 
         <h4>Attributes</h4>
         <table class="attributes-table">
             <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
             <tr><td><code>message</code></td><td>No</td><td>Text shown in the popup. Accepts EL. Omitted, falls back to a translated default message (see <h:link outcome="/i18n" value="Multilingual text"/>).</td></tr>
+            <tr><td><code>yes-label</code> / <code>no-label</code></td><td>No</td><td>Override the confirm/cancel button text (defaults to the translated <code>confirm.yes</code>/<code>confirm.no</code>).</td></tr>
+            <tr><td><code>yes-class</code> / <code>no-class</code></td><td>No</td><td>Extra CSS class added to the confirm/cancel button, alongside <code>box-confirm-yes</code>/<code>box-confirm-no</code>.</td></tr>
         </table>
 
         <pre class="code-example">&lt;h:commandLink action="\#{bean.delete(item)}" styleClass="link-danger"&gt;
     Delete
-    &lt;b:confirm message="Delete \#{item}?"/&gt;
-    &lt;f:ajax render=":formBehavior"/&gt;
+    &lt;box-confirm message="Delete \#{item}?" yes-label="Sim" yes-class="box-confirm-yes--custom"/&gt;
+    &lt;f:ajax render=":form"/&gt;
 &lt;/h:commandLink&gt;</pre>
 
-        <h:form id="formBehavior">
+        <h:form id="form">
             <table class="grid">
                 <tr><th>Item</th><th>Actions</th></tr>
-                <ui:repeat value="#{confirmDemoBean.itemsBehavior}" var="item">
+                <ui:repeat value="#{confirmDemoBean.items}" var="item">
                     <tr>
                         <td>#{item}</td>
                         <td>
-                            <h:commandLink action="#{confirmDemoBean.deleteBehavior(item)}" styleClass="link-danger"
+                            <h:commandLink action="#{confirmDemoBean.delete(item)}" styleClass="link-danger"
                                            p:aria-label="Delete #{item}">
                                 Delete
-                                <b:confirm message="Delete #{item}?"/>
-                                <f:ajax render=":formBehavior"/>
-                            </h:commandLink>
-                        </td>
-                    </tr>
-                </ui:repeat>
-            </table>
-        </h:form>
-
-        <h3>2. As a plain attribute, without a Faces component</h3>
-        <p>For when it doesn't even make sense to have a Faces
-            component/behavior: just the <code>data-box-confirm</code>
-            attribute on any link or button already gets the confirmation,
-            picked up by a generic listener already included on the page
-            (<code>confirm.js</code>). Uses fewer server resources (no extra
-            component state), but doesn't accept EL directly in the
-            attribute — pass the already-resolved text via
-            <code>p:data-box-confirm</code>.</p>
-
-        <pre class="code-example">&lt;h:commandLink action="\#{bean.delete(item)}" styleClass="link-danger"
-               p:data-box-confirm="Delete \#{item}?"&gt;
-    Delete
-    &lt;f:ajax render=":formAtributo"/&gt;
-&lt;/h:commandLink&gt;</pre>
-
-        <h:form id="formAtributo">
-            <table class="grid">
-                <tr><th>Item</th><th>Actions</th></tr>
-                <ui:repeat value="#{confirmDemoBean.itemsAttribute}" var="item">
-                    <tr>
-                        <td>#{item}</td>
-                        <td>
-                            <h:commandLink action="#{confirmDemoBean.deleteAttribute(item)}" styleClass="link-danger"
-                                           p:aria-label="Delete #{item}"
-                                           p:data-box-confirm="Delete #{item}?">
-                                Delete
-                                <f:ajax render=":formAtributo"/>
+                                <box-confirm message="Delete #{item}?" yes-label="Sim" yes-class="box-confirm-yes--custom"/>
+                                <f:ajax render=":form"/>
                             </h:commandLink>
                         </td>
                     </tr>
@@ -90,8 +58,8 @@
         </h:form>
 
         <h:form id="formRestaurar">
-            <h:commandButton value="Restore lists" action="#{confirmDemoBean.restore}">
-                <f:ajax render=":formBehavior :formAtributo"/>
+            <h:commandButton value="Restore list" action="#{confirmDemoBean.restore}">
+                <f:ajax render=":form"/>
             </h:commandButton>
         </h:form>
 

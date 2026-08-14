@@ -35,7 +35,7 @@ import java.util.Map;
  * "resize" (resized an existing event) and "click" (clicked an existing
  * event) events - the component only reports what happened (dates/event
  * id, via getStart()/getEnd()/getEventId() in the listener), it's up to
- * the page/bean to decide what to do, just like b:confirm doesn't decide
+ * the page/bean to decide what to do, just like box-confirm doesn't decide
  * what "confirm" does.
  *
  * Usage: xmlns:b="http://iffar.edu.br/box"

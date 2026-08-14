@@ -124,7 +124,7 @@ mvn -o flyway:migrate   # aplica as pendentes
 
 ## 6. box-showcase: vitrine e documentação dos componentes do box
 
-Uma página de demonstração por componente (`b:panel`, `b:confirm`,
+Uma página de demonstração por componente (`b:panel`, `box-confirm`,
 `b:editor`, `b:growl`, `b:schedule`, `b:schedule2`) — exemplo ao vivo + trecho de código XHTML pra reproduzi-lo +
 descrição dos atributos. É também onde ficam os testes end-to-end que
 garantem que os componentes do `box` continuam funcionando (ver seção 7).

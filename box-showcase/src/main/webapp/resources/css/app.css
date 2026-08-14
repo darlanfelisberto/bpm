@@ -233,3 +233,9 @@ a.link-danger:hover {
     flex-wrap: wrap;
     gap: 0.6rem;
 }
+
+/* Demo override for the <box-confirm yes-class="..."> example on /confirm.xhtml */
+.box-confirm-yes--custom {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}

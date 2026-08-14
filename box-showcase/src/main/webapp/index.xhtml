@@ -20,10 +20,10 @@
         </div>
 
         <div class="card">
-            <h3><h:link outcome="/confirm" value="b:confirm"/></h3>
-            <p>Inline confirmation before an action (e.g. delete), in both
-                forms: nested inside an <code>h:commandLink</code>/<code>h:commandButton</code>
-                or via the plain <code>data-box-confirm</code> attribute, with no Faces component.</p>
+            <h3><h:link outcome="/confirm" value="box-confirm"/></h3>
+            <p>Inline confirmation before an action (e.g. delete), via a
+                <code>&lt;box-confirm&gt;</code> custom element nested inside
+                an <code>h:commandLink</code> — no Faces component involved.</p>
         </div>
 
         <div class="card">
@@ -80,7 +80,7 @@
             <h3><h:link outcome="/i18n" value="Multilingual text"/></h3>
             <p>How box components resolve user-visible text (button
                 labels, placeholders, etc.) entirely in JS — switch
-                language live and see <code>b:confirm</code> react, with
+                language live and see <code>box-confirm</code> react, with
                 no server round trip.</p>
         </div>
 

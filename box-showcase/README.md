@@ -49,7 +49,7 @@ the repository root for more details on this mechanism.)
 |---|---|---|
 | `/index.xhtml` | — | List with a link to each page below |
 | `/panel.xhtml` | `b:panel` | Box with an optional title |
-| `/confirm.xhtml` | `b:confirm` | Inline confirmation before an action, as a behavior nested in an `h:commandLink` and as a plain `data-box-confirm` attribute (no Faces component) |
+| `/confirm.xhtml` | `box-confirm` | Inline confirmation before an action, via a `<box-confirm>` custom element nested in an `h:commandLink` (no Faces component) |
 | `/editor.xhtml` | `b:editor` | Rich text editor (Quill): bold, italic, font, color, lists, pasting images, etc. |
 | `/growl.xhtml` | `b:growl` | Messages (`FacesMessage`) shown as floating toasts, equivalent to `p:growl` |
 | `/schedule.xhtml` | `b:schedule` | Event calendar (FullCalendar): month/week/day, create/move/resize an event, click an event |

@@ -7,14 +7,13 @@
 <h:head>
     <title><ui:insert name="title">box-showcase</ui:insert></title>
     <h:outputStylesheet library="css" name="app.css"/>
-    <!-- confirm.js/css (box lib): when used via b:confirm, the component
-         itself pulls in these resources (@ResourceDependency). When used
-         via the plain data-box-confirm attribute (no Faces component at
-         all), nothing else asks JSF to include the resource - so it's
-         included here manually, once, for the whole application (same
-         pattern as bpm-app). confirm.js works standalone, with no
-         box-core.js dependency (it only uses it opportunistically for
-         translations, when another box component already loaded it). -->
+    <!-- confirm.js/css (box lib): <box-confirm> is a plain custom element,
+         not a Faces component, so nothing ever asks JSF to include its
+         resources automatically - included here manually, once, for the
+         whole application (same pattern as bpm-app). confirm.js works
+         standalone, with no box-core.js dependency (it only uses it
+         opportunistically for translations, when another box component
+         already loaded it). -->
     <h:outputStylesheet library="box" name="confirm/confirm.css"/>
     <h:outputScript library="box" name="confirm/confirm.js"/>
     <ui:insert name="head-extra"/>
@@ -25,7 +24,7 @@
         <nav>
             <h:link outcome="/index" value="Home"/>
             <h:link outcome="/panel" value="b:panel"/>
-            <h:link outcome="/confirm" value="b:confirm"/>
+            <h:link outcome="/confirm" value="box-confirm"/>
             <h:link outcome="/editor" value="b:editor"/>
             <h:link outcome="/growl" value="b:growl"/>
             <h:link outcome="/schedule" value="b:schedule"/>

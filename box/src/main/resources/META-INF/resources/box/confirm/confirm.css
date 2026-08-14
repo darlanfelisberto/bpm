@@ -1,3 +1,9 @@
+/* Hides <box-confirm> even before its custom element definition runs
+   (connectedCallback also sets this inline, but that's one JS tick late). */
+box-confirm {
+    display: none;
+}
+
 .box-confirm-popup {
     position: absolute;
     z-index: 1000;
