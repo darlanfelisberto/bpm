@@ -12,53 +12,53 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Pede confirmação do usuário antes de disparar a ação do componente pai —
- * um popup pequeno perto do botão, no estilo p:confirm do PrimeFaces, sem o
- * confirm() bloqueante do navegador. ClientBehavior nativo (não composite),
- * aninhável em qualquer ClientBehaviorHolder (h:commandLink,
- * h:commandButton, ...) do mesmo jeito que f:ajax; não precisa de uma
- * variante de componente por tipo de botão. Registrado via
- * META-INF/box.taglib.xml (behaviors não têm o atalho createTag que
- * @FacesComponent tem).
+ * Asks the user for confirmation before firing the parent component's
+ * action — a small popup near the button, in the style of PrimeFaces'
+ * p:confirm, without the browser's blocking confirm(). Native ClientBehavior
+ * (not composite), nestable inside any ClientBehaviorHolder (h:commandLink,
+ * h:commandButton, ...) the same way as f:ajax; no need for a component
+ * variant per button type. Registered via META-INF/box.taglib.xml (behaviors
+ * don't have the createTag shortcut that @FacesComponent has).
  *
- * "mensagem" guarda a ValueExpression (não o valor já resolvido) e só
- * avalia na hora de montar o script, para funcionar corretamente dentro de
- * h:dataTable/ui:repeat — o componente pai é reaproveitado a cada linha, e
- * essa é a forma padrão do JSF (a mesma usada por AjaxBehavior/f:ajax) de
- * reavaliar a expressão em cada linha em vez de fixar o valor da primeira.
+ * "message" holds the ValueExpression (not the already-resolved value) and
+ * only evaluates it when building the script, so it works correctly inside
+ * h:dataTable/ui:repeat — the parent component is reused for every row, and
+ * this is the standard JSF way (the same one used by AjaxBehavior/f:ajax) to
+ * re-evaluate the expression on each row instead of fixing the value of the
+ * first one.
  *
- * Uso: xmlns:b="http://iffar.edu.br/box"
+ * Usage: xmlns:b="http://iffar.edu.br/box"
  *      <h:commandLink action="#{bean.excluir}">
  *          ...
- *          <b:confirm mensagem="Excluir X?"/>
+ *          <b:confirm message="Delete X?"/>
  *          <f:ajax render=":form"/>
  *      </h:commandLink>
  */
 @FacesBehavior(value = Confirm.BEHAVIOR_ID)
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "confirm/confirmar.css", target = "head"),
-        @ResourceDependency(library = "box", name = "confirm/confirmar.js", target = "head")
+        @ResourceDependency(library = "box", name = "confirm/confirm.css", target = "head"),
+        @ResourceDependency(library = "box", name = "confirm/confirm.js", target = "head")
 })
 public class Confirm extends ClientBehaviorBase {
 
     public static final String BEHAVIOR_ID = "br.edu.iffar.box.Confirm";
 
-    private static final String MENSAGEM_PADRAO = "Tem certeza?";
+    private static final String DEFAULT_MESSAGE = "Are you sure?";
 
     private final Map<String, ValueExpression> bindings = new HashMap<>();
-    private String mensagemLiteral;
+    private String messageLiteral;
 
-    public String getMensagem() {
-        ValueExpression expressao = bindings.get("mensagem");
-        if (expressao != null) {
-            Object valor = expressao.getValue(FacesContext.getCurrentInstance().getELContext());
-            return valor != null ? valor.toString() : MENSAGEM_PADRAO;
+    public String getMessage() {
+        ValueExpression expression = bindings.get("message");
+        if (expression != null) {
+            Object value = expression.getValue(FacesContext.getCurrentInstance().getELContext());
+            return value != null ? value.toString() : DEFAULT_MESSAGE;
         }
-        return mensagemLiteral != null ? mensagemLiteral : MENSAGEM_PADRAO;
+        return messageLiteral != null ? messageLiteral : DEFAULT_MESSAGE;
     }
 
-    public void setMensagem(String mensagem) {
-        this.mensagemLiteral = mensagem;
+    public void setMessage(String message) {
+        this.messageLiteral = message;
     }
 
     public ValueExpression getValueExpression(String name) {
@@ -71,11 +71,11 @@ public class Confirm extends ClientBehaviorBase {
 
     @Override
     public String getScript(ClientBehaviorContext behaviorContext) {
-        return "return window.boxConfirmar(this, event, '" + escapeJavaScript(getMensagem()) + "');";
+        return "return window.boxConfirm(this, event, '" + escapeJavaScript(getMessage()) + "');";
     }
 
-    private static String escapeJavaScript(String valor) {
-        return valor
+    private static String escapeJavaScript(String value) {
+        return value
                 .replace("\\", "\\\\")
                 .replace("'", "\\'")
                 .replace("\n", " ")

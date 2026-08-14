@@ -1,9 +1,9 @@
 (function () {
     'use strict';
 
-    var DURACAO_FADE = 300;
+    var FADE_DURATION = 300;
 
-    function obterContainer() {
+    function getContainer() {
         var container = document.getElementById('box-growl-container');
         if (!container) {
             container = document.createElement('div');
@@ -13,79 +13,79 @@
         return container;
     }
 
-    function fecharToast(toast) {
-        if (toast.dataset.boxGrowlFechando === 'true') {
+    function closeToast(toast) {
+        if (toast.dataset.boxGrowlClosing === 'true') {
             return;
         }
-        toast.dataset.boxGrowlFechando = 'true';
-        toast.classList.add('box-growl-toast-saindo');
+        toast.dataset.boxGrowlClosing = 'true';
+        toast.classList.add('box-growl-toast-leaving');
         setTimeout(function () {
             toast.remove();
-        }, DURACAO_FADE);
+        }, FADE_DURATION);
     }
 
-    function criarToast(mensagem, life, sticky) {
+    function createToast(message, life, sticky) {
         var toast = document.createElement('div');
-        toast.className = 'box-growl-toast box-growl-' + mensagem.severidade;
+        toast.className = 'box-growl-toast box-growl-' + message.severity;
 
-        var texto = document.createElement('div');
-        texto.className = 'box-growl-toast-texto';
+        var text = document.createElement('div');
+        text.className = 'box-growl-toast-text';
 
-        var resumo = document.createElement('strong');
-        resumo.textContent = mensagem.resumo;
-        texto.appendChild(resumo);
+        var summary = document.createElement('strong');
+        summary.textContent = message.summary;
+        text.appendChild(summary);
 
-        if (mensagem.detalhe) {
-            var detalhe = document.createElement('p');
-            detalhe.textContent = mensagem.detalhe;
-            texto.appendChild(detalhe);
+        if (message.detail) {
+            var detail = document.createElement('p');
+            detail.textContent = message.detail;
+            text.appendChild(detail);
         }
-        toast.appendChild(texto);
+        toast.appendChild(text);
 
-        var fechar = document.createElement('button');
-        fechar.type = 'button';
-        fechar.className = 'box-growl-toast-fechar';
-        fechar.setAttribute('aria-label', 'Fechar');
-        fechar.textContent = '×';
-        fechar.addEventListener('click', function () {
-            fecharToast(toast);
+        var closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'box-growl-toast-close';
+        closeButton.setAttribute('aria-label', 'Close');
+        closeButton.textContent = '×';
+        closeButton.addEventListener('click', function () {
+            closeToast(toast);
         });
-        toast.appendChild(fechar);
+        toast.appendChild(closeButton);
 
-        obterContainer().appendChild(toast);
+        getContainer().appendChild(toast);
 
         if (!sticky) {
             setTimeout(function () {
-                fecharToast(toast);
+                closeToast(toast);
             }, life);
         }
     }
 
-    function processarWrapper(wrapper) {
-        var script = wrapper.querySelector('.box-growl-mensagens');
-        // Cada renderizacao do componente (inclusive parcial via ajax) traz
-        // um <script> novo com as mensagens daquela requisicao - marca o
-        // elemento em si (nao o wrapper) como processado, pra uma
-        // rescanned nao duplicar toast se o wrapper nao foi substituido.
-        if (!script || script.dataset.boxGrowlProcessado === 'true') {
+    function processWrapper(wrapper) {
+        var script = wrapper.querySelector('.box-growl-messages');
+        // Every render of the component (including partial via ajax) brings
+        // a new <script> with that request's messages - marks the element
+        // itself (not the wrapper) as processed, so a rescan doesn't
+        // duplicate a toast if the wrapper wasn't replaced.
+        if (!script || script.dataset.boxGrowlProcessed === 'true') {
             return;
         }
-        script.dataset.boxGrowlProcessado = 'true';
+        script.dataset.boxGrowlProcessed = 'true';
 
-        var mensagens = JSON.parse(script.textContent);
-        if (!mensagens.length) {
+        var messages = JSON.parse(script.textContent);
+        if (!messages.length) {
             return;
         }
         var life = parseInt(wrapper.dataset.life, 10) || 3000;
         var sticky = wrapper.dataset.sticky === 'true';
-        mensagens.forEach(function (mensagem) {
-            criarToast(mensagem, life, sticky);
+        messages.forEach(function (message) {
+            createToast(message, life, sticky);
         });
     }
 
-    function iniciarTodos(raiz) {
-        (raiz || document).querySelectorAll('.box-growl').forEach(processarWrapper);
+    function startAll(root) {
+        (root || document).querySelectorAll('.box-growl').forEach(processWrapper);
     }
 
-    window.Box.aoProntoOuAjax(iniciarTodos);
+    window.Box.onReadyOrAjax(startAll);
 })();

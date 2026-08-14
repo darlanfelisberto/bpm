@@ -25,30 +25,30 @@
     padding: 0.65rem 0.75rem;
     font-size: 0.85rem;
     font-family: inherit;
-    animation: box-growl-entrar 0.2s ease-out;
+    animation: box-growl-enter 0.2s ease-out;
 }
 
-.box-growl-toast-saindo {
-    animation: box-growl-sair 0.3s ease-in forwards;
+.box-growl-toast-leaving {
+    animation: box-growl-exit 0.3s ease-in forwards;
 }
 
-.box-growl-toast-texto {
+.box-growl-toast-text {
     flex: 1;
     min-width: 0;
 }
 
-.box-growl-toast-texto strong {
+.box-growl-toast-text strong {
     display: block;
     color: var(--color-text, #1f2933);
 }
 
-.box-growl-toast-texto p {
+.box-growl-toast-text p {
     margin: 0.2rem 0 0 0;
     color: var(--color-text-muted, #616e7c);
     line-height: 1.35;
 }
 
-.box-growl-toast-fechar {
+.box-growl-toast-close {
     background: none;
     border: none;
     color: var(--color-text-muted, #616e7c);
@@ -71,7 +71,7 @@
     border-left-color: var(--color-danger, #b3261e);
 }
 
-@keyframes box-growl-entrar {
+@keyframes box-growl-enter {
     from {
         opacity: 0;
         transform: translateX(16px);
@@ -82,7 +82,7 @@
     }
 }
 
-@keyframes box-growl-sair {
+@keyframes box-growl-exit {
     from {
         opacity: 1;
     }

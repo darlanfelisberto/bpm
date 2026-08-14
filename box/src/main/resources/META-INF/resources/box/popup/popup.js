@@ -1,52 +1,52 @@
 (function () {
     'use strict';
 
-    // Clique no backdrop nativo do <dialog> (a pseudo-elemento ::backdrop)
-    // borbulha com o proprio <dialog> como target - e o unico jeito de
-    // detectar "clicou fora" sem medir coordenadas.
-    function aoClicarNoBackdrop(evento) {
-        var dialog = evento.currentTarget;
-        if (evento.target === dialog && dialog.dataset.boxPopupFechavel !== 'false') {
+    // Click on the native <dialog> backdrop (the ::backdrop pseudo-element)
+    // bubbles up with the <dialog> itself as target - it's the only way to
+    // detect "clicked outside" without measuring coordinates.
+    function onBackdropClick(event) {
+        var dialog = event.currentTarget;
+        if (event.target === dialog && dialog.dataset.boxPopupClosable !== 'false') {
             dialog.close();
         }
     }
 
-    // Esc dispara "cancel" antes de fechar - previne quando closable=false.
-    function aoCancelar(evento) {
-        if (evento.target.dataset.boxPopupFechavel === 'false') {
-            evento.preventDefault();
+    // Esc fires "cancel" before closing - prevent it when closable=false.
+    function onCancel(event) {
+        if (event.target.dataset.boxPopupClosable === 'false') {
+            event.preventDefault();
         }
     }
 
-    function iniciarPopup(dialog) {
-        if (dialog.dataset.boxPopupIniciado === 'true') {
+    function initPopup(dialog) {
+        if (dialog.dataset.boxPopupInitialized === 'true') {
             return;
         }
-        dialog.dataset.boxPopupIniciado = 'true';
+        dialog.dataset.boxPopupInitialized = 'true';
 
-        dialog.addEventListener('click', aoClicarNoBackdrop);
-        dialog.addEventListener('cancel', aoCancelar);
+        dialog.addEventListener('click', onBackdropClick);
+        dialog.addEventListener('cancel', onCancel);
 
-        var botaoFechar = dialog.querySelector('.box-popup-fechar');
-        if (botaoFechar) {
-            botaoFechar.addEventListener('click', function () {
+        var closeButton = dialog.querySelector('.box-popup-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', function () {
                 dialog.close();
             });
         }
     }
 
-    function iniciarTodos(raiz) {
-        (raiz || document).querySelectorAll('.box-popup').forEach(iniciarPopup);
+    function initAll(root) {
+        (root || document).querySelectorAll('.box-popup').forEach(initPopup);
     }
 
     window.Box.popup = {
-        abrir: function (id) {
+        open: function (id) {
             var dialog = document.getElementById(id);
             if (dialog) {
                 dialog.showModal();
             }
         },
-        fechar: function (id) {
+        close: function (id) {
             var dialog = document.getElementById(id);
             if (dialog) {
                 dialog.close();
@@ -54,5 +54,5 @@
         }
     };
 
-    window.Box.aoProntoOuAjax(iniciarTodos);
+    window.Box.onReadyOrAjax(initAll);
 })();

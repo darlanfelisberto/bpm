@@ -26,39 +26,40 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Tabela com paginação/ordenação/filtro sempre resolvidos no backend - cada
- * interação (clicar numa página, num cabeçalho ordenável, digitar num
- * filtro) dispara um postback que chama de novo
- * {@link DatatableLazyModel#carregar(DatatableConsulta)}. Nenhuma linha
- * fica guardada entre requisições: só primitivos de controle (página,
- * campo/direção de ordenação, filtros) vão pro estado da view.
+ * Table with pagination/sorting/filtering always resolved on the backend -
+ * every interaction (clicking a page, a sortable header, typing in a
+ * filter) triggers a postback that calls
+ * {@link DatatableLazyModel#load(DatatableQuery)} again. No row stays kept
+ * between requests: only control primitives (page, sort field/direction,
+ * filters) go into the view state.
  *
- * Client behaviors "page", "sort" e "filter" (sempre auto-renderizam a
- * própria tabela, mesmo sem um &lt;f:ajax&gt; explícito, porque sem isso a
- * tabela nunca mostraria o resultado da interação) e "select" (clique numa
- * linha - evento default, igual ao b:schedule2 - informativo, não
- * auto-renderiza nada por padrão).
+ * Client behaviors "page", "sort" and "filter" (always auto-render the
+ * table itself, even without an explicit &lt;f:ajax&gt;, because without
+ * that the table would never show the result of the interaction) and
+ * "select" (row click - default event, like b:schedule2 - informational,
+ * does not auto-render anything by default).
  *
- * Seleção de linha não guarda o objeto: só o id (via um Converter) trafega
- * no request, igual ao campo transiente "eventoId" do b:schedule2. Um
- * getter de conveniência (getObjetoSelecionado) usa o Converter pra
- * reconstruir o objeto sob demanda, sem nada ficar no StateHelper.
+ * Row selection does not keep the object: only the id (via a Converter)
+ * travels in the request, like the transient "eventId" field of
+ * b:schedule2. A convenience getter (getSelectedObject) uses the Converter
+ * to rebuild the object on demand, without anything staying in the
+ * StateHelper.
  *
- * Facets opcionais "header"/"footer" (bloco acima/abaixo da tabela, ex.:
- * título, barra de ações) e "empty" (substitui o corpo da tabela quando a
- * página atual não tem linha nenhuma - normalmente por causa de um filtro).
+ * Optional facets "header"/"footer" (block above/below the table, e.g.
+ * title, action bar) and "empty" (replaces the table body when the
+ * current page has no row at all - usually because of a filter).
  *
- * Uso: xmlns:b="http://iffar.edu.br/box"
- *      <b:datatable value="#{bean.modelo}" var="item" linhasPorPagina="20"
- *                    converter="#{bean.conversorDeId}">
- *          <f:facet name="header">Título da tabela</f:facet>
- *          <b:column field="nome" header="Nome" sortable="true" filterable="true"/>
- *          <b:column field="email" header="E-mail" filterable="true"/>
+ * Usage: xmlns:b="http://iffar.edu.br/box"
+ *      <b:datatable value="#{bean.model}" var="item" pageSize="20"
+ *                    converter="#{bean.idConverter}">
+ *          <f:facet name="header">Table title</f:facet>
+ *          <b:column field="name" header="Name" sortable="true" filterable="true"/>
+ *          <b:column field="email" header="Email" filterable="true"/>
  *          <b:column header="Status">
  *              <span class="badge">#{item.status}</span>
  *          </b:column>
- *          <f:facet name="empty">Nenhum registro encontrado.</f:facet>
- *          <f:ajax event="select" listener="#{bean.aoSelecionar}" render=":resultado"/>
+ *          <f:facet name="empty">No records found.</f:facet>
+ *          <f:ajax event="select" listener="#{bean.onSelect}" render=":result"/>
  *      </b:datatable>
  */
 @FacesComponent(
@@ -79,9 +80,9 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
     private static final List<String> EVENT_NAMES =
             Collections.unmodifiableList(List.of("page", "sort", "filter", "select"));
 
-    private final Map<String, List<ClientBehavior>> comportamentos = new HashMap<>();
+    private final Map<String, List<ClientBehavior>> behaviors = new HashMap<>();
 
-    private transient String dadoLinhaId;
+    private transient String rowIdData;
 
     @Override
     public String getFamily() {
@@ -95,12 +96,12 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
 
     @Override
     public Map<String, List<ClientBehavior>> getClientBehaviors() {
-        return Collections.unmodifiableMap(comportamentos);
+        return Collections.unmodifiableMap(behaviors);
     }
 
     @Override
     public void addClientBehavior(String eventName, ClientBehavior behavior) {
-        comportamentos.computeIfAbsent(eventName, k -> new ArrayList<>()).add(behavior);
+        behaviors.computeIfAbsent(eventName, k -> new ArrayList<>()).add(behavior);
     }
 
     @Override
@@ -122,7 +123,7 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         getStateHelper().put("value", value);
     }
 
-    /** Nome que expõe a linha atual em EL pros filhos das colunas (igual ao "var" do h:dataTable). */
+    /** Name that exposes the current row in EL to the columns' children (like h:dataTable's "var"). */
     public String getVar() {
         return (String) getStateHelper().eval("var");
     }
@@ -131,16 +132,16 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         getStateHelper().put("var", var);
     }
 
-    /** Opcional - sem valor (ou <= 0), usa {@link DatatableLazyModel#linhasPorPaginaPadrao()}. */
-    public Integer getLinhasPorPagina() {
-        return (Integer) getStateHelper().eval("linhasPorPagina");
+    /** Optional - with no value (or <= 0), uses {@link DatatableLazyModel#defaultPageSize()}. */
+    public Integer getPageSize() {
+        return (Integer) getStateHelper().eval("pageSize");
     }
 
-    public void setLinhasPorPagina(Integer linhasPorPagina) {
-        getStateHelper().put("linhasPorPagina", linhasPorPagina);
+    public void setPageSize(Integer pageSize) {
+        getStateHelper().put("pageSize", pageSize);
     }
 
-    /** Necessário só pro evento "select": converte a linha clicada pra um id (ida) e de volta pro objeto (volta). */
+    /** Needed only for the "select" event: converts the clicked row to an id (there) and back to the object (return). */
     public Converter getConverter() {
         return (Converter) getStateHelper().eval("converter");
     }
@@ -149,59 +150,59 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         getStateHelper().put("converter", converter);
     }
 
-    public String getOrdenarPorPadrao() {
-        return (String) getStateHelper().eval("ordenarPorPadrao");
+    public String getDefaultSortBy() {
+        return (String) getStateHelper().eval("defaultSortBy");
     }
 
-    public void setOrdenarPorPadrao(String ordenarPorPadrao) {
-        getStateHelper().put("ordenarPorPadrao", ordenarPorPadrao);
+    public void setDefaultSortBy(String defaultSortBy) {
+        getStateHelper().put("defaultSortBy", defaultSortBy);
     }
 
-    public boolean isOrdenarAscendentePadrao() {
-        Boolean valor = (Boolean) getStateHelper().eval("ordenarAscendentePadrao");
-        return valor == null || valor;
+    public boolean isDefaultSortAscending() {
+        Boolean value = (Boolean) getStateHelper().eval("defaultSortAscending");
+        return value == null || value;
     }
 
-    public void setOrdenarAscendentePadrao(boolean ordenarAscendentePadrao) {
-        getStateHelper().put("ordenarAscendentePadrao", ordenarAscendentePadrao);
+    public void setDefaultSortAscending(boolean defaultSortAscending) {
+        getStateHelper().put("defaultSortAscending", defaultSortAscending);
     }
 
-    /** Id (via Converter) da linha clicada no evento "select" - null nos demais eventos. */
-    public String getLinhaId() {
-        return dadoLinhaId;
+    /** Id (via Converter) of the row clicked in the "select" event - null in the other events. */
+    public String getRowId() {
+        return rowIdData;
     }
 
-    /** Reconstrói a linha selecionada a partir do id, via Converter - null sem seleção ou sem Converter configurado. */
-    public Object getObjetoSelecionado() {
-        if (dadoLinhaId == null) {
+    /** Rebuilds the selected row from the id, via Converter - null with no selection or no Converter configured. */
+    public Object getSelectedObject() {
+        if (rowIdData == null) {
             return null;
         }
-        Converter conversor = getConverter();
-        if (conversor == null) {
+        Converter converter = getConverter();
+        if (converter == null) {
             return null;
         }
-        return conversor.getAsObject(FacesContext.getCurrentInstance(), this, dadoLinhaId);
+        return converter.getAsObject(FacesContext.getCurrentInstance(), this, rowIdData);
     }
 
-    private int paginaAtual() {
-        Integer pagina = (Integer) getStateHelper().get("pagina");
-        return pagina != null ? pagina : 0;
+    private int currentPage() {
+        Integer page = (Integer) getStateHelper().get("page");
+        return page != null ? page : 0;
     }
 
-    private String ordenarPorAtual() {
-        String valor = (String) getStateHelper().get("ordenarPor");
-        return valor != null ? valor : getOrdenarPorPadrao();
+    private String currentSortBy() {
+        String value = (String) getStateHelper().get("sortBy");
+        return value != null ? value : getDefaultSortBy();
     }
 
-    private boolean ordenarAscendenteAtual() {
-        Boolean valor = (Boolean) getStateHelper().get("ordenarAscendente");
-        return valor != null ? valor : isOrdenarAscendentePadrao();
+    private boolean currentSortAscending() {
+        Boolean value = (Boolean) getStateHelper().get("sortAscending");
+        return value != null ? value : isDefaultSortAscending();
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, String> filtrosAtuais() {
-        Map<String, String> filtros = (Map<String, String>) getStateHelper().get("filtros");
-        return filtros != null ? filtros : Map.of();
+    private Map<String, String> currentFilters() {
+        Map<String, String> filters = (Map<String, String>) getStateHelper().get("filters");
+        return filters != null ? filters : Map.of();
     }
 
     @Override
@@ -210,111 +211,111 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
             return;
         }
         String clientId = getClientId(context);
-        Map<String, String> parametros = context.getExternalContext().getRequestParameterMap();
+        Map<String, String> parameters = context.getExternalContext().getRequestParameterMap();
 
-        if (!clientId.equals(parametros.get("jakarta.faces.source"))) {
+        if (!clientId.equals(parameters.get("jakarta.faces.source"))) {
             return;
         }
-        String nomeEvento = parametros.get("jakarta.faces.behavior.event");
-        if (nomeEvento == null) {
+        String eventName = parameters.get("jakarta.faces.behavior.event");
+        if (eventName == null) {
             return;
         }
 
-        switch (nomeEvento) {
-            case "page" -> decodePagina(parametros, clientId);
-            case "sort" -> decodeOrdenacao(parametros, clientId);
-            case "filter" -> decodeFiltros(parametros, clientId);
-            case "select" -> dadoLinhaId = parametros.get(clientId + "_linhaId");
+        switch (eventName) {
+            case "page" -> decodePage(parameters, clientId);
+            case "sort" -> decodeSort(parameters, clientId);
+            case "filter" -> decodeFilters(parameters, clientId);
+            case "select" -> rowIdData = parameters.get(clientId + "_rowId");
             default -> { }
         }
 
-        List<ClientBehavior> comportamentosDoEvento = comportamentos.get(nomeEvento);
-        if (comportamentosDoEvento != null) {
-            for (ClientBehavior comportamento : comportamentosDoEvento) {
-                comportamento.decode(context, this);
+        List<ClientBehavior> eventBehaviors = behaviors.get(eventName);
+        if (eventBehaviors != null) {
+            for (ClientBehavior behavior : eventBehaviors) {
+                behavior.decode(context, this);
             }
         }
     }
 
-    private void decodePagina(Map<String, String> parametros, String clientId) {
-        Integer pagina = parseInteiro(parametros.get(clientId + "_pagina"));
-        if (pagina != null) {
-            getStateHelper().put("pagina", Math.max(0, pagina));
+    private void decodePage(Map<String, String> parameters, String clientId) {
+        Integer page = parseInt(parameters.get(clientId + "_page"));
+        if (page != null) {
+            getStateHelper().put("page", Math.max(0, page));
         }
     }
 
-    private void decodeOrdenacao(Map<String, String> parametros, String clientId) {
-        String campoClicado = parametros.get(clientId + "_ordenarPor");
-        if (campoClicado == null || campoClicado.isBlank()) {
+    private void decodeSort(Map<String, String> parameters, String clientId) {
+        String clickedField = parameters.get(clientId + "_sortBy");
+        if (clickedField == null || clickedField.isBlank()) {
             return;
         }
-        Ordenacao proxima = proximaOrdenacao(campoClicado, ordenarPorAtual(), ordenarAscendenteAtual());
-        getStateHelper().put("ordenarPor", proxima.campo());
-        getStateHelper().put("ordenarAscendente", proxima.ascendente());
-        getStateHelper().put("pagina", 0);
+        Sort next = nextSort(clickedField, currentSortBy(), currentSortAscending());
+        getStateHelper().put("sortBy", next.field());
+        getStateHelper().put("sortAscending", next.ascending());
+        getStateHelper().put("page", 0);
     }
 
-    private void decodeFiltros(Map<String, String> parametros, String clientId) {
-        getStateHelper().put("filtros", new HashMap<>(parseFiltros(parametros.get(clientId + "_filtros"))));
-        getStateHelper().put("pagina", 0);
+    private void decodeFilters(Map<String, String> parameters, String clientId) {
+        getStateHelper().put("filters", new HashMap<>(parseFilters(parameters.get(clientId + "_filters"))));
+        getStateHelper().put("page", 0);
     }
 
-    static Integer parseInteiro(String texto) {
-        if (texto == null || texto.isBlank()) {
+    static Integer parseInt(String text) {
+        if (text == null || text.isBlank()) {
             return null;
         }
         try {
-            return Integer.valueOf(texto);
-        } catch (NumberFormatException erro) {
+            return Integer.valueOf(text);
+        } catch (NumberFormatException error) {
             return null;
         }
     }
 
-    /** Ciclo nenhum->asc->desc->nenhum ao clicar sempre no mesmo campo; clicar noutro campo sempre volta pra asc. */
-    static Ordenacao proximaOrdenacao(String campoClicado, String ordenarPorAtual, boolean ascendenteAtual) {
-        if (!campoClicado.equals(ordenarPorAtual)) {
-            return new Ordenacao(campoClicado, true);
+    /** None->asc->desc->none cycle when always clicking the same field; clicking another field always goes back to asc. */
+    static Sort nextSort(String clickedField, String currentSortBy, boolean currentAscending) {
+        if (!clickedField.equals(currentSortBy)) {
+            return new Sort(clickedField, true);
         }
-        if (ascendenteAtual) {
-            return new Ordenacao(campoClicado, false);
+        if (currentAscending) {
+            return new Sort(clickedField, false);
         }
-        return new Ordenacao(null, true);
+        return new Sort(null, true);
     }
 
-    /** JSON malformado/adulterado (campo->texto) vira "sem filtro nenhum" em vez de derrubar a requisição. */
-    static Map<String, String> parseFiltros(String json) {
+    /** Malformed/tampered JSON (field->text) becomes "no filter at all" instead of failing the request. */
+    static Map<String, String> parseFilters(String json) {
         if (json == null || json.isBlank()) {
             return Map.of();
         }
-        Map<String, String> filtros = new LinkedHashMap<>();
-        try (JsonReader leitor = Json.createReader(new StringReader(json))) {
-            JsonObject objeto = leitor.readObject();
-            for (String campo : objeto.keySet()) {
-                String valor = objeto.getString(campo, "");
-                if (!valor.isBlank()) {
-                    filtros.put(campo, valor);
+        Map<String, String> filters = new LinkedHashMap<>();
+        try (JsonReader reader = Json.createReader(new StringReader(json))) {
+            JsonObject object = reader.readObject();
+            for (String field : object.keySet()) {
+                String value = object.getString(field, "");
+                if (!value.isBlank()) {
+                    filters.put(field, value);
                 }
             }
-        } catch (RuntimeException erro) {
+        } catch (RuntimeException error) {
             return Map.of();
         }
-        return filtros;
+        return filters;
     }
 
-    /** Corrige uma página que ficou fora do intervalo (ex.: filtro reduziu o total) pra última página válida. */
-    static int corrigirPaginaForaDoLimite(int pagina, int linhasPorPagina, long total) {
-        if (linhasPorPagina <= 0 || total <= 0) {
+    /** Fixes a page that ended up out of range (e.g. a filter reduced the total) to the last valid page. */
+    static int clampPageToBounds(int page, int pageSize, long total) {
+        if (pageSize <= 0 || total <= 0) {
             return 0;
         }
-        long totalPaginas = (total + linhasPorPagina - 1) / linhasPorPagina;
-        long primeiro = (long) pagina * linhasPorPagina;
-        if (primeiro < total) {
-            return pagina;
+        long totalPages = (total + pageSize - 1) / pageSize;
+        long first = (long) page * pageSize;
+        if (first < total) {
+            return page;
         }
-        return (int) Math.max(0, totalPaginas - 1);
+        return (int) Math.max(0, totalPages - 1);
     }
 
-    record Ordenacao(String campo, boolean ascendente) {
+    record Sort(String field, boolean ascending) {
     }
 
     @Override
@@ -328,8 +329,8 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         writer.startElement("div", this);
         writer.writeAttribute("id", clientId, "id");
         writer.writeAttribute("class", "box-datatable", null);
-        for (String nomeEvento : EVENT_NAMES) {
-            writer.writeAttribute("data-render-" + nomeEvento, renderPara(nomeEvento, clientId), null);
+        for (String eventName : EVENT_NAMES) {
+            writer.writeAttribute("data-render-" + eventName, renderTargetFor(eventName, clientId), null);
         }
     }
 
@@ -338,43 +339,43 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         if (!isRendered()) {
             return;
         }
-        List<Column> colunas = colunas();
-        DatatableLazyModel<Object> modelo = getValue();
-        if (modelo == null || colunas.isEmpty()) {
+        List<Column> columns = columns();
+        DatatableLazyModel<Object> model = getValue();
+        if (model == null || columns.isEmpty()) {
             return;
         }
 
-        int linhasPorPagina = linhasPorPaginaEfetivo(modelo);
-        int pagina = paginaAtual();
-        String ordenarPor = ordenarPorAtual();
-        boolean ordenarAscendente = ordenarAscendenteAtual();
-        Map<String, String> filtros = filtrosAtuais();
+        int pageSize = effectivePageSize(model);
+        int page = currentPage();
+        String sortBy = currentSortBy();
+        boolean sortAscending = currentSortAscending();
+        Map<String, String> filters = currentFilters();
 
-        DatatablePage<Object> resultado = modelo.carregar(
-                new DatatableConsulta(pagina * linhasPorPagina, linhasPorPagina, ordenarPor, ordenarAscendente, filtros));
+        DatatablePage<Object> result = model.load(
+                new DatatableQuery(page * pageSize, pageSize, sortBy, sortAscending, filters));
 
-        long primeiro = (long) pagina * linhasPorPagina;
-        if (resultado.total() > 0 && primeiro >= resultado.total()) {
-            pagina = corrigirPaginaForaDoLimite(pagina, linhasPorPagina, resultado.total());
-            getStateHelper().put("pagina", pagina);
-            resultado = modelo.carregar(
-                    new DatatableConsulta(pagina * linhasPorPagina, linhasPorPagina, ordenarPor, ordenarAscendente, filtros));
+        long first = (long) page * pageSize;
+        if (result.total() > 0 && first >= result.total()) {
+            page = clampPageToBounds(page, pageSize, result.total());
+            getStateHelper().put("page", page);
+            result = model.load(
+                    new DatatableQuery(page * pageSize, pageSize, sortBy, sortAscending, filters));
         }
 
         ResponseWriter writer = context.getResponseWriter();
-        escreverFacet(context, writer, "header", "box-datatable-topo");
-        escreverTabela(context, writer, colunas, resultado, ordenarPor, ordenarAscendente, filtros);
-        escreverPaginacao(writer, pagina, linhasPorPagina, resultado.total());
-        escreverFacet(context, writer, "footer", "box-datatable-rodape");
+        writeFacet(context, writer, "header", "box-datatable-top");
+        writeTable(context, writer, columns, result, sortBy, sortAscending, filters);
+        writePagination(writer, page, pageSize, result.total());
+        writeFacet(context, writer, "footer", "box-datatable-footer");
     }
 
-    private void escreverFacet(FacesContext context, ResponseWriter writer, String nome, String classe) throws IOException {
-        UIComponent facet = getFacet(nome);
+    private void writeFacet(FacesContext context, ResponseWriter writer, String name, String cssClass) throws IOException {
+        UIComponent facet = getFacet(name);
         if (facet == null || !facet.isRendered()) {
             return;
         }
         writer.startElement("div", this);
-        writer.writeAttribute("class", classe, null);
+        writer.writeAttribute("class", cssClass, null);
         facet.encodeAll(context);
         writer.endElement("div");
     }
@@ -387,75 +388,75 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         context.getResponseWriter().endElement("div");
     }
 
-    private List<Column> colunas() {
-        List<Column> colunas = new ArrayList<>();
-        for (UIComponent filho : getChildren()) {
-            if (filho instanceof Column coluna && filho.isRendered()) {
-                colunas.add(coluna);
+    private List<Column> columns() {
+        List<Column> columns = new ArrayList<>();
+        for (UIComponent child : getChildren()) {
+            if (child instanceof Column column && child.isRendered()) {
+                columns.add(column);
             }
         }
-        return colunas;
+        return columns;
     }
 
-    private int linhasPorPaginaEfetivo(DatatableLazyModel<Object> modelo) {
-        Integer atributo = getLinhasPorPagina();
-        if (atributo != null && atributo > 0) {
-            return atributo;
+    private int effectivePageSize(DatatableLazyModel<Object> model) {
+        Integer attribute = getPageSize();
+        if (attribute != null && attribute > 0) {
+            return attribute;
         }
-        return modelo.linhasPorPaginaPadrao();
+        return model.defaultPageSize();
     }
 
-    private void escreverTabela(FacesContext context, ResponseWriter writer, List<Column> colunas,
-            DatatablePage<Object> resultado, String ordenarPor, boolean ordenarAscendente, Map<String, String> filtros)
+    private void writeTable(FacesContext context, ResponseWriter writer, List<Column> columns,
+            DatatablePage<Object> result, String sortBy, boolean sortAscending, Map<String, String> filters)
             throws IOException {
 
-        boolean algumaFiltravel = colunas.stream().anyMatch(Column::isFilterable);
+        boolean anyFilterable = columns.stream().anyMatch(Column::isFilterable);
 
         writer.startElement("table", this);
-        writer.writeAttribute("class", "box-datatable-tabela", null);
+        writer.writeAttribute("class", "box-datatable-table", null);
 
         writer.startElement("thead", this);
         writer.startElement("tr", this);
-        writer.writeAttribute("class", "box-datatable-cabecalho", null);
-        for (Column coluna : colunas) {
+        writer.writeAttribute("class", "box-datatable-header", null);
+        for (Column column : columns) {
             writer.startElement("th", this);
-            String campo = coluna.getField();
-            if (coluna.isSortable() && campo != null) {
-                writer.writeAttribute("class", "box-datatable-cabecalho-ordenavel", null);
-                writer.writeAttribute("data-campo", campo, null);
-                if (campo.equals(ordenarPor)) {
-                    writer.writeAttribute("data-ordenar-direcao", ordenarAscendente ? "asc" : "desc", null);
+            String field = column.getField();
+            if (column.isSortable() && field != null) {
+                writer.writeAttribute("class", "box-datatable-header-sortable", null);
+                writer.writeAttribute("data-field", field, null);
+                if (field.equals(sortBy)) {
+                    writer.writeAttribute("data-sort-direction", sortAscending ? "asc" : "desc", null);
                 }
             }
-            String rotulo = coluna.getHeader() != null ? coluna.getHeader() : campo;
-            writer.writeText(rotulo != null ? rotulo : "", "header");
-            if (coluna.isSortable() && campo != null && campo.equals(ordenarPor)) {
+            String label = column.getHeader() != null ? column.getHeader() : field;
+            writer.writeText(label != null ? label : "", "header");
+            if (column.isSortable() && field != null && field.equals(sortBy)) {
                 writer.startElement("span", this);
-                writer.writeAttribute("class", "box-datatable-indicador-ordenacao", null);
-                writer.writeText(ordenarAscendente ? " ▲" : " ▼", null);
+                writer.writeAttribute("class", "box-datatable-sort-indicator", null);
+                writer.writeText(sortAscending ? " ▲" : " ▼", null);
                 writer.endElement("span");
             }
             writer.endElement("th");
         }
         writer.endElement("tr");
 
-        if (algumaFiltravel) {
+        if (anyFilterable) {
             writer.startElement("tr", this);
-            writer.writeAttribute("class", "box-datatable-filtros", null);
-            for (Column coluna : colunas) {
+            writer.writeAttribute("class", "box-datatable-filters", null);
+            for (Column column : columns) {
                 writer.startElement("td", this);
-                String campo = coluna.getField();
-                if (coluna.isFilterable() && campo != null) {
-                    String rotuloFiltro = coluna.getHeader() != null ? coluna.getHeader() : campo;
+                String field = column.getField();
+                if (column.isFilterable() && field != null) {
+                    String filterLabel = column.getHeader() != null ? column.getHeader() : field;
                     writer.startElement("input", this);
                     writer.writeAttribute("type", "text", null);
-                    writer.writeAttribute("class", "box-datatable-filtro-input", null);
-                    writer.writeAttribute("data-campo", campo, null);
-                    writer.writeAttribute("placeholder", "Filtrar…", null);
-                    writer.writeAttribute("aria-label", "Filtrar por " + rotuloFiltro, null);
-                    String valorAtual = filtros.get(campo);
-                    if (valorAtual != null) {
-                        writer.writeAttribute("value", valorAtual, null);
+                    writer.writeAttribute("class", "box-datatable-filter-input", null);
+                    writer.writeAttribute("data-field", field, null);
+                    writer.writeAttribute("placeholder", "Filter…", null);
+                    writer.writeAttribute("aria-label", "Filter by " + filterLabel, null);
+                    String currentValue = filters.get(field);
+                    if (currentValue != null) {
+                        writer.writeAttribute("value", currentValue, null);
                     }
                     writer.endElement("input");
                 }
@@ -468,32 +469,32 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         writer.startElement("tbody", this);
         String var = getVar();
         Map<String, Object> requestMap = context.getExternalContext().getRequestMap();
-        boolean tinhaValorAnterior = var != null && requestMap.containsKey(var);
-        Object valorAnterior = tinhaValorAnterior ? requestMap.get(var) : null;
-        Converter conversor = getConverter();
+        boolean hadPreviousValue = var != null && requestMap.containsKey(var);
+        Object previousValue = hadPreviousValue ? requestMap.get(var) : null;
+        Converter converter = getConverter();
 
-        if (resultado.linhas().isEmpty()) {
-            escreverLinhaVazia(context, writer, colunas.size());
+        if (result.rows().isEmpty()) {
+            writeEmptyRow(context, writer, columns.size());
         }
-        for (Object linha : resultado.linhas()) {
+        for (Object row : result.rows()) {
             if (var != null) {
-                requestMap.put(var, linha);
+                requestMap.put(var, row);
             }
             writer.startElement("tr", this);
-            writer.writeAttribute("class", "box-datatable-linha", null);
-            if (conversor != null) {
-                writer.writeAttribute("data-linha-id", conversor.getAsString(context, this, linha), null);
+            writer.writeAttribute("class", "box-datatable-row", null);
+            if (converter != null) {
+                writer.writeAttribute("data-row-id", converter.getAsString(context, this, row), null);
             }
-            for (Column coluna : colunas) {
+            for (Column column : columns) {
                 writer.startElement("td", this);
-                if (coluna.getChildCount() > 0) {
-                    for (UIComponent filho : coluna.getChildren()) {
-                        filho.encodeAll(context);
+                if (column.getChildCount() > 0) {
+                    for (UIComponent child : column.getChildren()) {
+                        child.encodeAll(context);
                     }
                 } else {
-                    String campo = coluna.getField();
-                    Object valor = campo != null ? valorDoCampo(context, linha, campo) : null;
-                    writer.writeText(valor != null ? valor.toString() : "", null);
+                    String field = column.getField();
+                    Object value = field != null ? fieldValue(context, row, field) : null;
+                    writer.writeText(value != null ? value.toString() : "", null);
                 }
                 writer.endElement("td");
             }
@@ -501,8 +502,8 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         }
 
         if (var != null) {
-            if (tinhaValorAnterior) {
-                requestMap.put(var, valorAnterior);
+            if (hadPreviousValue) {
+                requestMap.put(var, previousValue);
             } else {
                 requestMap.remove(var);
             }
@@ -512,74 +513,74 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         writer.endElement("table");
     }
 
-    private void escreverLinhaVazia(FacesContext context, ResponseWriter writer, int colspan) throws IOException {
-        UIComponent vazio = getFacet("empty");
-        if (vazio == null || !vazio.isRendered()) {
+    private void writeEmptyRow(FacesContext context, ResponseWriter writer, int colspan) throws IOException {
+        UIComponent empty = getFacet("empty");
+        if (empty == null || !empty.isRendered()) {
             return;
         }
         writer.startElement("tr", this);
-        writer.writeAttribute("class", "box-datatable-linha-vazia", null);
+        writer.writeAttribute("class", "box-datatable-empty-row", null);
         writer.startElement("td", this);
         writer.writeAttribute("colspan", String.valueOf(colspan), null);
-        vazio.encodeAll(context);
+        empty.encodeAll(context);
         writer.endElement("td");
         writer.endElement("tr");
     }
 
-    private Object valorDoCampo(FacesContext context, Object linha, String campo) {
-        if (linha == null) {
+    private Object fieldValue(FacesContext context, Object row, String field) {
+        if (row == null) {
             return null;
         }
-        return context.getApplication().getELResolver().getValue(context.getELContext(), linha, campo);
+        return context.getApplication().getELResolver().getValue(context.getELContext(), row, field);
     }
 
-    private void escreverPaginacao(ResponseWriter writer, int pagina, int linhasPorPagina, long total) throws IOException {
-        long totalPaginas = total <= 0 ? 1 : (total + linhasPorPagina - 1) / linhasPorPagina;
-        long primeiroRegistro = total == 0 ? 0 : (long) pagina * linhasPorPagina + 1;
-        long ultimoRegistro = Math.min(total, (long) (pagina + 1) * linhasPorPagina);
+    private void writePagination(ResponseWriter writer, int page, int pageSize, long total) throws IOException {
+        long totalPages = total <= 0 ? 1 : (total + pageSize - 1) / pageSize;
+        long firstRecord = total == 0 ? 0 : (long) page * pageSize + 1;
+        long lastRecord = Math.min(total, (long) (page + 1) * pageSize);
 
         writer.startElement("div", this);
-        writer.writeAttribute("class", "box-datatable-paginacao", null);
-        writer.writeAttribute("data-pagina-atual", String.valueOf(pagina), null);
-        writer.writeAttribute("data-total-paginas", String.valueOf(totalPaginas), null);
+        writer.writeAttribute("class", "box-datatable-pagination", null);
+        writer.writeAttribute("data-current-page", String.valueOf(page), null);
+        writer.writeAttribute("data-total-pages", String.valueOf(totalPages), null);
 
-        escreverBotaoPaginacao(writer, "primeira", "«", pagina <= 0);
-        escreverBotaoPaginacao(writer, "anterior", "‹", pagina <= 0);
+        writePaginationButton(writer, "first", "«", page <= 0);
+        writePaginationButton(writer, "previous", "‹", page <= 0);
 
         writer.startElement("span", this);
-        writer.writeAttribute("class", "box-datatable-paginacao-info", null);
-        writer.writeText(total == 0 ? "Nenhum registro" : primeiroRegistro + "–" + ultimoRegistro + " de " + total, null);
+        writer.writeAttribute("class", "box-datatable-pagination-info", null);
+        writer.writeText(total == 0 ? "No records" : firstRecord + "–" + lastRecord + " of " + total, null);
         writer.endElement("span");
 
-        escreverBotaoPaginacao(writer, "proxima", "›", pagina + 1 >= totalPaginas);
-        escreverBotaoPaginacao(writer, "ultima", "»", pagina + 1 >= totalPaginas);
+        writePaginationButton(writer, "next", "›", page + 1 >= totalPages);
+        writePaginationButton(writer, "last", "»", page + 1 >= totalPages);
 
         writer.endElement("div");
     }
 
-    private void escreverBotaoPaginacao(ResponseWriter writer, String acao, String rotulo, boolean desabilitado)
+    private void writePaginationButton(ResponseWriter writer, String action, String label, boolean disabled)
             throws IOException {
         writer.startElement("button", this);
         writer.writeAttribute("type", "button", null);
-        writer.writeAttribute("class", "box-datatable-paginacao-botao", null);
-        writer.writeAttribute("data-acao", acao, null);
-        if (desabilitado) {
+        writer.writeAttribute("class", "box-datatable-pagination-button", null);
+        writer.writeAttribute("data-action", action, null);
+        if (disabled) {
             writer.writeAttribute("disabled", "disabled", null);
         }
-        writer.writeText(rotulo, null);
+        writer.writeText(label, null);
         writer.endElement("button");
     }
 
-    private String renderPara(String nomeEvento, String clientId) {
-        List<ClientBehavior> comportamentosDoEvento = comportamentos.get(nomeEvento);
-        if (comportamentosDoEvento != null) {
-            for (ClientBehavior comportamento : comportamentosDoEvento) {
-                if (comportamento instanceof AjaxBehavior ajax && ajax.getRender() != null
+    private String renderTargetFor(String eventName, String clientId) {
+        List<ClientBehavior> eventBehaviors = behaviors.get(eventName);
+        if (eventBehaviors != null) {
+            for (ClientBehavior behavior : eventBehaviors) {
+                if (behavior instanceof AjaxBehavior ajax && ajax.getRender() != null
                         && !ajax.getRender().isEmpty()) {
                     return String.join(" ", ajax.getRender());
                 }
             }
         }
-        return "select".equals(nomeEvento) ? "@none" : clientId;
+        return "select".equals(eventName) ? "@none" : clientId;
     }
 }

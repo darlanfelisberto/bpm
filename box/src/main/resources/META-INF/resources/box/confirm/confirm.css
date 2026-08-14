@@ -1,4 +1,4 @@
-.box-confirmar-popup {
+.box-confirm-popup {
     position: absolute;
     z-index: 1000;
     background: var(--color-surface, #ffffff);
@@ -11,18 +11,18 @@
     font-family: inherit;
 }
 
-/* Seta apontando para o botão que abriu o popup: um quadrado de 12px rotacionado
-   45° (mesma cor de fundo/borda do popup), com metade escondida atrás do corpo
-   do popup e as duas bordas "internas" removidas — sobra só a pontinha, que
-   herda borda e sombra corretamente (o truque clássico de triângulo com
-   border-color ficava sem contraste num fundo de página tão claro quanto
-   --color-border). --box-seta é a distância da borda esquerda do popup até o
-   centro do botão, calculada em JS a cada abertura. */
+/* Arrow pointing at the button that opened the popup: a 12px square rotated
+   45° (same background/border color as the popup), with half hidden behind
+   the popup body and the two "inner" borders removed — only the tip is left,
+   which correctly inherits border and shadow (the classic border-color
+   triangle trick had no contrast against a page background as light as
+   --color-border). --box-arrow is the distance from the popup's left edge to
+   the center of the button, computed in JS on every open. */
 
-.box-confirmar-popup::after {
+.box-confirm-popup::after {
     content: "";
     position: absolute;
-    left: var(--box-seta, 16px);
+    left: var(--box-arrow, 16px);
     width: 12px;
     height: 12px;
     background: var(--color-surface, #ffffff);
@@ -30,27 +30,27 @@
     transform: translateX(-50%) rotate(45deg);
 }
 
-.box-confirmar-popup--abaixo::after {
+.box-confirm-popup--below::after {
     top: -6px;
     border-right: none;
     border-bottom: none;
     box-shadow: -2px -2px 3px -1px rgba(16, 24, 32, 0.1);
 }
 
-.box-confirmar-popup--acima::after {
+.box-confirm-popup--above::after {
     bottom: -6px;
     border-left: none;
     border-top: none;
     box-shadow: 2px 2px 3px -1px rgba(16, 24, 32, 0.1);
 }
 
-.box-confirmar-popup p {
+.box-confirm-popup p {
     margin: 0 0 0.65rem 0;
     color: var(--color-text, #1f2933);
     line-height: 1.4;
 }
 
-.box-confirmar-popup button {
+.box-confirm-popup button {
     font-family: inherit;
     font-size: 0.8rem;
     font-weight: 600;
@@ -60,17 +60,17 @@
     margin-right: 0.4rem;
 }
 
-.box-confirmar-popup button:last-child {
+.box-confirm-popup button:last-child {
     margin-right: 0;
 }
 
-.box-confirmar-sim {
+.box-confirm-yes {
     background: var(--color-danger, #b3261e);
     border: 1px solid var(--color-danger, #b3261e);
     color: #ffffff;
 }
 
-.box-confirmar-nao {
+.box-confirm-no {
     background: var(--color-surface, #ffffff);
     border: 1px solid var(--color-border, #dfe4ea);
     color: var(--color-text, #1f2933);

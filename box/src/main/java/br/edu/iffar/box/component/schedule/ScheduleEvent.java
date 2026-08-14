@@ -4,28 +4,28 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * Um evento exibido pelo b:schedule. POJO simples - quem usa o componente
- * gerencia a própria lista (criar/mover/redimensionar chegam via os
- * client behaviors "select"/"move"/"resize"; este objeto só carrega o que
- * já existe pra desenhar o calendário).
+ * An event displayed by b:schedule. Simple POJO - whoever uses the
+ * component manages its own list (create/move/resize arrive via the
+ * "select"/"move"/"resize" client behaviors; this object only carries
+ * what already exists, to draw the calendar).
  */
 public class ScheduleEvent implements Serializable {
 
     private String id;
-    private String titulo;
-    private LocalDateTime inicio;
-    private LocalDateTime fim;
-    private boolean diaTodo;
-    private String cor;
+    private String title;
+    private LocalDateTime start;
+    private LocalDateTime end;
+    private boolean allDay;
+    private String color;
 
     public ScheduleEvent() {
     }
 
-    public ScheduleEvent(String id, String titulo, LocalDateTime inicio, LocalDateTime fim) {
+    public ScheduleEvent(String id, String title, LocalDateTime start, LocalDateTime end) {
         this.id = id;
-        this.titulo = titulo;
-        this.inicio = inicio;
-        this.fim = fim;
+        this.title = title;
+        this.start = start;
+        this.end = end;
     }
 
     public String getId() {
@@ -36,43 +36,43 @@ public class ScheduleEvent implements Serializable {
         this.id = id;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public LocalDateTime getInicio() {
-        return inicio;
+    public LocalDateTime getStart() {
+        return start;
     }
 
-    public void setInicio(LocalDateTime inicio) {
-        this.inicio = inicio;
+    public void setStart(LocalDateTime start) {
+        this.start = start;
     }
 
-    public LocalDateTime getFim() {
-        return fim;
+    public LocalDateTime getEnd() {
+        return end;
     }
 
-    public void setFim(LocalDateTime fim) {
-        this.fim = fim;
+    public void setEnd(LocalDateTime end) {
+        this.end = end;
     }
 
-    public boolean isDiaTodo() {
-        return diaTodo;
+    public boolean isAllDay() {
+        return allDay;
     }
 
-    public void setDiaTodo(boolean diaTodo) {
-        this.diaTodo = diaTodo;
+    public void setAllDay(boolean allDay) {
+        this.allDay = allDay;
     }
 
-    public String getCor() {
-        return cor;
+    public String getColor() {
+        return color;
     }
 
-    public void setCor(String cor) {
-        this.cor = cor;
+    public void setColor(String color) {
+        this.color = color;
     }
 }

@@ -1,18 +1,18 @@
 package br.edu.iffar.box.component.datatable;
 
 /**
- * Fonte de dados do b:datatable. Cada interação (paginar, ordenar, filtrar)
- * chama {@link #carregar(DatatableConsulta)} de novo - nenhuma linha fica
- * guardada no estado da view entre requisições, só os parâmetros da
- * consulta (página/ordenação/filtros), então a implementação é responsável
- * por buscar (banco, serviço, etc.) só a fatia pedida.
+ * Data source of b:datatable. Every interaction (paginate, sort, filter)
+ * calls {@link #load(DatatableQuery)} again - no row stays kept in the
+ * view state between requests, only the query parameters
+ * (page/sort/filters), so the implementation is responsible for fetching
+ * (database, service, etc.) only the requested slice.
  */
 public interface DatatableLazyModel<T> {
 
-    DatatablePage<T> carregar(DatatableConsulta consulta);
+    DatatablePage<T> load(DatatableQuery query);
 
-    /** Usado quando o componente não recebe o atributo "linhasPorPagina". */
-    default int linhasPorPaginaPadrao() {
+    /** Used when the component does not receive the "pageSize" attribute. */
+    default int defaultPageSize() {
         return 10;
     }
 }

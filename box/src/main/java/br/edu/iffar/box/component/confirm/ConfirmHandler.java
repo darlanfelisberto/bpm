@@ -14,22 +14,22 @@ import jakarta.faces.view.facelets.TagHandler;
 import java.io.IOException;
 
 /**
- * Tag handler explícito para &lt;b:confirm&gt; — o BehaviorHandler padrão do
- * JSF (usado quando um &lt;behavior&gt; do taglib.xml não declara
- * handler-class próprio) resolve o atributo "mensagem" avaliando-o uma única
- * vez no build da view, o que quebra dentro de h:dataTable/ui:repeat (a
- * expressão é avaliada antes do var da linha existir). Aqui a
- * ValueExpression é capturada explicitamente via TagAttribute e guardada no
- * Confirm sem avaliar, para ser resolvida de novo a cada linha, na hora do
- * getScript().
+ * Explicit tag handler for &lt;b:confirm&gt; — JSF's default BehaviorHandler
+ * (used when a &lt;behavior&gt; in taglib.xml doesn't declare its own
+ * handler-class) resolves the "message" attribute by evaluating it exactly
+ * once during view build, which breaks inside h:dataTable/ui:repeat (the
+ * expression is evaluated before the row's var exists). Here the
+ * ValueExpression is captured explicitly via TagAttribute and stored on
+ * Confirm without evaluating it, to be resolved again on each row, when
+ * getScript() runs.
  */
 public class ConfirmHandler extends TagHandler {
 
-    private final TagAttribute mensagem;
+    private final TagAttribute message;
 
     public ConfirmHandler(TagConfig config) {
         super(config);
-        this.mensagem = getAttribute("mensagem");
+        this.message = getAttribute("message");
     }
 
     @Override
@@ -39,7 +39,7 @@ public class ConfirmHandler extends TagHandler {
         }
         if (!(parent instanceof ClientBehaviorHolder)) {
             throw new IllegalStateException(
-                    "b:confirm só pode ser usado dentro de um componente que aceite client behaviors "
+                    "b:confirm can only be used inside a component that accepts client behaviors "
                             + "(h:commandLink, h:commandButton, ...)");
         }
 
@@ -47,9 +47,9 @@ public class ConfirmHandler extends TagHandler {
         Application application = facesContext.getApplication();
         Confirm behavior = (Confirm) application.createBehavior(Confirm.BEHAVIOR_ID);
 
-        if (mensagem != null) {
-            ValueExpression expressao = mensagem.getValueExpression(ctx, String.class);
-            behavior.setValueExpression("mensagem", expressao);
+        if (message != null) {
+            ValueExpression expression = message.getValueExpression(ctx, String.class);
+            behavior.setValueExpression("message", expression);
         }
 
         ClientBehaviorHolder holder = (ClientBehaviorHolder) parent;

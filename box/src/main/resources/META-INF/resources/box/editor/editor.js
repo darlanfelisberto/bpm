@@ -1,40 +1,40 @@
 (function () {
     'use strict';
 
-    var FONTES = ['arial', 'georgia', 'times-new-roman', 'courier-new', 'verdana', 'trebuchet-ms'];
+    var FONTS = ['arial', 'georgia', 'times-new-roman', 'courier-new', 'verdana', 'trebuchet-ms'];
 
-    var fontesRegistradas = false;
+    var registeredFonts = false;
 
-    function registrarFontes() {
-        if (fontesRegistradas || !window.Quill) {
+    function registerFonts() {
+        if (registeredFonts || !window.Quill) {
             return;
         }
         var Font = window.Quill.import('formats/font');
-        Font.whitelist = FONTES;
+        Font.whitelist = FONTS;
         window.Quill.register(Font, true);
-        fontesRegistradas = true;
+        registeredFonts = true;
     }
 
-    function sincronizar(quill, wrapper) {
-        // getSemanticHTML() em vez de quill.root.innerHTML: gera <ul>/<ol>
-        // e <pre> de verdade e não inclui os marcadores internos do editor
-        // (ex.: <span class="ql-ui" contenteditable="false"> dos itens de
-        // lista), que não fazem sentido fora do Quill.
-        wrapper.querySelector('.box-editor-valor').value = quill.getSemanticHTML();
+    function sync(quill, wrapper) {
+        // getSemanticHTML() instead of quill.root.innerHTML: produces real
+        // <ul>/<ol> and <pre> and doesn't include the editor's internal
+        // markers (e.g. <span class="ql-ui" contenteditable="false"> on
+        // list items), which don't make sense outside of Quill.
+        wrapper.querySelector('.box-editor-value').value = quill.getSemanticHTML();
     }
 
-    function iniciarEditor(wrapper) {
-        if (wrapper.dataset.boxEditorIniciado === 'true') {
+    function initEditor(wrapper) {
+        if (wrapper.dataset.boxEditorInitialized === 'true') {
             return;
         }
-        wrapper.dataset.boxEditorIniciado = 'true';
+        wrapper.dataset.boxEditorInitialized = 'true';
 
         var quill = new window.Quill(wrapper.querySelector('.box-editor-quill'), {
             theme: 'snow',
             modules: {
                 toolbar: [
                     [{header: [1, 2, 3, false]}],
-                    [{font: FONTES}],
+                    [{font: FONTS}],
                     [{size: ['small', false, 'large', 'huge']}],
                     ['bold', 'italic', 'underline', 'strike'],
                     [{color: []}, {background: []}],
@@ -44,9 +44,10 @@
                     [{indent: '-1'}, {indent: '+1'}],
                     [{align: []}],
                     [{direction: 'rtl'}],
-                    // "video" fora de propósito: geraria um <iframe
-                    // src="..."> com URL livre, fora do controle da lista
-                    // de permissão do sanitizador (ver Editor.java).
+                    // "video" left out on purpose: it would produce an
+                    // <iframe src="..."> with a free-form URL, outside the
+                    // control of the sanitizer's allowlist (see
+                    // Editor.java).
                     ['link', 'image'],
                     ['clean']
                 ]
@@ -54,21 +55,21 @@
         });
 
         quill.on('text-change', function () {
-            sincronizar(quill, wrapper);
+            sync(quill, wrapper);
         });
     }
 
-    function iniciarTodos(raiz) {
+    function initAll(root) {
         if (!window.Quill) {
             return;
         }
-        registrarFontes();
-        (raiz || document).querySelectorAll('.box-editor').forEach(iniciarEditor);
+        registerFonts();
+        (root || document).querySelectorAll('.box-editor').forEach(initEditor);
     }
 
-    // Reinicializa editores que apareceram numa atualização parcial (ajax)
-    // - iniciarEditor() já ignora os que já estavam prontos. Ver
-    // box-core.js pro motivo da checagem de window.faces ficar dentro do
-    // handler de DOMContentLoaded.
-    window.Box.aoProntoOuAjax(iniciarTodos);
+    // Re-initializes editors that appeared in a partial (ajax) update -
+    // initEditor() already skips the ones that were already ready. See
+    // box-core.js for why the window.faces check stays inside the
+    // DOMContentLoaded handler.
+    window.Box.onReadyOrAjax(initAll);
 })();

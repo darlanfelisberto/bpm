@@ -16,18 +16,18 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Editor de texto rico (negrito, itálico, sublinhado, fonte, cor da fonte,
- * colar imagens), usando Quill (auto-hospedado em vendor/quill/, sem CDN)
- * como motor de edição. Componente nativo (UIInput, não composite): integra
- * com value/required/validação como qualquer input do JSF, só a
- * renderização é manual.
+ * Rich text editor (bold, italic, underline, font, font color, pasting
+ * images), using Quill (self-hosted under vendor/quill/, no CDN) as the
+ * editing engine. Native component (UIInput, not a composite): integrates
+ * with value/required/validation like any JSF input, only the rendering
+ * is manual.
  *
- * O valor persistido é o HTML do conteúdo (inclusive imagens coladas, como
- * data URI embutida) — quem exibir esse valor precisa usar
- * escape="false" (ex.: h:outputText), já que ele contém marcação.
+ * The persisted value is the content's HTML (including pasted images, as
+ * an embedded data URI) — whoever displays this value needs to use
+ * escape="false" (e.g. h:outputText), since it contains markup.
  *
- * Uso: xmlns:b="http://iffar.edu.br/box"
- *      <b:editor value="#{bean.objetivo}"/>
+ * Usage: xmlns:b="http://iffar.edu.br/box"
+ *      <b:editor value="#{bean.objective}"/>
  */
 @FacesComponent(
         value = Editor.COMPONENT_TYPE,
@@ -46,18 +46,18 @@ public class Editor extends UIInput {
     public static final String COMPONENT_TYPE = "br.edu.iffar.box.Editor";
     public static final String COMPONENT_FAMILY = "br.edu.iffar.box.Editor";
 
-    // Lista de permissão com o HTML que o Quill produz (via
-    // quill.getSemanticHTML(), não quill.root.innerHTML — evita marcadores
-    // internos do editor tipo <span class="ql-ui" contenteditable="false">
-    // que não fazem sentido fora dele) para os formatos habilitados na
-    // toolbar: cabeçalhos, fonte, tamanho, negrito/itálico/sublinhado/
-    // tachado, cor/fundo, sub/sobrescrito, citação, código, listas, recuo,
-    // alinhamento, direção, link, imagem e limpar formatação. Vídeo foi
-    // deixado de fora da toolbar (ver editor.js) porque geraria um
-    // <iframe src="..."> com URL livre — igual a "style", ficaria fora do
-    // controle desta lista de permissão. Tudo que não está aqui (script,
-    // on*, javascript:, iframe...) é removido, inclusive se o POST for
-    // forjado sem passar pela UI.
+    // Allowlist for the HTML Quill produces (via quill.getSemanticHTML(),
+    // not quill.root.innerHTML — avoids the editor's internal markers like
+    // <span class="ql-ui" contenteditable="false"> that don't make sense
+    // outside of it) for the formats enabled in the toolbar: headers,
+    // font, size, bold/italic/underline/strikethrough, color/background,
+    // sub/superscript, blockquote, code, lists, indent, alignment,
+    // direction, link, image and clear formatting. Video was left out of
+    // the toolbar (see editor.js) because it would produce an
+    // <iframe src="..."> with a free-form URL — same problem as "style",
+    // it would be outside this allowlist's control. Anything not listed
+    // here (script, on*, javascript:, iframe...) is stripped, even if the
+    // POST is forged without going through the UI.
     private static final Safelist SAFELIST = Safelist.none()
             .addTags("p", "br", "h1", "h2", "h3", "blockquote", "pre",
                     "ol", "ul", "li", "sub", "sup", "s", "strong", "em", "u", "span", "img", "a")
@@ -76,33 +76,33 @@ public class Editor extends UIInput {
             .addProtocols("img", "src", "data", "http", "https")
             .addProtocols("a", "href", "http", "https", "mailto");
 
-    // O Quill guarda cor/fundo da fonte como estilo inline (style="color:
-    // ..."/"background-color: ..."). Jsoup não valida o conteúdo do
-    // atributo style sozinho, só a presença dele — sem essa checagem um
-    // POST forjado poderia injetar qualquer CSS (url(), por exemplo,
-    // permite exfiltrar dados). Só passa se for exatamente uma dessas duas
-    // declarações, com cor em #hex ou rgb(...).
-    private static final Pattern ESTILO_SEGURO = Pattern.compile(
+    // Quill stores font color/background as an inline style (style="color:
+    // ..."/"background-color: ..."). Jsoup doesn't validate the style
+    // attribute's content by itself, only whether it's present — without
+    // this check a forged POST could inject arbitrary CSS (url(), for
+    // instance, allows exfiltrating data). Only passes if it's exactly one
+    // of these two declarations, with the color in #hex or rgb(...).
+    private static final Pattern SAFE_STYLE = Pattern.compile(
             "(color|background-color):\\s*(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|rgb\\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*\\))\\s*;?\\s*");
 
-    // Pacote-privado (nao private) de proposito: permite teste unitario
-    // direto (EditorSanitizarTest, mesmo pacote) sem reflection.
-    static String sanitizar(String html) {
+    // Package-private (not private) on purpose: allows a direct unit test
+    // (EditorSanitizeTest, same package) without reflection.
+    static String sanitize(String html) {
         if (html == null) {
             return null;
         }
-        Document.OutputSettings semFormatacao = new Document.OutputSettings().prettyPrint(false);
-        String limpo = Jsoup.clean(html, "", SAFELIST, semFormatacao);
-        Document doc = Jsoup.parseBodyFragment(limpo);
-        doc.outputSettings(semFormatacao);
-        for (Element elemento : doc.select("[style]")) {
-            if (!ESTILO_SEGURO.matcher(elemento.attr("style").trim()).matches()) {
-                elemento.removeAttr("style");
+        Document.OutputSettings noFormatting = new Document.OutputSettings().prettyPrint(false);
+        String clean = Jsoup.clean(html, "", SAFELIST, noFormatting);
+        Document doc = Jsoup.parseBodyFragment(clean);
+        doc.outputSettings(noFormatting);
+        for (Element element : doc.select("[style]")) {
+            if (!SAFE_STYLE.matcher(element.attr("style").trim()).matches()) {
+                element.removeAttr("style");
             }
         }
-        // rel/target de <a> não vêm do Jsoup (não estão na lista de
-        // permissão) — setados aqui, sempre com o mesmo valor seguro, em
-        // vez de confiar no que veio no POST.
+        // <a> rel/target don't come from Jsoup (they're not in the
+        // allowlist) — set here, always with the same safe value, instead
+        // of trusting whatever came in the POST.
         for (Element link : doc.select("a[href]")) {
             link.attr("target", "_blank");
             link.attr("rel", "noopener noreferrer");
@@ -122,27 +122,27 @@ public class Editor extends UIInput {
         }
         ResponseWriter writer = context.getResponseWriter();
         String clientId = getClientId(context);
-        Object valorAtual = getValue();
-        String valor = valorAtual != null ? valorAtual.toString() : "";
+        Object currentValue = getValue();
+        String value = currentValue != null ? currentValue.toString() : "";
 
         writer.startElement("div", this);
         writer.writeAttribute("id", clientId, "id");
         writer.writeAttribute("class", "box-editor", null);
 
-        // O Quill toma conta desta div (toolbar + área editável); ele lê o
-        // HTML já presente aqui como conteúdo inicial.
+        // Quill takes over this div (toolbar + editable area); it reads
+        // the HTML already present here as the initial content.
         writer.startElement("div", this);
         writer.writeAttribute("class", "box-editor-quill", null);
-        writer.write(valor);
+        writer.write(value);
         writer.endElement("div");
 
-        // Campo real submetido com o form: o Quill em si não participa da
-        // submissão nativa, o editor.js copia o HTML gerado pra cá a cada
-        // mudança (evento text-change).
+        // Actual field submitted with the form: Quill itself doesn't
+        // take part in native submission, editor.js copies the generated
+        // HTML here on every change (text-change event).
         writer.startElement("textarea", this);
         writer.writeAttribute("name", clientId, null);
-        writer.writeAttribute("class", "box-editor-valor", null);
-        writer.write(valor);
+        writer.writeAttribute("class", "box-editor-value", null);
+        writer.write(value);
         writer.endElement("textarea");
 
         writer.endElement("div");
@@ -154,9 +154,9 @@ public class Editor extends UIInput {
             return;
         }
         String clientId = getClientId(context);
-        Map<String, String> parametros = context.getExternalContext().getRequestParameterMap();
-        if (parametros.containsKey(clientId)) {
-            setSubmittedValue(sanitizar(parametros.get(clientId)));
+        Map<String, String> parameters = context.getExternalContext().getRequestParameterMap();
+        if (parameters.containsKey(clientId)) {
+            setSubmittedValue(sanitize(parameters.get(clientId)));
         }
     }
 }

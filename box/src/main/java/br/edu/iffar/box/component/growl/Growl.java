@@ -15,14 +15,14 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * Mensagens (FacesMessage) como toasts flutuantes, equivalente ao p:growl
- * do PrimeFaces. Componente nativo (UIComponentBase, não composite): lê
- * FacesContext.getMessageList() a cada renderização e entrega o resultado
- * pro growl.js empilhar como toasts - como qualquer outro exibidor de
- * mensagens (h:messages, p:growl), precisa estar no "render" do
- * f:ajax/h:commandButton que adicionou a mensagem pra ela aparecer.
+ * FacesMessages rendered as floating toasts, equivalent to PrimeFaces'
+ * p:growl. Native component (UIComponentBase, not composite): reads
+ * FacesContext.getMessageList() on every render and hands the result off
+ * to growl.js to stack as toasts - like any other message renderer
+ * (h:messages, p:growl), it needs to be in the "render" of the
+ * f:ajax/h:commandButton that added the message for it to show up.
  *
- * Uso: xmlns:b="http://iffar.edu.br/box"
+ * Usage: xmlns:b="http://iffar.edu.br/box"
  *      <b:growl/>
  *      <b:growl for="formCadastro" life="5000" sticky="false"/>
  */
@@ -46,7 +46,7 @@ public class Growl extends UIComponentBase {
         return COMPONENT_FAMILY;
     }
 
-    /** ClientId cujas mensagens exibir - null (padrão) mostra todas, globais e de qualquer componente. */
+    /** ClientId whose messages to show - null (default) shows all, global and from any component. */
     public String getFor() {
         return (String) getStateHelper().eval("for");
     }
@@ -55,7 +55,7 @@ public class Growl extends UIComponentBase {
         getStateHelper().put("for", forClientId);
     }
 
-    /** Tempo em milissegundos até o toast sumir sozinho. Padrão 3000. */
+    /** Time in milliseconds until the toast disappears on its own. Default 3000. */
     public int getLife() {
         Integer life = (Integer) getStateHelper().eval("life");
         return life != null ? life : 3000;
@@ -65,7 +65,7 @@ public class Growl extends UIComponentBase {
         getStateHelper().put("life", life);
     }
 
-    /** Se true, o toast fica até o usuário fechar manualmente (ignora "life"). Padrão false. */
+    /** If true, the toast stays until the user closes it manually (ignores "life"). Default false. */
     public boolean isSticky() {
         Boolean sticky = (Boolean) getStateHelper().eval("sticky");
         return sticky != null && sticky;
@@ -87,14 +87,13 @@ public class Growl extends UIComponentBase {
         writer.writeAttribute("data-life", String.valueOf(getLife()), null);
         writer.writeAttribute("data-sticky", String.valueOf(isSticky()), null);
 
-        // Igual ao box-schedule-eventos (Schedule.java): script
-        // application/json, nao executavel, com "<" escapado pra um
-        // resumo/detalhe com "</script>" nao vazar HTML pro resto da
-        // pagina.
+        // Same as box-schedule-eventos (Schedule.java): application/json
+        // script, non-executable, with "<" escaped so a summary/detail
+        // with "</script>" doesn't leak HTML into the rest of the page.
         writer.startElement("script", this);
         writer.writeAttribute("type", "application/json", null);
-        writer.writeAttribute("class", "box-growl-mensagens", null);
-        writer.write(mensagensComoJson(context).replace("<", "\\u003C"));
+        writer.writeAttribute("class", "box-growl-messages", null);
+        writer.write(messagesAsJson(context).replace("<", "\\u003C"));
         writer.endElement("script");
     }
 
@@ -106,33 +105,33 @@ public class Growl extends UIComponentBase {
         context.getResponseWriter().endElement("div");
     }
 
-    private String mensagensComoJson(FacesContext context) {
+    private String messagesAsJson(FacesContext context) {
         JsonArrayBuilder array = Json.createArrayBuilder();
         String forClientId = getFor();
-        Iterator<FacesMessage> mensagens = forClientId != null
+        Iterator<FacesMessage> messages = forClientId != null
                 ? context.getMessages(forClientId)
                 : context.getMessages();
-        while (mensagens.hasNext()) {
-            FacesMessage mensagem = mensagens.next();
-            JsonObjectBuilder objeto = Json.createObjectBuilder();
-            objeto.add("severidade", severidadeComoTexto(mensagem.getSeverity()));
-            objeto.add("resumo", mensagem.getSummary() != null ? mensagem.getSummary() : "");
-            objeto.add("detalhe", mensagem.getDetail() != null ? mensagem.getDetail() : "");
-            array.add(objeto);
-            // Marca como exibida, senao o MyFaces (RenderResponseExecutor) loga
-            // "unhandled FacesMessages" no final do RENDER_RESPONSE - o mesmo
-            // flag que h:message/h:messages setam ao renderizar.
-            mensagem.rendered();
+        while (messages.hasNext()) {
+            FacesMessage message = messages.next();
+            JsonObjectBuilder object = Json.createObjectBuilder();
+            object.add("severity", severityAsText(message.getSeverity()));
+            object.add("summary", message.getSummary() != null ? message.getSummary() : "");
+            object.add("detail", message.getDetail() != null ? message.getDetail() : "");
+            array.add(object);
+            // Marks as rendered, otherwise MyFaces (RenderResponseExecutor) logs
+            // "unhandled FacesMessages" at the end of RENDER_RESPONSE - the same
+            // flag h:message/h:messages set when rendering.
+            message.rendered();
         }
         return array.build().toString();
     }
 
-    private String severidadeComoTexto(FacesMessage.Severity severidade) {
-        if (severidade == FacesMessage.SEVERITY_WARN) {
+    private String severityAsText(FacesMessage.Severity severity) {
+        if (severity == FacesMessage.SEVERITY_WARN) {
             return "warn";
-        } else if (severidade == FacesMessage.SEVERITY_ERROR) {
+        } else if (severity == FacesMessage.SEVERITY_ERROR) {
             return "error";
-        } else if (severidade == FacesMessage.SEVERITY_FATAL) {
+        } else if (severity == FacesMessage.SEVERITY_FATAL) {
             return "fatal";
         }
         return "info";

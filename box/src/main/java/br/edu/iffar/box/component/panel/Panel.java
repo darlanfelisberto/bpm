@@ -8,13 +8,13 @@ import jakarta.faces.context.ResponseWriter;
 import java.io.IOException;
 
 /**
- * Quadro com título opcional, equivalente ao p:panel (só com o atributo
- * "header"). Componente nativo (UIComponent auto-renderizável), não
- * composite: sem Renderer separado, sem *.taglib.xml — a tag é gerada em
- * tempo de execução por createTag/namespace/tagName abaixo.
+ * Panel with an optional title, equivalent to p:panel (only with the
+ * "header" attribute). Native component (self-rendering UIComponent), not
+ * a composite: no separate Renderer, no *.taglib.xml — the tag is
+ * generated at runtime by createTag/namespace/tagName below.
  *
- * Uso: xmlns:b="http://iffar.edu.br/box"
- *      <b:panel header="Novo instrumento">...</b:panel>
+ * Usage: xmlns:b="http://iffar.edu.br/box"
+ *        <b:panel header="New instrument">...</b:panel>
  */
 @FacesComponent(
         value = Panel.COMPONENT_TYPE,

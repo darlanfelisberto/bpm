@@ -28,23 +28,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Igual ao b:schedule, mas sem nenhuma lib externa: só grade de mês
- * (sem semana/dia, sem redimensionar - granularidade de dia inteiro não
- * dá pra "esticar" sem uma grade de horas, que é justamente a parte mais
- * trabalhosa de reproduzir na mão) desenhada em JS vanilla puro
- * (schedule2.js), sem FullCalendar. Existe pra comparar o resultado -
- * ver box-showcase/schedule2.xhtml - não pra substituir o b:schedule.
+ * Same as b:schedule, but with no external lib at all: just a month grid
+ * (no week/day view, no resizing - whole-day granularity can't be
+ * "stretched" without an hour grid, which is precisely the most
+ * laborious part to reproduce by hand) drawn in plain vanilla JS
+ * (schedule2.js), no FullCalendar. Exists to compare the result - see
+ * box-showcase/schedule2.xhtml - not to replace b:schedule.
  *
- * Mesmos client behaviors "select" (clicar num dia vazio) e "click"
- * (clicar num evento), mais "move" (arrastar um evento pra outro dia,
- * via Drag and Drop nativo do HTML5 - draggable="true"/dragstart/
- * dragover/drop, sem lib nenhuma).
+ * Same client behaviors "select" (click an empty day) and "click"
+ * (click an event), plus "move" (drag an event to another day, via
+ * native HTML5 Drag and Drop - draggable="true"/dragstart/dragover/drop,
+ * no lib at all).
  *
- * Uso: xmlns:b="http://iffar.edu.br/box"
- *      <b:schedule2 events="#{bean.eventos}">
- *          <f:ajax event="select" listener="#{bean.aoSelecionar}" render=":resultado"/>
- *          <f:ajax event="move" listener="#{bean.aoMover}" render=":resultado"/>
- *          <f:ajax event="click" listener="#{bean.aoClicar}" render=":resultado"/>
+ * Usage: xmlns:b="http://iffar.edu.br/box"
+ *      <b:schedule2 events="#{bean.events}">
+ *          <f:ajax event="select" listener="#{bean.onSelect}" render=":result"/>
+ *          <f:ajax event="move" listener="#{bean.onMove}" render=":result"/>
+ *          <f:ajax event="click" listener="#{bean.onClick}" render=":result"/>
  *      </b:schedule2>
  */
 @FacesComponent(
@@ -65,11 +65,11 @@ public class Schedule2 extends UIComponentBase implements ClientBehaviorHolder {
     private static final List<String> EVENT_NAMES =
             Collections.unmodifiableList(List.of("select", "move", "click"));
 
-    private final Map<String, List<ClientBehavior>> comportamentos = new HashMap<>();
+    private final Map<String, List<ClientBehavior>> behaviors = new HashMap<>();
 
-    private transient String dadoInicio;
-    private transient String dadoFim;
-    private transient String dadoEventoId;
+    private transient String startData;
+    private transient String endData;
+    private transient String eventIdData;
 
     @Override
     public String getFamily() {
@@ -78,12 +78,12 @@ public class Schedule2 extends UIComponentBase implements ClientBehaviorHolder {
 
     @Override
     public Map<String, List<ClientBehavior>> getClientBehaviors() {
-        return Collections.unmodifiableMap(comportamentos);
+        return Collections.unmodifiableMap(behaviors);
     }
 
     @Override
     public void addClientBehavior(String eventName, ClientBehavior behavior) {
-        comportamentos.computeIfAbsent(eventName, k -> new ArrayList<>()).add(behavior);
+        behaviors.computeIfAbsent(eventName, k -> new ArrayList<>()).add(behavior);
     }
 
     @Override
@@ -105,32 +105,32 @@ public class Schedule2 extends UIComponentBase implements ClientBehaviorHolder {
         getStateHelper().put("events", events);
     }
 
-    /** Data de início do dia selecionado ("select") ou nova data do evento movido ("move"). */
-    public LocalDateTime getInicio() {
-        return parseDataHora(dadoInicio);
+    /** Start date of the selected day ("select") or new date of the moved event ("move"). */
+    public LocalDateTime getStart() {
+        return parseDateTime(startData);
     }
 
-    /** Data de fim do dia selecionado ("select") ou nova data de fim do evento movido ("move"). */
-    public LocalDateTime getFim() {
-        return parseDataHora(dadoFim);
+    /** End date of the selected day ("select") or new end date of the moved event ("move"). */
+    public LocalDateTime getEnd() {
+        return parseDateTime(endData);
     }
 
-    /** Id do evento movido/clicado - null em "select". */
-    public String getEventoId() {
-        return dadoEventoId;
+    /** Id of the moved/clicked event - null on "select". */
+    public String getEventId() {
+        return eventIdData;
     }
 
-    static LocalDateTime parseDataHora(String texto) {
-        if (texto == null || texto.isBlank()) {
+    static LocalDateTime parseDateTime(String text) {
+        if (text == null || text.isBlank()) {
             return null;
         }
         try {
-            return LocalDateTime.parse(texto);
-        } catch (DateTimeParseException semHora) {
+            return LocalDateTime.parse(text);
+        } catch (DateTimeParseException noTime) {
             try {
-                return OffsetDateTime.parse(texto).toLocalDateTime();
-            } catch (DateTimeParseException comOffset) {
-                return LocalDate.parse(texto).atStartOfDay();
+                return OffsetDateTime.parse(text).toLocalDateTime();
+            } catch (DateTimeParseException withOffset) {
+                return LocalDate.parse(text).atStartOfDay();
             }
         }
     }
@@ -141,24 +141,24 @@ public class Schedule2 extends UIComponentBase implements ClientBehaviorHolder {
             return;
         }
         String clientId = getClientId(context);
-        Map<String, String> parametros = context.getExternalContext().getRequestParameterMap();
+        Map<String, String> parameters = context.getExternalContext().getRequestParameterMap();
 
-        if (!clientId.equals(parametros.get("jakarta.faces.source"))) {
+        if (!clientId.equals(parameters.get("jakarta.faces.source"))) {
             return;
         }
-        String nomeEvento = parametros.get("jakarta.faces.behavior.event");
-        if (nomeEvento == null) {
+        String eventName = parameters.get("jakarta.faces.behavior.event");
+        if (eventName == null) {
             return;
         }
 
-        dadoInicio = parametros.get(clientId + "_inicio");
-        dadoFim = parametros.get(clientId + "_fim");
-        dadoEventoId = parametros.get(clientId + "_eventoId");
+        startData = parameters.get(clientId + "_start");
+        endData = parameters.get(clientId + "_end");
+        eventIdData = parameters.get(clientId + "_eventId");
 
-        List<ClientBehavior> comportamentosDoEvento = comportamentos.get(nomeEvento);
-        if (comportamentosDoEvento != null) {
-            for (ClientBehavior comportamento : comportamentosDoEvento) {
-                comportamento.decode(context, this);
+        List<ClientBehavior> behaviorsForEvent = behaviors.get(eventName);
+        if (behaviorsForEvent != null) {
+            for (ClientBehavior behavior : behaviorsForEvent) {
+                behavior.decode(context, this);
             }
         }
     }
@@ -174,20 +174,20 @@ public class Schedule2 extends UIComponentBase implements ClientBehaviorHolder {
         writer.startElement("div", this);
         writer.writeAttribute("id", clientId, "id");
         writer.writeAttribute("class", "box-schedule2", null);
-        for (String nomeEvento : EVENT_NAMES) {
-            writer.writeAttribute("data-render-" + nomeEvento, renderPara(nomeEvento), null);
+        for (String eventName : EVENT_NAMES) {
+            writer.writeAttribute("data-render-" + eventName, renderTargetFor(eventName), null);
         }
 
-        // Mesmo cuidado de escaping do b:schedule: "<" vira < pra um
-        // titulo com "</script>" nao fechar a tag mais cedo.
+        // Same escaping care as b:schedule: "<" becomes < so a title
+        // with "</script>" doesn't close the tag early.
         writer.startElement("script", this);
         writer.writeAttribute("type", "application/json", null);
-        writer.writeAttribute("class", "box-schedule2-eventos", null);
-        writer.write(eventosComoJson().replace("<", "\\u003C"));
+        writer.writeAttribute("class", "box-schedule2-events", null);
+        writer.write(eventsAsJson().replace("<", "\\u003C"));
         writer.endElement("script");
 
         writer.startElement("div", this);
-        writer.writeAttribute("class", "box-schedule2-calendario", null);
+        writer.writeAttribute("class", "box-schedule2-calendar", null);
         writer.endElement("div");
     }
 
@@ -199,36 +199,36 @@ public class Schedule2 extends UIComponentBase implements ClientBehaviorHolder {
         context.getResponseWriter().endElement("div");
     }
 
-    private String eventosComoJson() {
+    private String eventsAsJson() {
         JsonArrayBuilder array = Json.createArrayBuilder();
-        List<ScheduleEvent> lista = getEvents();
-        if (lista != null) {
-            for (ScheduleEvent evento : lista) {
-                JsonObjectBuilder objeto = Json.createObjectBuilder();
-                if (evento.getId() != null) {
-                    objeto.add("id", evento.getId());
+        List<ScheduleEvent> events = getEvents();
+        if (events != null) {
+            for (ScheduleEvent event : events) {
+                JsonObjectBuilder object = Json.createObjectBuilder();
+                if (event.getId() != null) {
+                    object.add("id", event.getId());
                 }
-                objeto.add("title", evento.getTitulo() != null ? evento.getTitulo() : "");
-                if (evento.getInicio() != null) {
-                    objeto.add("start", evento.getInicio().toString());
+                object.add("title", event.getTitle() != null ? event.getTitle() : "");
+                if (event.getStart() != null) {
+                    object.add("start", event.getStart().toString());
                 }
-                if (evento.getFim() != null) {
-                    objeto.add("end", evento.getFim().toString());
+                if (event.getEnd() != null) {
+                    object.add("end", event.getEnd().toString());
                 }
-                if (evento.getCor() != null) {
-                    objeto.add("color", evento.getCor());
+                if (event.getColor() != null) {
+                    object.add("color", event.getColor());
                 }
-                array.add(objeto);
+                array.add(object);
             }
         }
         return array.build().toString();
     }
 
-    private String renderPara(String nomeEvento) {
-        List<ClientBehavior> comportamentosDoEvento = comportamentos.get(nomeEvento);
-        if (comportamentosDoEvento != null) {
-            for (ClientBehavior comportamento : comportamentosDoEvento) {
-                if (comportamento instanceof AjaxBehavior ajax && ajax.getRender() != null
+    private String renderTargetFor(String eventName) {
+        List<ClientBehavior> behaviorsForEvent = behaviors.get(eventName);
+        if (behaviorsForEvent != null) {
+            for (ClientBehavior behavior : behaviorsForEvent) {
+                if (behavior instanceof AjaxBehavior ajax && ajax.getRender() != null
                         && !ajax.getRender().isEmpty()) {
                     return String.join(" ", ajax.getRender());
                 }

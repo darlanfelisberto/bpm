@@ -1,245 +1,245 @@
 (function () {
     'use strict';
 
-    // Igual ao schedule.js (b:schedule), so que sem FullCalendar: a grade
-    // do mes, a navegacao entre meses e o drag-and-drop sao tudo escrito
-    // na mao aqui. So visao de mes (sem semana/dia, sem redimensionar -
-    // exigiria uma grade de horas, a parte mais trabalhosa de reproduzir).
-    // Multi-dia: o mesmo evento aparece repetido em cada dia que ele toca
-    // (sem a barra continua que o FullCalendar desenha).
+    // Same as schedule.js (b:schedule), but with no FullCalendar: the
+    // month grid, navigation between months and drag-and-drop are all
+    // hand-written here. Month view only (no week/day, no resizing -
+    // would require an hour grid, the most laborious part to reproduce).
+    // Multi-day: the same event appears repeated on each day it touches
+    // (no continuous bar like FullCalendar draws).
 
-    function lerEventos(wrapper) {
-        var script = wrapper.querySelector('.box-schedule2-eventos');
+    function readEvents(wrapper) {
+        var script = wrapper.querySelector('.box-schedule2-events');
         return script ? JSON.parse(script.textContent) : [];
     }
 
-    function doisDigitos(n) {
+    function twoDigits(n) {
         return n < 10 ? '0' + n : '' + n;
     }
 
-    function formatarData(data) {
-        return data.getFullYear() + '-' + doisDigitos(data.getMonth() + 1) + '-' + doisDigitos(data.getDate());
+    function formatDate(date) {
+        return date.getFullYear() + '-' + twoDigits(date.getMonth() + 1) + '-' + twoDigits(date.getDate());
     }
 
-    function formatarDataHora(data) {
-        return formatarData(data) + 'T' + doisDigitos(data.getHours()) + ':'
-                + doisDigitos(data.getMinutes()) + ':' + doisDigitos(data.getSeconds());
+    function formatDateTime(date) {
+        return formatDate(date) + 'T' + twoDigits(date.getHours()) + ':'
+                + twoDigits(date.getMinutes()) + ':' + twoDigits(date.getSeconds());
     }
 
-    function somenteData(data) {
-        return new Date(data.getFullYear(), data.getMonth(), data.getDate());
+    function dateOnly(date) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
     }
 
-    function somarDias(data, dias) {
-        var copia = new Date(data);
-        copia.setDate(copia.getDate() + dias);
-        return copia;
+    function addDays(date, days) {
+        var copy = new Date(date);
+        copy.setDate(copy.getDate() + days);
+        return copy;
     }
 
-    // Semanas completas (dom-sab) que cobrem o mes inteiro - inclui dias
-    // do mes anterior/seguinte pra preencher a primeira/ultima semana.
-    function gerarSemanas(ano, mes) {
-        var primeiroDoMes = new Date(ano, mes, 1);
-        var cursor = somarDias(primeiroDoMes, -primeiroDoMes.getDay());
-        var ultimoDoMes = new Date(ano, mes + 1, 0);
-        var semanas = [];
+    // Full weeks (Sun-Sat) that cover the entire month - includes days
+    // from the previous/next month to fill out the first/last week.
+    function generateWeeks(year, month) {
+        var firstOfMonth = new Date(year, month, 1);
+        var cursor = addDays(firstOfMonth, -firstOfMonth.getDay());
+        var lastOfMonth = new Date(year, month + 1, 0);
+        var weeks = [];
         do {
-            var semana = [];
+            var week = [];
             for (var i = 0; i < 7; i++) {
-                semana.push(new Date(cursor));
-                cursor = somarDias(cursor, 1);
+                week.push(new Date(cursor));
+                cursor = addDays(cursor, 1);
             }
-            semanas.push(semana);
-        } while (cursor <= ultimoDoMes);
-        return semanas;
+            weeks.push(week);
+        } while (cursor <= lastOfMonth);
+        return weeks;
     }
 
-    // Um Schedule2Grade por wrapper .box-schedule2 - guarda o mes/ano em
-    // exibicao e os eventos, e sabe (re)desenhar a grade a partir desse
-    // estado.
-    class Schedule2Grade {
+    // One Schedule2Grid per .box-schedule2 wrapper - holds the month/year
+    // currently being shown and the events, and knows how to (re)draw the
+    // grid from that state.
+    class Schedule2Grid {
         constructor(wrapper) {
             this.wrapper = wrapper;
-            this.eventos = lerEventos(wrapper);
-            var hoje = new Date();
-            this.ano = hoje.getFullYear();
-            this.mes = hoje.getMonth();
+            this.events = readEvents(wrapper);
+            var today = new Date();
+            this.year = today.getFullYear();
+            this.month = today.getMonth();
         }
 
-        eventosNoDia(dia) {
-            return this.eventos.filter(function (evento) {
-                if (!evento.start) {
+        eventsOnDay(day) {
+            return this.events.filter(function (event) {
+                if (!event.start) {
                     return false;
                 }
-                var inicio = somenteData(new Date(evento.start));
-                var fim = evento.end ? somenteData(new Date(evento.end)) : inicio;
-                return dia >= inicio && dia <= fim;
+                var start = dateOnly(new Date(event.start));
+                var end = event.end ? dateOnly(new Date(event.end)) : start;
+                return day >= start && day <= end;
             });
         }
 
-        moverEvento(eventoId, novoDia) {
-            var evento = this.eventos.find(function (e) { return e.id === eventoId; });
-            if (!evento) {
+        moveEvent(eventId, newDay) {
+            var event = this.events.find(function (e) { return e.id === eventId; });
+            if (!event) {
                 return;
             }
-            var inicioOriginal = new Date(evento.start);
-            var diasDeDiferenca = Math.round((novoDia - somenteData(inicioOriginal)) / 86400000);
-            if (diasDeDiferenca === 0) {
+            var originalStart = new Date(event.start);
+            var dayDifference = Math.round((newDay - dateOnly(originalStart)) / 86400000);
+            if (dayDifference === 0) {
                 return;
             }
-            var novoInicio = somarDias(inicioOriginal, diasDeDiferenca);
-            evento.start = formatarDataHora(novoInicio);
-            var novoFimTexto = evento.start;
-            if (evento.end) {
-                var novoFim = somarDias(new Date(evento.end), diasDeDiferenca);
-                evento.end = formatarDataHora(novoFim);
-                novoFimTexto = evento.end;
+            var newStart = addDays(originalStart, dayDifference);
+            event.start = formatDateTime(newStart);
+            var newEndText = event.start;
+            if (event.end) {
+                var newEnd = addDays(new Date(event.end), dayDifference);
+                event.end = formatDateTime(newEnd);
+                newEndText = event.end;
             }
 
-            this.renderizarGrade();
+            this.renderGrid();
 
-            var dados = {};
-            dados[this.wrapper.id + '_eventoId'] = eventoId;
-            dados[this.wrapper.id + '_inicio'] = evento.start;
-            dados[this.wrapper.id + '_fim'] = novoFimTexto;
-            window.Box.disparar(this.wrapper, 'move', dados);
+            var data = {};
+            data[this.wrapper.id + '_eventId'] = eventId;
+            data[this.wrapper.id + '_start'] = event.start;
+            data[this.wrapper.id + '_end'] = newEndText;
+            window.Box.trigger(this.wrapper, 'move', data);
         }
 
-        criarCelula(dia) {
+        createCell(day) {
             var self = this;
-            var celula = document.createElement('div');
-            celula.className = 'box-schedule2-dia';
-            if (dia.getMonth() !== this.mes) {
-                celula.classList.add('box-schedule2-dia-fora');
+            var cell = document.createElement('div');
+            cell.className = 'box-schedule2-day';
+            if (day.getMonth() !== this.month) {
+                cell.classList.add('box-schedule2-day-outside');
             }
-            var hoje = somenteData(new Date());
-            if (dia.getTime() === hoje.getTime()) {
-                celula.classList.add('box-schedule2-dia-hoje');
+            var today = dateOnly(new Date());
+            if (day.getTime() === today.getTime()) {
+                cell.classList.add('box-schedule2-day-today');
             }
 
-            var numero = document.createElement('span');
-            numero.className = 'box-schedule2-dia-numero';
-            numero.textContent = dia.getDate();
-            celula.appendChild(numero);
+            var number = document.createElement('span');
+            number.className = 'box-schedule2-day-number';
+            number.textContent = day.getDate();
+            cell.appendChild(number);
 
-            this.eventosNoDia(dia).forEach(function (evento) {
+            this.eventsOnDay(day).forEach(function (event) {
                 var chip = document.createElement('div');
-                chip.className = 'box-schedule2-evento';
-                chip.textContent = evento.title;
+                chip.className = 'box-schedule2-event';
+                chip.textContent = event.title;
                 chip.draggable = true;
-                if (evento.color) {
-                    chip.style.backgroundColor = evento.color;
+                if (event.color) {
+                    chip.style.backgroundColor = event.color;
                 }
                 chip.addEventListener('dragstart', function (dragEvent) {
-                    dragEvent.dataTransfer.setData('text/plain', evento.id);
+                    dragEvent.dataTransfer.setData('text/plain', event.id);
                     dragEvent.dataTransfer.effectAllowed = 'move';
                 });
                 chip.addEventListener('click', function (clickEvent) {
                     clickEvent.stopPropagation();
-                    var dados = {};
-                    dados[self.wrapper.id + '_eventoId'] = evento.id;
-                    window.Box.disparar(self.wrapper, 'click', dados);
+                    var data = {};
+                    data[self.wrapper.id + '_eventId'] = event.id;
+                    window.Box.trigger(self.wrapper, 'click', data);
                 });
-                celula.appendChild(chip);
+                cell.appendChild(chip);
             });
 
-            celula.addEventListener('dragover', function (dragEvent) {
+            cell.addEventListener('dragover', function (dragEvent) {
                 dragEvent.preventDefault();
                 dragEvent.dataTransfer.dropEffect = 'move';
             });
-            celula.addEventListener('drop', function (dropEvent) {
+            cell.addEventListener('drop', function (dropEvent) {
                 dropEvent.preventDefault();
-                var eventoId = dropEvent.dataTransfer.getData('text/plain');
-                self.moverEvento(eventoId, dia);
+                var eventId = dropEvent.dataTransfer.getData('text/plain');
+                self.moveEvent(eventId, day);
             });
-            celula.addEventListener('click', function () {
-                var dados = {};
-                dados[self.wrapper.id + '_inicio'] = formatarData(dia);
-                dados[self.wrapper.id + '_fim'] = formatarData(somarDias(dia, 1));
-                window.Box.disparar(self.wrapper, 'select', dados);
+            cell.addEventListener('click', function () {
+                var data = {};
+                data[self.wrapper.id + '_start'] = formatDate(day);
+                data[self.wrapper.id + '_end'] = formatDate(addDays(day, 1));
+                window.Box.trigger(self.wrapper, 'select', data);
             });
 
-            return celula;
+            return cell;
         }
 
-        renderizarGrade() {
+        renderGrid() {
             var self = this;
-            var alvo = this.wrapper.querySelector('.box-schedule2-calendario');
-            alvo.replaceChildren();
+            var target = this.wrapper.querySelector('.box-schedule2-calendar');
+            target.replaceChildren();
 
-            var cabecalho = document.createElement('div');
-            cabecalho.className = 'box-schedule2-cabecalho';
+            var header = document.createElement('div');
+            header.className = 'box-schedule2-header';
 
-            var botaoAnterior = document.createElement('button');
-            botaoAnterior.type = 'button';
-            botaoAnterior.textContent = '‹';
-            botaoAnterior.addEventListener('click', function () {
-                self.mes -= 1;
-                if (self.mes < 0) {
-                    self.mes = 11;
-                    self.ano -= 1;
+            var previousButton = document.createElement('button');
+            previousButton.type = 'button';
+            previousButton.textContent = '‹';
+            previousButton.addEventListener('click', function () {
+                self.month -= 1;
+                if (self.month < 0) {
+                    self.month = 11;
+                    self.year -= 1;
                 }
-                self.renderizarGrade();
+                self.renderGrid();
             });
 
-            var botaoProximo = document.createElement('button');
-            botaoProximo.type = 'button';
-            botaoProximo.textContent = '›';
-            botaoProximo.addEventListener('click', function () {
-                self.mes += 1;
-                if (self.mes > 11) {
-                    self.mes = 0;
-                    self.ano += 1;
+            var nextButton = document.createElement('button');
+            nextButton.type = 'button';
+            nextButton.textContent = '›';
+            nextButton.addEventListener('click', function () {
+                self.month += 1;
+                if (self.month > 11) {
+                    self.month = 0;
+                    self.year += 1;
                 }
-                self.renderizarGrade();
+                self.renderGrid();
             });
 
-            var titulo = document.createElement('span');
-            titulo.className = 'box-schedule2-titulo';
-            var textoTitulo = new Date(this.ano, this.mes, 1)
+            var title = document.createElement('span');
+            title.className = 'box-schedule2-title';
+            var titleText = new Date(this.year, this.month, 1)
                     .toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
-            // so a primeira letra maiuscula ("Agosto de 2026") - text-transform:
-            // capitalize maiusculizaria cada palavra ("Agosto De 2026").
-            titulo.textContent = textoTitulo.charAt(0).toUpperCase() + textoTitulo.slice(1);
+            // only the first letter uppercase ("Agosto de 2026") -
+            // text-transform: capitalize would uppercase every word ("Agosto De 2026").
+            title.textContent = titleText.charAt(0).toUpperCase() + titleText.slice(1);
 
-            cabecalho.appendChild(botaoAnterior);
-            cabecalho.appendChild(titulo);
-            cabecalho.appendChild(botaoProximo);
-            alvo.appendChild(cabecalho);
+            header.appendChild(previousButton);
+            header.appendChild(title);
+            header.appendChild(nextButton);
+            target.appendChild(header);
 
-            var grade = document.createElement('div');
-            grade.className = 'box-schedule2-grade';
+            var grid = document.createElement('div');
+            grid.className = 'box-schedule2-grid';
 
-            var formatadorDiaSemana = new Intl.DateTimeFormat('pt-BR', {weekday: 'short'});
+            var weekdayFormatter = new Intl.DateTimeFormat('pt-BR', {weekday: 'short'});
             for (var i = 0; i < 7; i++) {
-                var cabecalhoDia = document.createElement('div');
-                cabecalhoDia.className = 'box-schedule2-cabecalho-dia';
-                cabecalhoDia.textContent = formatadorDiaSemana.format(new Date(2026, 0, 4 + i));
-                grade.appendChild(cabecalhoDia);
+                var headerDay = document.createElement('div');
+                headerDay.className = 'box-schedule2-header-day';
+                headerDay.textContent = weekdayFormatter.format(new Date(2026, 0, 4 + i));
+                grid.appendChild(headerDay);
             }
 
-            gerarSemanas(this.ano, this.mes).forEach(function (semana) {
-                semana.forEach(function (dia) {
-                    grade.appendChild(self.criarCelula(dia));
+            generateWeeks(this.year, this.month).forEach(function (week) {
+                week.forEach(function (day) {
+                    grid.appendChild(self.createCell(day));
                 });
             });
 
-            alvo.appendChild(grade);
+            target.appendChild(grid);
         }
     }
 
-    function iniciarSchedule2(wrapper) {
-        if (wrapper.dataset.boxSchedule2Iniciado === 'true') {
+    function initSchedule2(wrapper) {
+        if (wrapper.dataset.boxSchedule2Initialized === 'true') {
             return;
         }
-        wrapper.dataset.boxSchedule2Iniciado = 'true';
+        wrapper.dataset.boxSchedule2Initialized = 'true';
 
-        new Schedule2Grade(wrapper).renderizarGrade();
+        new Schedule2Grid(wrapper).renderGrid();
     }
 
-    function iniciarTodos(raiz) {
-        (raiz || document).querySelectorAll('.box-schedule2').forEach(iniciarSchedule2);
+    function initAll(root) {
+        (root || document).querySelectorAll('.box-schedule2').forEach(initSchedule2);
     }
 
-    window.Box.aoProntoOuAjax(iniciarTodos);
+    window.Box.onReadyOrAjax(initAll);
 })();

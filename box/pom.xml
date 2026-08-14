@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>box</name>
-    <description>Componentes e behaviors Jakarta Faces nativos, reutilizaveis entre projetos do IFFar</description>
+    <description>Native Jakarta Faces components and behaviors, reusable across IFFar projects</description>
 
     <dependencies>
         <dependency>
@@ -27,10 +27,10 @@
             <version>${version.el-api}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- JSON-P: serializa os eventos do b:schedule pro JSON que o
-             FullCalendar le, com escaping correto (nao hand-rolled) -
-             fornecido em runtime pelo Open Liberty (parte do
-             webProfile-11.0/jsonp-2.1), so usado pra compilar. -->
+        <!-- JSON-P: serializes b:schedule's events into the JSON FullCalendar
+             reads, with correct escaping (not hand-rolled) - provided at
+             runtime by Open Liberty (part of webProfile-11.0/jsonp-2.1),
+             only used here to compile. -->
         <dependency>
             <groupId>jakarta.json</groupId>
             <artifactId>jakarta.json-api</artifactId>
@@ -47,11 +47,11 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- jakarta.json-api acima e' so a API (implementacao vem do Open
-             Liberty em runtime) - Parsson e' a implementacao de referencia,
-             so em teste, pra Json.createReader/createArrayBuilder
-             funcionarem rodando os testes unitarios fora do Liberty
-             (ex.: DatatableTest, parse do JSON de filtros). -->
+        <!-- jakarta.json-api above is just the API (the implementation comes
+             from Open Liberty at runtime) - Parsson is the reference
+             implementation, test-only, so Json.createReader/createArrayBuilder
+             work when running unit tests outside Liberty (e.g. DatatableTest,
+             filter JSON parsing). -->
         <dependency>
             <groupId>org.eclipse.parsson</groupId>
             <artifactId>parsson</artifactId>
@@ -61,10 +61,10 @@
     </dependencies>
 
     <build>
-        <!-- src/main/resources continua valendo (comportamento padrao do Maven
-             some se <resources> for declarado, por isso listado aqui de novo)
-             + o vendor/quill baixado pelo download-maven-plugin abaixo, gerado
-             em target/ a cada build (nunca versionado). -->
+        <!-- src/main/resources still needs to be listed (Maven's default
+             disappears once <resources> is declared, hence re-listing it
+             here) + the vendor/quill downloaded by the download-maven-plugin
+             below, generated into target/ on every build (never versioned). -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -74,18 +74,19 @@
             </resource>
         </resources>
         <plugins>
-            <!-- Baixa o Quill (JS/CSS) direto do jsdelivr a cada build, em vez
-                 de versionar os arquivos no git. Pra atualizar: mudar
-                 version.quill no pom.xml raiz e o sha256 correspondente (o
-                 build falha se o arquivo baixado nao bater com o hash
-                 esperado, evitando trocar a lib por engano/adulteracao). -->
+            <!-- Downloads Quill (JS/CSS) straight from jsdelivr on every build,
+                 instead of versioning the files in git. To update: change
+                 version.quill in the root pom.xml and the matching sha256
+                 (the build fails if the downloaded file doesn't match the
+                 expected hash, guarding against swapping the lib by
+                 mistake/tampering). -->
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
                 <version>${version.download-maven-plugin}</version>
                 <executions>
                     <execution>
-                        <id>baixar-quill-js</id>
+                        <id>download-quill-js</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>wget</goal>
@@ -98,7 +99,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>baixar-quill-css</id>
+                        <id>download-quill-css</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>wget</goal>
@@ -111,7 +112,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>baixar-fullcalendar-js</id>
+                        <id>download-fullcalendar-js</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>wget</goal>

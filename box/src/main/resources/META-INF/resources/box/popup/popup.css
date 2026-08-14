@@ -13,7 +13,7 @@
     background: rgba(16, 24, 32, 0.45);
 }
 
-.box-popup-cabecalho {
+.box-popup-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -22,12 +22,12 @@
     border-bottom: 1px solid var(--color-border, #dfe4ea);
 }
 
-.box-popup-cabecalho h3 {
+.box-popup-header h3 {
     margin: 0;
     font-size: 1rem;
 }
 
-.box-popup-fechar {
+.box-popup-close {
     background: none;
     border: none;
     color: var(--color-text-muted, #616e7c);
@@ -37,13 +37,13 @@
     padding: 0;
 }
 
-.box-popup-corpo {
+.box-popup-body {
     padding: 1.1rem;
     max-height: 70vh;
     overflow-y: auto;
 }
 
-.box-popup-rodape {
+.box-popup-footer {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;

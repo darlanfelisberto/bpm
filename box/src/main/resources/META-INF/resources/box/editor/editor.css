@@ -23,13 +23,13 @@
     height: auto;
 }
 
-.box-editor-valor {
+.box-editor-value {
     display: none;
 }
 
-/* Fontes do seletor "font": o Quill só gera a classe ql-font-<valor>, quem
-   mapeia pra uma font-family de verdade e pro rótulo legível no dropdown
-   somos nós. */
+/* Fonts for the "font" selector: Quill only generates the class
+   ql-font-<value>, mapping it to an actual font-family and to the
+   readable label in the dropdown is on us. */
 .ql-font-arial { font-family: Arial, sans-serif; }
 .ql-font-georgia { font-family: Georgia, serif; }
 .ql-font-times-new-roman { font-family: 'Times New Roman', serif; }
@@ -50,11 +50,12 @@
 .box-editor .ql-picker.ql-font .ql-picker-label[data-value="trebuchet-ms"]::before,
 .box-editor .ql-picker.ql-font .ql-picker-item[data-value="trebuchet-ms"]::before { content: 'Trebuchet MS'; font-family: 'Trebuchet MS', sans-serif; }
 
-/* Formatos que só existem como classe (tamanho, alinhamento, recuo,
-   direção) e o bloco de código: sem CSS própria, não têm efeito nenhum
-   fora do editor. Regras sem escopo em .box-editor de propósito — elas
-   também precisam valer onde o conteúdo salvo é exibido (h:outputText
-   escape="false"), página que não necessariamente carrega o Quill. */
+/* Formats that only exist as a class (size, alignment, indent,
+   direction) and the code block: without their own CSS, they'd have no
+   effect outside the editor. Rules left unscoped from .box-editor on
+   purpose — they also need to apply wherever the saved content is
+   displayed (h:outputText escape="false"), a page that doesn't
+   necessarily load Quill. */
 .ql-size-small { font-size: 0.75em; }
 .ql-size-large { font-size: 1.5em; }
 .ql-size-huge { font-size: 2.5em; }

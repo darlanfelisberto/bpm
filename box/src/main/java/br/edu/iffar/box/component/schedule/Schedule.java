@@ -26,24 +26,24 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Agenda de eventos (mês/semana/dia), equivalente ao p:schedule do
- * PrimeFaces. Usa o FullCalendar (auto-hospedado em vendor/fullcalendar/,
- * sem CDN) como motor - mesma lib que o próprio p:schedule usa por baixo.
- * Componente nativo (UIComponentBase, não composite) que implementa
- * ClientBehaviorHolder pra suportar f:ajax aninhado nos eventos
- * "select" (arrastou pra selecionar um intervalo vazio), "move" (arrastou
- * um evento existente), "resize" (redimensionou um evento existente) e
- * "click" (clicou num evento existente) - o componente só reporta o que
- * aconteceu (datas/id do evento, via getInicio()/getFim()/getEventoId()
- * no listener), quem decide o que fazer é a página/bean, igual ao
- * b:confirm não decidir o que "confirmar" faz.
+ * Event schedule (month/week/day), equivalent to PrimeFaces' p:schedule.
+ * Uses FullCalendar (self-hosted under vendor/fullcalendar/, no CDN) as
+ * the engine - the same lib p:schedule itself uses under the hood.
+ * Native component (UIComponentBase, not composite) that implements
+ * ClientBehaviorHolder to support nested f:ajax on the "select" (dragged
+ * to select an empty range), "move" (dragged an existing event),
+ * "resize" (resized an existing event) and "click" (clicked an existing
+ * event) events - the component only reports what happened (dates/event
+ * id, via getStart()/getEnd()/getEventId() in the listener), it's up to
+ * the page/bean to decide what to do, just like b:confirm doesn't decide
+ * what "confirm" does.
  *
- * Uso: xmlns:b="http://iffar.edu.br/box"
- *      <b:schedule events="#{bean.eventos}">
- *          <f:ajax event="select" listener="#{bean.aoSelecionar}" render=":formNovo"/>
- *          <f:ajax event="move" listener="#{bean.aoMover}" render=":formLista"/>
- *          <f:ajax event="resize" listener="#{bean.aoRedimensionar}" render=":formLista"/>
- *          <f:ajax event="click" listener="#{bean.aoClicar}" render=":formDetalhe"/>
+ * Usage: xmlns:b="http://iffar.edu.br/box"
+ *      <b:schedule events="#{bean.events}">
+ *          <f:ajax event="select" listener="#{bean.onSelect}" render=":newForm"/>
+ *          <f:ajax event="move" listener="#{bean.onMove}" render=":listForm"/>
+ *          <f:ajax event="resize" listener="#{bean.onResize}" render=":listForm"/>
+ *          <f:ajax event="click" listener="#{bean.onClick}" render=":detailForm"/>
  *      </b:schedule>
  */
 @FacesComponent(
@@ -65,14 +65,14 @@ public class Schedule extends UIComponentBase implements ClientBehaviorHolder {
     private static final List<String> EVENT_NAMES =
             Collections.unmodifiableList(List.of("select", "move", "resize", "click"));
 
-    private final Map<String, List<ClientBehavior>> comportamentos = new HashMap<>();
+    private final Map<String, List<ClientBehavior>> behaviors = new HashMap<>();
 
-    // Dados do evento decodificado nesta requisição - não fazem parte do
-    // estado do componente (getStateHelper), são só o "recado" desta
-    // requisição pro listener ler via evento.getComponent().
-    private transient String dadoInicio;
-    private transient String dadoFim;
-    private transient String dadoEventoId;
+    // Decoded event data for this request - not part of the component's
+    // state (getStateHelper), just the "message" for this request for
+    // the listener to read via event.getComponent().
+    private transient String startData;
+    private transient String endData;
+    private transient String eventIdData;
 
     @Override
     public String getFamily() {
@@ -81,12 +81,12 @@ public class Schedule extends UIComponentBase implements ClientBehaviorHolder {
 
     @Override
     public Map<String, List<ClientBehavior>> getClientBehaviors() {
-        return Collections.unmodifiableMap(comportamentos);
+        return Collections.unmodifiableMap(behaviors);
     }
 
     @Override
     public void addClientBehavior(String eventName, ClientBehavior behavior) {
-        comportamentos.computeIfAbsent(eventName, k -> new ArrayList<>()).add(behavior);
+        behaviors.computeIfAbsent(eventName, k -> new ArrayList<>()).add(behavior);
     }
 
     @Override
@@ -108,39 +108,41 @@ public class Schedule extends UIComponentBase implements ClientBehaviorHolder {
         getStateHelper().put("events", events);
     }
 
-    /** Data/hora de início do intervalo selecionado ("select") ou do evento movido/redimensionado ("move"/"resize"). */
-    public LocalDateTime getInicio() {
-        return parseDataHora(dadoInicio);
+    /** Start date/time of the selected range ("select") or of the moved/resized event ("move"/"resize"). */
+    public LocalDateTime getStart() {
+        return parseDateTime(startData);
     }
 
-    /** Data/hora de fim do intervalo selecionado ("select") ou do evento movido/redimensionado ("move"/"resize"). */
-    public LocalDateTime getFim() {
-        return parseDataHora(dadoFim);
+    /** End date/time of the selected range ("select") or of the moved/resized event ("move"/"resize"). */
+    public LocalDateTime getEnd() {
+        return parseDateTime(endData);
     }
 
-    /** Id do evento movido/redimensionado/clicado - null em "select" (nenhum evento existente envolvido). */
-    public String getEventoId() {
-        return dadoEventoId;
+    /** Id of the moved/resized/clicked event - null on "select" (no existing event involved). */
+    public String getEventId() {
+        return eventIdData;
     }
 
-    // Pacote-privado (nao private) de proposito: permite teste unitario
-    // direto (ScheduleParseDataHoraTest, mesmo pacote) sem reflection.
-    static LocalDateTime parseDataHora(String texto) {
-        if (texto == null || texto.isBlank()) {
+    // Package-private (not private) on purpose: allows the unit test
+    // (ScheduleParseDateTimeTest, same package) to call it directly
+    // without reflection.
+    static LocalDateTime parseDateTime(String text) {
+        if (text == null || text.isBlank()) {
             return null;
         }
-        // O formato que o FullCalendar manda varia com o tipo de interacao:
-        // "select" manda data/hora sem offset (ex.: "2026-09-03T00:00");
-        // mover/redimensionar um evento manda COM offset de fuso (ex.:
-        // "2026-08-14T10:00:00-03:00"); uma selecao/evento de dia inteiro
-        // manda so a data (ex.: "2026-08-20"). Tenta os tres formatos.
+        // The format FullCalendar sends varies with the kind of
+        // interaction: "select" sends date/time without offset (e.g.
+        // "2026-09-03T00:00"); moving/resizing an event sends it WITH a
+        // timezone offset (e.g. "2026-08-14T10:00:00-03:00"); a whole-day
+        // selection/event sends just the date (e.g. "2026-08-20"). Tries
+        // all three formats.
         try {
-            return LocalDateTime.parse(texto);
-        } catch (DateTimeParseException semHora) {
+            return LocalDateTime.parse(text);
+        } catch (DateTimeParseException noTime) {
             try {
-                return OffsetDateTime.parse(texto).toLocalDateTime();
-            } catch (DateTimeParseException comOffset) {
-                return LocalDate.parse(texto).atStartOfDay();
+                return OffsetDateTime.parse(text).toLocalDateTime();
+            } catch (DateTimeParseException withOffset) {
+                return LocalDate.parse(text).atStartOfDay();
             }
         }
     }
@@ -151,27 +153,27 @@ public class Schedule extends UIComponentBase implements ClientBehaviorHolder {
             return;
         }
         String clientId = getClientId(context);
-        Map<String, String> parametros = context.getExternalContext().getRequestParameterMap();
+        Map<String, String> parameters = context.getExternalContext().getRequestParameterMap();
 
-        // So processa se esta requisicao ajax for de fato sobre este
-        // componente - o mesmo formulario pode ter outros elementos
-        // disparando ajax (ex.: um h:commandButton qualquer na pagina).
-        if (!clientId.equals(parametros.get("jakarta.faces.source"))) {
+        // Only processes if this ajax request is actually about this
+        // component - the same form may have other elements triggering
+        // ajax (e.g. some unrelated h:commandButton on the page).
+        if (!clientId.equals(parameters.get("jakarta.faces.source"))) {
             return;
         }
-        String nomeEvento = parametros.get("jakarta.faces.behavior.event");
-        if (nomeEvento == null) {
+        String eventName = parameters.get("jakarta.faces.behavior.event");
+        if (eventName == null) {
             return;
         }
 
-        dadoInicio = parametros.get(clientId + "_inicio");
-        dadoFim = parametros.get(clientId + "_fim");
-        dadoEventoId = parametros.get(clientId + "_eventoId");
+        startData = parameters.get(clientId + "_start");
+        endData = parameters.get(clientId + "_end");
+        eventIdData = parameters.get(clientId + "_eventId");
 
-        List<ClientBehavior> comportamentosDoEvento = comportamentos.get(nomeEvento);
-        if (comportamentosDoEvento != null) {
-            for (ClientBehavior comportamento : comportamentosDoEvento) {
-                comportamento.decode(context, this);
+        List<ClientBehavior> behaviorsForEvent = behaviors.get(eventName);
+        if (behaviorsForEvent != null) {
+            for (ClientBehavior behavior : behaviorsForEvent) {
+                behavior.decode(context, this);
             }
         }
     }
@@ -187,24 +189,24 @@ public class Schedule extends UIComponentBase implements ClientBehaviorHolder {
         writer.startElement("div", this);
         writer.writeAttribute("id", clientId, "id");
         writer.writeAttribute("class", "box-schedule", null);
-        for (String nomeEvento : EVENT_NAMES) {
-            writer.writeAttribute("data-render-" + nomeEvento, renderPara(nomeEvento), null);
+        for (String eventName : EVENT_NAMES) {
+            writer.writeAttribute("data-render-" + eventName, renderTargetFor(eventName), null);
         }
 
-        // Estado inicial dos eventos: script application/json, nao
-        // executavel pelo navegador (schedule.js le via JSON.parse do
-        // textContent). "<" escapado como < evita que um titulo com
-        // "</script>" feche a tag mais cedo e vaze HTML pro resto da
-        // pagina - o parser HTML procura essa sequencia literal
-        // independente do type do script.
+        // Initial event state: application/json script, not executable
+        // by the browser (schedule.js reads it via JSON.parse on
+        // textContent). "<" is escaped as < so a title containing
+        // "</script>" can't close the tag early and leak HTML into the
+        // rest of the page - the HTML parser looks for that literal
+        // sequence regardless of the script's type.
         writer.startElement("script", this);
         writer.writeAttribute("type", "application/json", null);
-        writer.writeAttribute("class", "box-schedule-eventos", null);
-        writer.write(eventosComoJson().replace("<", "\\u003C"));
+        writer.writeAttribute("class", "box-schedule-events", null);
+        writer.write(eventsAsJson().replace("<", "\\u003C"));
         writer.endElement("script");
 
         writer.startElement("div", this);
-        writer.writeAttribute("class", "box-schedule-calendario", null);
+        writer.writeAttribute("class", "box-schedule-calendar", null);
         writer.endElement("div");
     }
 
@@ -216,41 +218,42 @@ public class Schedule extends UIComponentBase implements ClientBehaviorHolder {
         context.getResponseWriter().endElement("div");
     }
 
-    private String eventosComoJson() {
+    private String eventsAsJson() {
         JsonArrayBuilder array = Json.createArrayBuilder();
-        List<ScheduleEvent> lista = getEvents();
-        if (lista != null) {
-            for (ScheduleEvent evento : lista) {
-                JsonObjectBuilder objeto = Json.createObjectBuilder();
-                if (evento.getId() != null) {
-                    objeto.add("id", evento.getId());
+        List<ScheduleEvent> events = getEvents();
+        if (events != null) {
+            for (ScheduleEvent event : events) {
+                JsonObjectBuilder object = Json.createObjectBuilder();
+                if (event.getId() != null) {
+                    object.add("id", event.getId());
                 }
-                objeto.add("title", evento.getTitulo() != null ? evento.getTitulo() : "");
-                if (evento.getInicio() != null) {
-                    objeto.add("start", evento.getInicio().toString());
+                object.add("title", event.getTitle() != null ? event.getTitle() : "");
+                if (event.getStart() != null) {
+                    object.add("start", event.getStart().toString());
                 }
-                if (evento.getFim() != null) {
-                    objeto.add("end", evento.getFim().toString());
+                if (event.getEnd() != null) {
+                    object.add("end", event.getEnd().toString());
                 }
-                objeto.add("allDay", evento.isDiaTodo());
-                if (evento.getCor() != null) {
-                    objeto.add("color", evento.getCor());
+                object.add("allDay", event.isAllDay());
+                if (event.getColor() != null) {
+                    object.add("color", event.getColor());
                 }
-                array.add(objeto);
+                array.add(object);
             }
         }
         return array.build().toString();
     }
 
-    // Le o "render" configurado no <f:ajax event="..." render="..."/>
-    // aninhado, pra passar pro schedule.js chamar faces.ajax.request() com
-    // o mesmo alvo que o desenvolvedor declarou - sem isso o componente
-    // teria que reinventar um jeito proprio de configurar render.
-    private String renderPara(String nomeEvento) {
-        List<ClientBehavior> comportamentosDoEvento = comportamentos.get(nomeEvento);
-        if (comportamentosDoEvento != null) {
-            for (ClientBehavior comportamento : comportamentosDoEvento) {
-                if (comportamento instanceof AjaxBehavior ajax && ajax.getRender() != null
+    // Reads the "render" configured on the nested
+    // <f:ajax event="..." render="..."/>, to pass along so schedule.js
+    // can call faces.ajax.request() with the same target the developer
+    // declared - without this the component would have to reinvent its
+    // own way to configure render.
+    private String renderTargetFor(String eventName) {
+        List<ClientBehavior> behaviorsForEvent = behaviors.get(eventName);
+        if (behaviorsForEvent != null) {
+            for (ClientBehavior behavior : behaviorsForEvent) {
+                if (behavior instanceof AjaxBehavior ajax && ajax.getRender() != null
                         && !ajax.getRender().isEmpty()) {
                     return String.join(" ", ajax.getRender());
                 }

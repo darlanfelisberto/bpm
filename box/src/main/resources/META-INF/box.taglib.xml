@@ -6,16 +6,17 @@
 
     <namespace>http://iffar.edu.br/box</namespace>
 
-    <!-- panel é registrado via @FacesComponent(createTag=true); só o
-         behavior "confirm" precisa de taglib manual, já que @FacesBehavior
-         não tem esse atalho. handler-class explícito (ConfirmHandler) em vez
-         do BehaviorHandler padrão: o padrão avalia "mensagem" uma única vez
-         no build da view, o que quebra dentro de h:dataTable/ui:repeat. -->
+    <!-- panel is registered via @FacesComponent(createTag=true); only the
+         "confirm" behavior needs a manual taglib entry, since @FacesBehavior
+         doesn't have that shortcut. Explicit handler-class (ConfirmHandler)
+         instead of the default BehaviorHandler: the default evaluates
+         "message" exactly once during view build, which breaks inside
+         h:dataTable/ui:repeat. -->
     <tag>
         <tag-name>confirm</tag-name>
         <handler-class>br.edu.iffar.box.component.confirm.ConfirmHandler</handler-class>
         <attribute>
-            <name>mensagem</name>
+            <name>message</name>
             <required>false</required>
         </attribute>
     </tag>

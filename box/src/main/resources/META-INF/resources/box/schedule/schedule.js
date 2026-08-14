@@ -1,19 +1,19 @@
 (function () {
     'use strict';
 
-    function lerEventos(wrapper) {
-        var script = wrapper.querySelector('.box-schedule-eventos');
+    function readEvents(wrapper) {
+        var script = wrapper.querySelector('.box-schedule-events');
         return script ? JSON.parse(script.textContent) : [];
     }
 
-    function iniciarSchedule(wrapper) {
-        if (wrapper.dataset.boxScheduleIniciado === 'true') {
+    function initSchedule(wrapper) {
+        if (wrapper.dataset.boxScheduleInitialized === 'true') {
             return;
         }
-        wrapper.dataset.boxScheduleIniciado = 'true';
+        wrapper.dataset.boxScheduleInitialized = 'true';
 
-        var alvo = wrapper.querySelector('.box-schedule-calendario');
-        var calendar = new window.FullCalendar.Calendar(alvo, {
+        var target = wrapper.querySelector('.box-schedule-calendar');
+        var calendar = new window.FullCalendar.Calendar(target, {
             locale: 'pt-br',
             height: 'auto',
             initialView: 'dayGridMonth',
@@ -24,44 +24,44 @@
             },
             selectable: true,
             editable: true,
-            events: lerEventos(wrapper),
+            events: readEvents(wrapper),
             select: function (info) {
-                var dados = {};
-                dados[wrapper.id + '_inicio'] = info.startStr;
-                dados[wrapper.id + '_fim'] = info.endStr;
-                window.Box.disparar(wrapper, 'select', dados);
+                var data = {};
+                data[wrapper.id + '_start'] = info.startStr;
+                data[wrapper.id + '_end'] = info.endStr;
+                window.Box.trigger(wrapper, 'select', data);
                 calendar.unselect();
             },
             eventDrop: function (info) {
-                var dados = {};
-                dados[wrapper.id + '_eventoId'] = info.event.id;
-                dados[wrapper.id + '_inicio'] = info.event.startStr;
-                dados[wrapper.id + '_fim'] = info.event.endStr || info.event.startStr;
-                window.Box.disparar(wrapper, 'move', dados);
+                var data = {};
+                data[wrapper.id + '_eventId'] = info.event.id;
+                data[wrapper.id + '_start'] = info.event.startStr;
+                data[wrapper.id + '_end'] = info.event.endStr || info.event.startStr;
+                window.Box.trigger(wrapper, 'move', data);
             },
             eventResize: function (info) {
-                var dados = {};
-                dados[wrapper.id + '_eventoId'] = info.event.id;
-                dados[wrapper.id + '_inicio'] = info.event.startStr;
-                dados[wrapper.id + '_fim'] = info.event.endStr || info.event.startStr;
-                window.Box.disparar(wrapper, 'resize', dados);
+                var data = {};
+                data[wrapper.id + '_eventId'] = info.event.id;
+                data[wrapper.id + '_start'] = info.event.startStr;
+                data[wrapper.id + '_end'] = info.event.endStr || info.event.startStr;
+                window.Box.trigger(wrapper, 'resize', data);
             },
             eventClick: function (info) {
-                var dados = {};
-                dados[wrapper.id + '_eventoId'] = info.event.id;
-                window.Box.disparar(wrapper, 'click', dados);
+                var data = {};
+                data[wrapper.id + '_eventId'] = info.event.id;
+                window.Box.trigger(wrapper, 'click', data);
             }
         });
         calendar.render();
         wrapper.boxScheduleCalendar = calendar;
     }
 
-    function iniciarTodos(raiz) {
+    function initAll(root) {
         if (!window.FullCalendar) {
             return;
         }
-        (raiz || document).querySelectorAll('.box-schedule').forEach(iniciarSchedule);
+        (root || document).querySelectorAll('.box-schedule').forEach(initSchedule);
     }
 
-    window.Box.aoProntoOuAjax(iniciarTodos);
+    window.Box.onReadyOrAjax(initAll);
 })();

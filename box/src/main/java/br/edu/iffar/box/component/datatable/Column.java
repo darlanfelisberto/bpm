@@ -4,17 +4,18 @@ import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponentBase;
 
 /**
- * Metadado de uma coluna do b:datatable - não desenha nada sozinha (o
- * Datatable é quem lê os atributos e, linha a linha, os filhos dela).
+ * Metadata of a b:datatable column - it does not render anything by
+ * itself (the Datatable is what reads its attributes and, row by row,
+ * its children).
  *
- * Sem filhos, a célula mostra o valor de "field" (via resolução de
- * propriedade padrão, igual #{var.field}). Com filhos, eles definem o
- * corpo da célula, avaliados uma vez por linha - útil pra formatação
- * (ex.: <b:column header="Status"><span class="badge">#{item.status}
+ * With no children, the cell shows the value of "field" (via default
+ * property resolution, like #{var.field}). With children, they define
+ * the cell body, evaluated once per row - useful for formatting
+ * (e.g.: <b:column header="Status"><span class="badge">#{item.status}
  * </span></b:column>).
  *
- * Uso: xmlns:b="http://iffar.edu.br/box"
- *      <b:column field="nome" header="Nome" sortable="true" filterable="true"/>
+ * Usage: xmlns:b="http://iffar.edu.br/box"
+ *      <b:column field="name" header="Name" sortable="true" filterable="true"/>
  */
 @FacesComponent(
         value = Column.COMPONENT_TYPE,
@@ -31,7 +32,7 @@ public class Column extends UIComponentBase {
         return COMPONENT_FAMILY;
     }
 
-    /** Nome da propriedade lida do objeto de linha (var) e enviada ao backend como chave de ordenação/filtro. */
+    /** Name of the property read from the row object (var) and sent to the backend as the sort/filter key. */
     public String getField() {
         return (String) getStateHelper().eval("field");
     }
@@ -40,7 +41,7 @@ public class Column extends UIComponentBase {
         getStateHelper().put("field", field);
     }
 
-    /** Rótulo exibido no cabeçalho. Sem valor, usa o próprio "field". */
+    /** Label shown in the header. With no value, uses "field" itself. */
     public String getHeader() {
         return (String) getStateHelper().eval("header");
     }
