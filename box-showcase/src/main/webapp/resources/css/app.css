@@ -136,14 +136,14 @@ table.grid tbody tr:hover {
     background: #fafcfb;
 }
 
-.campo {
+.field {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
     margin-bottom: 1rem;
 }
 
-.campo > label {
+.field > label {
     color: var(--color-text-muted);
     font-size: 0.9rem;
 }
@@ -193,9 +193,9 @@ a.link-danger:hover {
     text-decoration: underline;
 }
 
-/* Documentação: trecho de código de uso de cada componente */
+/* Documentation: usage code snippet for each component */
 
-.exemplo-codigo {
+.code-example {
     background: #1f2933;
     color: #e4e9ee;
     border-radius: 6px;
@@ -208,27 +208,27 @@ a.link-danger:hover {
     margin: 0 0 1rem 0;
 }
 
-.descricao-atributos {
+.attributes-table {
     width: 100%;
     font-size: 0.88rem;
     margin-bottom: 1rem;
 }
 
-.descricao-atributos th,
-.descricao-atributos td {
+.attributes-table th,
+.attributes-table td {
     text-align: left;
     padding: 0.4rem 0.6rem;
     border-bottom: 1px solid var(--color-border);
 }
 
-.descricao-atributos code {
+.attributes-table code {
     background: var(--color-bg);
     padding: 0.1rem 0.35rem;
     border-radius: 4px;
     font-size: 0.85em;
 }
 
-.acoes {
+.actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;

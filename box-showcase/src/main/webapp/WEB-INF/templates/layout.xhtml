@@ -4,23 +4,23 @@
       xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets">
 <h:head>
-    <title><ui:insert name="titulo">box-showcase</ui:insert></title>
+    <title><ui:insert name="title">box-showcase</ui:insert></title>
     <h:outputStylesheet library="css" name="app.css"/>
-    <!-- confirmar.js/css (lib box): quando usado via b:confirm, o proprio
-         componente puxa esses recursos sozinho (@ResourceDependency). Quando
-         usado via atributo puro data-box-confirm (sem nenhum componente
-         Faces), ninguem mais pede o recurso pra JSF incluir - por isso
-         inclui aqui manualmente, uma vez, pra toda a aplicacao (mesmo
-         padrao do bpm-app). -->
-    <h:outputStylesheet library="box" name="confirm/confirmar.css"/>
-    <h:outputScript library="box" name="confirm/confirmar.js"/>
+    <!-- confirm.js/css (box lib): when used via b:confirm, the component
+         itself pulls in these resources (@ResourceDependency). When used
+         via the plain data-box-confirm attribute (no Faces component at
+         all), nothing else asks JSF to include the resource - so it's
+         included here manually, once, for the whole application (same
+         pattern as bpm-app). -->
+    <h:outputStylesheet library="box" name="confirm/confirm.css"/>
+    <h:outputScript library="box" name="confirm/confirm.js"/>
     <ui:insert name="head-extra"/>
 </h:head>
 <h:body>
     <header class="app-header">
         <h1><h:link outcome="/index" value="box-showcase" style="color: inherit; text-decoration: none;"/></h1>
         <nav>
-            <h:link outcome="/index" value="Início"/>
+            <h:link outcome="/index" value="Home"/>
             <h:link outcome="/panel" value="b:panel"/>
             <h:link outcome="/confirm" value="b:confirm"/>
             <h:link outcome="/editor" value="b:editor"/>
@@ -32,7 +32,7 @@
         </nav>
     </header>
     <main class="app-content">
-        <ui:insert name="conteudo"/>
+        <ui:insert name="content"/>
     </main>
 </h:body>
 </html>

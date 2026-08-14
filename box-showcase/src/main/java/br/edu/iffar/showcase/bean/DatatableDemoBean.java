@@ -1,9 +1,9 @@
 package br.edu.iffar.showcase.bean;
 
 import br.edu.iffar.box.component.datatable.Datatable;
-import br.edu.iffar.box.component.datatable.DatatableConsulta;
 import br.edu.iffar.box.component.datatable.DatatableLazyModel;
 import br.edu.iffar.box.component.datatable.DatatablePage;
+import br.edu.iffar.box.component.datatable.DatatableQuery;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.SessionScoped;
@@ -20,123 +20,123 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Estado da página de demonstração do b:datatable (/datatable.xhtml).
- * Implementa DatatableLazyModel diretamente no bean - dataset sintético em
- * memória, mas carregar() só devolve a fatia pedida (como uma consulta
- * paginada faria contra um banco de verdade). Não define o atributo
- * "linhasPorPagina" na tag: quem controla o tamanho da página aqui é o
- * método linhasPorPaginaPadrao() da própria interface.
+ * State for the b:datatable demo page (/datatable.xhtml).
+ * Implements DatatableLazyModel directly on the bean - synthetic in-memory
+ * dataset, but load() only returns the requested slice (like a paginated
+ * query against a real database would). Doesn't set the "pageSize"
+ * attribute on the tag: page size here is controlled by the interface's
+ * own defaultPageSize() method.
  */
 @Named
 @SessionScoped
-public class DatatableDemoBean implements Serializable, DatatableLazyModel<Pessoa> {
+public class DatatableDemoBean implements Serializable, DatatableLazyModel<Person> {
 
-    private static final String[] NOMES = {
-            "Ana", "Bruno", "Carla", "Diego", "Elisa", "Fábio", "Gabriela", "Heitor",
-            "Íris", "João", "Karina", "Leonardo", "Marina", "Nelson", "Olívia", "Pedro"
+    private static final String[] FIRST_NAMES = {
+            "Alice", "Bob", "Carol", "Diana", "Ethan", "Fiona", "George", "Hannah",
+            "Ivy", "Jack", "Karen", "Leo", "Maya", "Nathan", "Olivia", "Peter"
     };
-    private static final String[] SOBRENOMES = {
-            "Silva", "Souza", "Oliveira", "Pereira", "Costa", "Rodrigues", "Almeida", "Nunes"
+    private static final String[] LAST_NAMES = {
+            "Smith", "Johnson", "Brown", "Taylor", "Miller", "Davis", "Wilson", "Moore"
     };
-    private static final String[] CARGOS = {
-            "Desenvolvedor(a)", "Analista", "Coordenador(a)", "Estagiário(a)", "Gerente"
+    private static final String[] ROLES = {
+            "Developer", "Analyst", "Coordinator", "Intern", "Manager"
     };
 
-    private List<Pessoa> pessoas;
-    private String ultimaSelecao = "";
+    private List<Person> people;
+    private String lastSelection = "";
 
     @PostConstruct
-    void iniciar() {
-        popular();
+    void init() {
+        populate();
     }
 
-    private void popular() {
-        pessoas = new ArrayList<>();
+    private void populate() {
+        people = new ArrayList<>();
         for (int i = 1; i <= 63; i++) {
-            String nome = NOMES[i % NOMES.length] + " " + SOBRENOMES[(i / NOMES.length) % SOBRENOMES.length];
-            String email = nome.toLowerCase(Locale.ROOT).replace(" ", ".").replace("í", "i") + "@iffar.edu.br";
-            pessoas.add(new Pessoa((long) i, nome, email, CARGOS[i % CARGOS.length],
+            String name = FIRST_NAMES[i % FIRST_NAMES.length] + " " + LAST_NAMES[(i / FIRST_NAMES.length) % LAST_NAMES.length];
+            String email = name.toLowerCase(Locale.ROOT).replace(" ", ".") + "@iffar.edu.br";
+            people.add(new Person((long) i, name, email, ROLES[i % ROLES.length],
                     LocalDate.of(2016, 1, 1).plusDays(i * 17L)));
         }
     }
 
-    public String getUltimaSelecao() {
-        return ultimaSelecao;
+    public String getLastSelection() {
+        return lastSelection;
     }
 
-    public void aoSelecionar(AjaxBehaviorEvent evento) {
-        Datatable datatable = (Datatable) evento.getComponent();
-        Object selecionado = datatable.getObjetoSelecionado();
-        ultimaSelecao = selecionado != null
-                ? "select: " + selecionado
-                : "select: id " + datatable.getLinhaId() + " não encontrado";
+    public void onSelect(AjaxBehaviorEvent event) {
+        Datatable datatable = (Datatable) event.getComponent();
+        Object selected = datatable.getSelectedObject();
+        lastSelection = selected != null
+                ? "select: " + selected
+                : "select: id " + datatable.getRowId() + " not found";
     }
 
-    public void restaurar() {
-        popular();
-        ultimaSelecao = "";
+    public void reset() {
+        populate();
+        lastSelection = "";
     }
 
     @Override
-    public int linhasPorPaginaPadrao() {
+    public int defaultPageSize() {
         return 8;
     }
 
     @Override
-    public DatatablePage<Pessoa> carregar(DatatableConsulta consulta) {
-        List<Pessoa> filtradas = pessoas.stream()
-                .filter(pessoa -> corresponde(pessoa, consulta.filtros()))
+    public DatatablePage<Person> load(DatatableQuery query) {
+        List<Person> filtered = people.stream()
+                .filter(person -> matches(person, query.filters()))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        Comparator<Pessoa> comparador = comparadorPara(consulta.ordenarPor());
-        if (comparador != null) {
-            filtradas.sort(consulta.ordenarAscendente() ? comparador : comparador.reversed());
+        Comparator<Person> comparator = comparatorFor(query.sortBy());
+        if (comparator != null) {
+            filtered.sort(query.sortAscending() ? comparator : comparator.reversed());
         }
 
-        int total = filtradas.size();
-        if (consulta.primeiro() >= total) {
+        int total = filtered.size();
+        if (query.first() >= total) {
             return new DatatablePage<>(List.of(), total);
         }
-        int fim = Math.min(consulta.primeiro() + consulta.quantidade(), total);
-        return new DatatablePage<>(new ArrayList<>(filtradas.subList(consulta.primeiro(), fim)), total);
+        int end = Math.min(query.first() + query.size(), total);
+        return new DatatablePage<>(new ArrayList<>(filtered.subList(query.first(), end)), total);
     }
 
-    private boolean corresponde(Pessoa pessoa, Map<String, String> filtros) {
-        for (Map.Entry<String, String> filtro : filtros.entrySet()) {
-            String valor = valorDoCampo(pessoa, filtro.getKey());
-            if (valor == null || !valor.toLowerCase(Locale.ROOT).contains(filtro.getValue().toLowerCase(Locale.ROOT))) {
+    private boolean matches(Person person, Map<String, String> filters) {
+        for (Map.Entry<String, String> filter : filters.entrySet()) {
+            String value = fieldValue(person, filter.getKey());
+            if (value == null || !value.toLowerCase(Locale.ROOT).contains(filter.getValue().toLowerCase(Locale.ROOT))) {
                 return false;
             }
         }
         return true;
     }
 
-    private String valorDoCampo(Pessoa pessoa, String campo) {
-        return switch (campo) {
-            case "nome" -> pessoa.getNome();
-            case "email" -> pessoa.getEmail();
-            case "cargo" -> pessoa.getCargo();
-            case "dataAdmissao" -> pessoa.getDataAdmissao() != null ? pessoa.getDataAdmissao().toString() : null;
+    private String fieldValue(Person person, String field) {
+        return switch (field) {
+            case "name" -> person.getName();
+            case "email" -> person.getEmail();
+            case "role" -> person.getRole();
+            case "hireDate" -> person.getHireDate() != null ? person.getHireDate().toString() : null;
             default -> null;
         };
     }
 
-    private Comparator<Pessoa> comparadorPara(String campo) {
-        if (campo == null) {
+    private Comparator<Person> comparatorFor(String field) {
+        if (field == null) {
             return null;
         }
-        return switch (campo) {
-            case "nome" -> Comparator.comparing(Pessoa::getNome, Comparator.nullsLast(String::compareTo));
-            case "email" -> Comparator.comparing(Pessoa::getEmail, Comparator.nullsLast(String::compareTo));
-            case "cargo" -> Comparator.comparing(Pessoa::getCargo, Comparator.nullsLast(String::compareTo));
-            case "dataAdmissao" ->
-                    Comparator.comparing(Pessoa::getDataAdmissao, Comparator.nullsLast(Comparator.naturalOrder()));
+        return switch (field) {
+            case "name" -> Comparator.comparing(Person::getName, Comparator.nullsLast(String::compareTo));
+            case "email" -> Comparator.comparing(Person::getEmail, Comparator.nullsLast(String::compareTo));
+            case "role" -> Comparator.comparing(Person::getRole, Comparator.nullsLast(String::compareTo));
+            case "hireDate" ->
+                    Comparator.comparing(Person::getHireDate, Comparator.nullsLast(Comparator.naturalOrder()));
             default -> null;
         };
     }
 
-    /** Usado pelo PessoaConverter (injetado por CDI) pra reconstruir a linha selecionada a partir do id. */
-    Pessoa buscarPorId(long id) {
-        return pessoas.stream().filter(pessoa -> pessoa.getId() == id).findFirst().orElse(null);
+    /** Used by PersonConverter (injected via CDI) to reconstruct the selected row from its id. */
+    Person findById(long id) {
+        return people.stream().filter(person -> person.getId() == id).findFirst().orElse(null);
     }
 }

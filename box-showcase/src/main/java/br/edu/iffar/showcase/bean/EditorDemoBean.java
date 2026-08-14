@@ -6,21 +6,21 @@ import jakarta.inject.Named;
 import java.io.Serializable;
 
 /**
- * Estado da página de demonstração do b:editor (/editor.xhtml). SessionScoped
- * pelo mesmo motivo do ConfirmDemoBean: sobrevive a reload da página, útil
- * pros testes E2E inspecionarem o valor salvo.
+ * State of the b:editor demo page (/editor.xhtml). SessionScoped for the
+ * same reason as ConfirmDemoBean: survives a page reload, useful for the
+ * E2E tests to inspect the saved value.
  */
 @Named
 @SessionScoped
 public class EditorDemoBean implements Serializable {
 
-    private String conteudo = "";
+    private String content = "";
 
-    public String getConteudo() {
-        return conteudo;
+    public String getContent() {
+        return content;
     }
 
-    public void setConteudo(String conteudo) {
-        this.conteudo = conteudo;
+    public void setContent(String content) {
+        this.content = content;
     }
 }

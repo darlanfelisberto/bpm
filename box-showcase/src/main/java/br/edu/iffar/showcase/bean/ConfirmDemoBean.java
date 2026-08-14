@@ -8,38 +8,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Estado da página de demonstração do b:confirm (/confirm.xhtml): duas
- * listas independentes, uma pra cada forma de usar a confirmação (behavior
- * b:confirm aninhado, e atributo data-box-confirm sem componente Faces).
- * SessionScoped (não ViewScoped) pra sobreviver ao "mvn liberty:dev"
- * recarregando a página e pra ficar simples de restaurar via reload
- * durante os testes E2E.
+ * State for the b:confirm demo page (/confirm.xhtml): two independent
+ * lists, one for each way of using the confirmation (nested b:confirm
+ * behavior, and the data-box-confirm attribute without a Faces component).
+ * SessionScoped (not ViewScoped) to survive "mvn liberty:dev" reloading the
+ * page and to keep it simple to restore via reload during E2E tests.
  */
 @Named
 @SessionScoped
 public class ConfirmDemoBean implements Serializable {
 
-    private List<String> itensBehavior = new ArrayList<>(List.of("Item A", "Item B", "Item C"));
-    private List<String> itensAtributo = new ArrayList<>(List.of("Item X", "Item Y", "Item Z"));
+    private List<String> itemsBehavior = new ArrayList<>(List.of("Item A", "Item B", "Item C"));
+    private List<String> itemsAttribute = new ArrayList<>(List.of("Item X", "Item Y", "Item Z"));
 
-    public List<String> getItensBehavior() {
-        return itensBehavior;
+    public List<String> getItemsBehavior() {
+        return itemsBehavior;
     }
 
-    public List<String> getItensAtributo() {
-        return itensAtributo;
+    public List<String> getItemsAttribute() {
+        return itemsAttribute;
     }
 
-    public void excluirBehavior(String item) {
-        itensBehavior.remove(item);
+    public void deleteBehavior(String item) {
+        itemsBehavior.remove(item);
     }
 
-    public void excluirAtributo(String item) {
-        itensAtributo.remove(item);
+    public void deleteAttribute(String item) {
+        itemsAttribute.remove(item);
     }
 
-    public void restaurar() {
-        itensBehavior = new ArrayList<>(List.of("Item A", "Item B", "Item C"));
-        itensAtributo = new ArrayList<>(List.of("Item X", "Item Y", "Item Z"));
+    public void restore() {
+        itemsBehavior = new ArrayList<>(List.of("Item A", "Item B", "Item C"));
+        itemsAttribute = new ArrayList<>(List.of("Item X", "Item Y", "Item Z"));
     }
 }

@@ -8,31 +8,31 @@ import jakarta.inject.Named;
 import java.io.Serializable;
 
 /**
- * Estado da página de demonstração do b:growl (/growl.xhtml): cada botão
- * adiciona uma FacesMessage de severidade diferente, que o b:growl no
- * "render" do próprio botão exibe como toast.
+ * State for the b:growl demo page (/growl.xhtml): each button adds a
+ * FacesMessage with a different severity, which the b:growl in the
+ * button's own "render" displays as a toast.
  */
 @Named
 @SessionScoped
 public class GrowlDemoBean implements Serializable {
 
-    public void avisarInfo() {
-        adicionar(FacesMessage.SEVERITY_INFO, "Salvo com sucesso", "O registro foi gravado.");
+    public void notifyInfo() {
+        add(FacesMessage.SEVERITY_INFO, "Saved successfully", "The record has been saved.");
     }
 
-    public void avisarAlerta() {
-        adicionar(FacesMessage.SEVERITY_WARN, "Atenção", "Alguns campos opcionais ficaram em branco.");
+    public void notifyWarning() {
+        add(FacesMessage.SEVERITY_WARN, "Warning", "Some optional fields were left blank.");
     }
 
-    public void avisarErro() {
-        adicionar(FacesMessage.SEVERITY_ERROR, "Falha ao salvar", "Verifique os campos destacados.");
+    public void notifyError() {
+        add(FacesMessage.SEVERITY_ERROR, "Failed to save", "Please check the highlighted fields.");
     }
 
-    public void avisarFixo() {
-        adicionar(FacesMessage.SEVERITY_WARN, "Sessão expirando", "Fica na tela até você fechar.");
+    public void notifyFixed() {
+        add(FacesMessage.SEVERITY_WARN, "Session expiring", "Stays on screen until you close it.");
     }
 
-    private void adicionar(FacesMessage.Severity severidade, String resumo, String detalhe) {
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severidade, resumo, detalhe));
+    private void add(FacesMessage.Severity severity, String summary, String detail) {
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, detail));
     }
 }

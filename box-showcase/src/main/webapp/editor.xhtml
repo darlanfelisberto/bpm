@@ -5,52 +5,52 @@
       xmlns:f="jakarta.faces.core"
       xmlns:b="http://iffar.edu.br/box">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
-    <ui:define name="titulo">b:editor</ui:define>
-    <ui:define name="conteudo">
+    <ui:define name="title">b:editor</ui:define>
+    <ui:define name="content">
 
         <h2>b:editor</h2>
-        <p>Editor de texto rico usando Quill (auto-hospedado, sem CDN) como
-            motor de edição. Componente nativo <code>UIInput</code> (não
-            composite): integra com <code>value</code>/validação como
-            qualquer input do Faces, só a renderização é manual.</p>
-        <p>O valor persistido é HTML (inclusive imagens coladas, como data
-            URI embutida), sanitizado no servidor com Jsoup antes de
-            gravar — único ponto de defesa contra XSS armazenado, já que o
-            cliente é só Quill/JS e um POST forjado pode mandar qualquer
-            coisa direto pro servidor. Quem exibir o valor precisa usar
-            <code>escape="false"</code> (ex.: <code>h:outputText</code>),
-            já que ele contém marcação.</p>
+        <p>Rich text editor using Quill (self-hosted, no CDN) as the editing
+            engine. Native <code>UIInput</code> component (not a composite):
+            it integrates with <code>value</code>/validation like any Faces
+            input, only the rendering is manual.</p>
+        <p>The persisted value is HTML (including pasted images, as an
+            embedded data URI), sanitized server-side with Jsoup before
+            saving — the only line of defense against stored XSS, since the
+            client is just Quill/JS and a forged POST could send anything
+            straight to the server. Whoever displays the value needs to use
+            <code>escape="false"</code> (e.g. <code>h:outputText</code>),
+            since it contains markup.</p>
 
-        <h4>Atributos</h4>
-        <table class="descricao-atributos">
-            <tr><th>Atributo</th><th>Obrigatório</th><th>Descrição</th></tr>
-            <tr><td><code>value</code></td><td>Sim</td><td>Expressão EL apontando pra uma propriedade String — recebe o HTML sanitizado.</td></tr>
+        <h4>Attributes</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>value</code></td><td>Yes</td><td>EL expression pointing to a String property — receives the sanitized HTML.</td></tr>
         </table>
 
-        <h4>Exemplo</h4>
-        <pre class="exemplo-codigo">&lt;b:editor id="objetivo" value="\#{bean.objetivo}"/&gt;
+        <h4>Example</h4>
+        <pre class="code-example">&lt;b:editor id="objetivo" value="\#{bean.objetivo}"/&gt;
 ...
 &lt;h:outputText value="\#{bean.objetivo}" escape="false"/&gt;</pre>
 
         <h:form id="formEditor">
-            <div class="campo">
-                <h:outputLabel for="conteudo" value="Conteúdo"/>
-                <b:editor id="conteudo" value="#{editorDemoBean.conteudo}"/>
+            <div class="field">
+                <h:outputLabel for="content" value="Content"/>
+                <b:editor id="content" value="#{editorDemoBean.content}"/>
             </div>
-            <h:commandButton value="Salvar">
+            <h:commandButton value="Save">
                 <f:ajax execute="@form" render=":formEditor :resultado"/>
             </h:commandButton>
         </h:form>
 
-        <h4>Conteúdo salvo (h:outputText escape="false")</h4>
-        <!-- h:panelGroup, não uma div pura: precisa ser um componente Faces
-             de verdade pra o f:ajax render=":resultado" acima achar e
-             atualizar essa região - uma div HTML solta com id não participa
-             da árvore de componentes, então o ajax simplesmente não teria
-             o que substituir (só um reload completo mostraria o valor
-             novo). -->
+        <h4>Saved content (h:outputText escape="false")</h4>
+        <!-- h:panelGroup, not a plain div: it needs to be an actual Faces
+             component for the f:ajax render=":resultado" above to find and
+             update this region - a loose HTML div with an id doesn't
+             participate in the component tree, so ajax would simply have
+             nothing to replace (only a full reload would show the new
+             value). -->
         <h:panelGroup id="resultado" layout="block" styleClass="card">
-            <h:outputText value="#{editorDemoBean.conteudo}" escape="false"/>
+            <h:outputText value="#{editorDemoBean.content}" escape="false"/>
         </h:panelGroup>
 
     </ui:define>

@@ -5,99 +5,102 @@
       xmlns:f="jakarta.faces.core"
       xmlns:b="http://iffar.edu.br/box">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
-    <ui:define name="titulo">b:popup</ui:define>
-    <ui:define name="conteudo">
+    <ui:define name="title">b:popup</ui:define>
+    <ui:define name="content">
 
         <h2>b:popup</h2>
-        <p>Popup modal, equivalente ao <code>p:dialog</code>, baseado no
-            elemento nativo <code>&lt;dialog&gt;</code> — foco, Esc e
-            empilhamento (top layer) são o próprio browser cuidando disso,
-            sem reimplementar nada em JS. Abrir/fechar é sempre client-side
-            (<code>Box.popup.abrir('id')</code>/<code>Box.popup.fechar('id')</code>)
-            — sem atributo <code>visible</code>/estado nenhum guardado no
-            bean. Quando o bean precisa fechar o popup como reação a uma
-            ação (ex.: só fechar depois de salvar sem erro), ele manda o
-            cliente executar <code>Box.popup.fechar(...)</code> via
-            <code>PartialViewContext.getEvalScripts()</code> — o canal
-            nativo do Jakarta Faces pra rodar JS junto da resposta ajax,
-            equivalente ao <code>RequestContext.execute()</code> do
-            PrimeFaces. Ver exemplo mais abaixo.</p>
+        <p>Modal popup, equivalent to <code>p:dialog</code>, built on the
+            native <code>&lt;dialog&gt;</code> element — focus, Esc and
+            stacking (top layer) are handled by the browser itself,
+            without reimplementing anything in JS. Opening/closing is
+            always client-side
+            (<code>Box.popup.open('id')</code>/<code>Box.popup.close('id')</code>)
+            — no <code>visible</code> attribute, no state kept in the
+            bean. When the bean needs to close the popup as a reaction to
+            an action (e.g.: only close after saving without error), it
+            tells the client to run <code>Box.popup.close(...)</code> via
+            <code>PartialViewContext.getEvalScripts()</code> — the native
+            Jakarta Faces channel for running JS alongside the ajax
+            response, equivalent to PrimeFaces'
+            <code>RequestContext.execute()</code>. See the example
+            further below.</p>
 
-        <h4>Atributos</h4>
-        <table class="descricao-atributos">
-            <tr><th>Atributo</th><th>Obrigatório</th><th>Descrição</th></tr>
-            <tr><td><code>header</code></td><td>Não</td><td>Título exibido no cabeçalho. Alternativa mais simples à facet <code>header</code> (útil quando o título é só texto).</td></tr>
-            <tr><td><code>closable</code></td><td>Não</td><td>Se <code>false</code>, remove o botão de fechar e desliga fechar por clique fora/Esc. Padrão <code>true</code>.</td></tr>
+        <h4>Attributes</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>header</code></td><td>No</td><td>Title shown in the header. Simpler alternative to the <code>header</code> facet (useful when the title is just text).</td></tr>
+            <tr><td><code>closable</code></td><td>No</td><td>If <code>false</code>, removes the close button and disables closing by clicking outside/Esc. Defaults to <code>true</code>.</td></tr>
         </table>
 
         <h4>Facets</h4>
-        <table class="descricao-atributos">
-            <tr><th>Facet</th><th>Descrição</th></tr>
-            <tr><td><code>header</code></td><td>Cabeçalho com marcação, quando um texto simples não é suficiente.</td></tr>
-            <tr><td><code>footer</code></td><td>Rodapé — normalmente os botões de ação (ex.: Salvar/Cancelar).</td></tr>
+        <table class="attributes-table">
+            <tr><th>Facet</th><th>Description</th></tr>
+            <tr><td><code>header</code></td><td>Header with markup, for when plain text isn't enough.</td></tr>
+            <tr><td><code>footer</code></td><td>Footer — usually the action buttons (e.g.: Save/Cancel).</td></tr>
         </table>
 
-        <h4>Exemplo</h4>
-        <pre class="exemplo-codigo">&lt;b:popup id="dlg" header="Editar item"&gt;
-    Conteúdo qualquer aqui dentro.
+        <h4>Example</h4>
+        <pre class="code-example">&lt;b:popup id="dlg" header="Edit item"&gt;
+    Any content goes here.
     &lt;f:facet name="footer"&gt;
-        &lt;h:commandButton value="Fechar" onclick="Box.popup.fechar('dlg'); return false;"/&gt;
+        &lt;h:commandButton value="Close" onclick="Box.popup.close('dlg'); return false;"/&gt;
     &lt;/f:facet&gt;
 &lt;/b:popup&gt;
 
-&lt;h:commandButton value="Abrir popup" onclick="Box.popup.abrir('dlg'); return false;"/&gt;</pre>
+&lt;h:commandButton value="Open popup" onclick="Box.popup.open('dlg'); return false;"/&gt;</pre>
 
-        <div class="acoes">
-            <h:commandButton value="Abrir popup" onclick="Box.popup.abrir('dlg'); return false;"/>
-            <h:commandButton value="Abrir popup (sem fechar por fora)" onclick="Box.popup.abrir('dlgSemFechar'); return false;"/>
+        <div class="actions">
+            <h:commandButton value="Open popup" onclick="Box.popup.open('dlg'); return false;"/>
+            <h:commandButton value="Open popup (no closing from outside)" onclick="Box.popup.open('dlgSemFechar'); return false;"/>
         </div>
 
-        <b:popup id="dlg" header="Editar item">
-            <p>Conteúdo qualquer aqui dentro — formulário, texto, o que precisar.</p>
+        <b:popup id="dlg" header="Edit item">
+            <p>Any content goes here — a form, text, whatever is needed.</p>
             <f:facet name="footer">
-                <h:commandButton value="Fechar" onclick="Box.popup.fechar('dlg'); return false;"/>
+                <h:commandButton value="Close" onclick="Box.popup.close('dlg'); return false;"/>
             </f:facet>
         </b:popup>
 
-        <b:popup id="dlgSemFechar" header="Sem fechar por fora" closable="false">
-            <p>Esc e clique fora não fecham este popup — só o botão do rodapé.</p>
+        <b:popup id="dlgSemFechar" header="No closing from outside" closable="false">
+            <p>Esc and clicking outside don't close this popup — only the footer button does.</p>
             <f:facet name="footer">
-                <h:commandButton value="Fechar" onclick="Box.popup.fechar('dlgSemFechar'); return false;"/>
+                <h:commandButton value="Close" onclick="Box.popup.close('dlgSemFechar'); return false;"/>
             </f:facet>
         </b:popup>
 
-        <h4>Exemplo — bean fechando o popup depois de salvar</h4>
-        <p>"Abrir" continua 100% client-side. "Salvar" executa a ação no
-            bean (que só atualiza <code>ultimoSalvamento</code>) e manda
-            fechar o popup via script — por isso o <code>render</code> do
-            botão não inclui o popup: quem fecha é o
-            <code>getScriptsToExecute()</code>, não uma troca de
+        <h4>Example — bean closing the popup after saving</h4>
+        <p>"Open" is still 100% client-side. "Save" runs the action on
+            the bean (which just updates <code>lastSaved</code>) and
+            tells the popup to close via script — that's why the
+            button's <code>render</code> doesn't include the popup:
+            what closes it is
+            <code>getEvalScripts()</code>, not a swap of the
             <code>&lt;dialog&gt;</code>.</p>
-        <pre class="exemplo-codigo">&lt;b:popup id="dlgServidor" header="Novo instrumento"&gt;
-    Conteúdo qualquer aqui dentro.
+        <pre class="code-example">&lt;b:popup id="dlgServidor" header="New instrument"&gt;
+    Any content goes here.
     &lt;f:facet name="footer"&gt;
-        &lt;h:commandButton value="Salvar" action="\#{popupDemoBean.salvar}"&gt;
+        &lt;h:commandButton value="Save" action="\#{popupDemoBean.save}"&gt;
             &lt;f:ajax execute="@form" render=":formPopupServidor:resultadoPopup"/&gt;
         &lt;/h:commandButton&gt;
     &lt;/f:facet&gt;
 &lt;/b:popup&gt;
 
-&lt;h:commandButton value="Abrir" onclick="Box.popup.abrir('formPopupServidor:dlgServidor'); return false;"/&gt;
+&lt;h:commandButton value="Open" onclick="Box.popup.open('formPopupServidor:dlgServidor'); return false;"/&gt;
 
-// PopupDemoBean.salvar()
+// PopupDemoBean.save()
 FacesContext.getCurrentInstance().getPartialViewContext()
-        .getEvalScripts().add("Box.popup.fechar('formPopupServidor:dlgServidor')");</pre>
+        .getEvalScripts().add("Box.popup.close('formPopupServidor:dlgServidor')");</pre>
 
         <h:form id="formPopupServidor">
-            <div class="acoes">
-                <h:commandButton value="Abrir" onclick="Box.popup.abrir('formPopupServidor:dlgServidor'); return false;"/>
-                <h:outputText id="resultadoPopup" value="#{popupDemoBean.ultimoSalvamento}"/>
+            <div class="actions">
+                <h:commandButton value="Open" onclick="Box.popup.open('formPopupServidor:dlgServidor'); return false;"/>
+                <h:outputText id="resultadoPopup" value="#{popupDemoBean.lastSaved}"/>
             </div>
 
-            <b:popup id="dlgServidor" header="Novo instrumento">
-                <p>Conteúdo qualquer aqui dentro. Salvar fecha este popup por um script mandado pelo bean.</p>
+            <b:popup id="dlgServidor" header="New instrument">
+                <p>Any content goes here. Saving closes this popup via a script sent by the bean.</p>
                 <f:facet name="footer">
-                    <h:commandButton value="Salvar" action="#{popupDemoBean.salvar}">
+                    <h:commandButton value="Save" action="#{popupDemoBean.save}">
                         <f:ajax execute="@form" render=":formPopupServidor:resultadoPopup"/>
                     </h:commandButton>
                 </f:facet>

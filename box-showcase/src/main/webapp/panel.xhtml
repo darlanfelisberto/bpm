@@ -4,36 +4,36 @@
       xmlns:h="jakarta.faces.html"
       xmlns:b="http://iffar.edu.br/box">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
-    <ui:define name="titulo">b:panel</ui:define>
-    <ui:define name="conteudo">
+    <ui:define name="title">b:panel</ui:define>
+    <ui:define name="content">
 
         <h2>b:panel</h2>
-        <p>Quadro com título opcional (equivalente a um card). Componente
-            nativo (<code>UIComponentBase</code>), sem <code>Renderer</code>
-            separado nem <code>*.taglib.xml</code> — a tag é gerada
-            automaticamente por <code>createTag</code>/<code>namespace</code>/
-            <code>tagName</code> na própria classe Java.</p>
+        <p>Box with an optional title (equivalent to a card). Native
+            component (<code>UIComponentBase</code>), with no separate
+            <code>Renderer</code> nor <code>*.taglib.xml</code> — the tag is
+            generated automatically by <code>createTag</code>/<code>namespace</code>/
+            <code>tagName</code> on the Java class itself.</p>
 
-        <h4>Atributos</h4>
-        <table class="descricao-atributos">
-            <tr><th>Atributo</th><th>Obrigatório</th><th>Descrição</th></tr>
-            <tr><td><code>header</code></td><td>Não</td><td>Título exibido no topo do quadro. Omitido, o quadro fica sem título.</td></tr>
+        <h4>Attributes</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>header</code></td><td>No</td><td>Title shown at the top of the box. Omitted, the box has no title.</td></tr>
         </table>
 
-        <h4>Exemplo — com título</h4>
-        <pre class="exemplo-codigo">&lt;b:panel header="Novo item"&gt;
-    Conteúdo qualquer aqui dentro.
+        <h4>Example — with a title</h4>
+        <pre class="code-example">&lt;b:panel header="New item"&gt;
+    Any content goes here.
 &lt;/b:panel&gt;</pre>
-        <b:panel header="Novo item">
-            Conteúdo qualquer aqui dentro.
+        <b:panel header="New item">
+            Any content goes here.
         </b:panel>
 
-        <h4>Exemplo — sem título</h4>
-        <pre class="exemplo-codigo">&lt;b:panel&gt;
-    Quadro sem título, só o card.
+        <h4>Example — without a title</h4>
+        <pre class="code-example">&lt;b:panel&gt;
+    Box with no title, just the card.
 &lt;/b:panel&gt;</pre>
         <b:panel>
-            Quadro sem título, só o card.
+            Box with no title, just the card.
         </b:panel>
 
     </ui:define>

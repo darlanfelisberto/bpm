@@ -1,78 +1,80 @@
 # box-showcase
 
-Vitrine dos componentes Jakarta Faces nativos da lib `box` (módulo
-`br.edu.iffar:box`, reutilizável entre projetos do IFFar): uma página de
-demonstração por componente, com exemplo ao vivo, trecho de código XHTML
-pra reproduzi-lo e descrição dos atributos.
+Showcase of the native Jakarta Faces components from the `box` lib
+(module `br.edu.iffar:box`, reusable across IFFar projects): one
+demonstration page per component, with a live example, an XHTML code
+snippet to reproduce it, and a description of its attributes.
 
-## Pré-requisitos
+## Prerequisites
 
-| Ferramenta | Versão |
+| Tool | Version |
 |---|---|
 | JDK | 25 |
 | Maven | 3.9+ |
 
-**Sem banco de dados** — nenhum componente do `box` precisa de
-persistência, diferente do `bpm-app`.
+**No database** — no `box` component needs persistence, unlike
+`bpm-app`.
 
-## Como rodar
+## How to run
 
-Da raiz do repositório:
+From the repository root:
 
 ```bash
 cd box-showcase
 mvn -o liberty:run
 ```
 
-- Aplicação: **http://localhost:9081**
-- Ctrl+C para parar (`liberty:run` roda em primeiro plano).
-- Pra desenvolvimento com hot-reload de código Java/Facelets, use
-  `mvn -o liberty:dev` no lugar de `liberty:run`.
-- Porta diferente da do `bpm-app` (9080/9443): dá pra rodar os dois ao
-  mesmo tempo sem conflito.
+- Application: **http://localhost:9081**
+- Ctrl+C to stop (`liberty:run` runs in the foreground).
+- For development with Java/Facelets hot-reload, use `mvn -o liberty:dev`
+  instead of `liberty:run`.
+- Different port than `bpm-app` (9080/9443): both can run at the same
+  time without conflict.
 
-Se for a primeira vez rodando o reactor (ou depois de um `git pull` que
-trouxe módulo/dependência nova), compile tudo antes, da raiz do
-repositório:
+If this is the first time running the reactor (or after a `git pull`
+that brought in a new module/dependency), build everything first, from
+the repository root:
 
 ```bash
 mvn clean install -DskipTests
 ```
 
-(Sem essa flag `-o` na primeira vez: o `download-maven-plugin` precisa de
-rede pra baixar Quill/Bootstrap Icons/FullCalendar. Ver `BUILD.md` na raiz
-do repositório para mais detalhes sobre esse mecanismo.)
+(No `-o` flag the first time: the `download-maven-plugin` needs network
+access to download Quill/Bootstrap Icons/FullCalendar. See `BUILD.md` in
+the repository root for more details on this mechanism.)
 
-## O que tem na vitrine
+## What's in the showcase
 
-| Página | Componente | Demonstra |
+| Page | Component | Demonstrates |
 |---|---|---|
-| `/index.xhtml` | — | Lista com link pra cada página abaixo |
-| `/panel.xhtml` | `b:panel` | Quadro com título opcional |
-| `/confirm.xhtml` | `b:confirm` | Confirmação inline antes de uma ação, como behavior aninhado num `h:commandLink` e como atributo puro `data-box-confirm` (sem componente Faces) |
-| `/editor.xhtml` | `b:editor` | Editor de texto rico (Quill): negrito, itálico, fonte, cor, listas, colar imagens, etc. |
-| `/growl.xhtml` | `b:growl` | Mensagens (`FacesMessage`) exibidas como toasts flutuantes, equivalente ao `p:growl` |
-| `/schedule.xhtml` | `b:schedule` | Agenda de eventos (FullCalendar): mês/semana/dia, criar/mover/redimensionar evento, clicar num evento |
-| `/schedule2.xhtml` | `b:schedule2` | Mesma ideia do `b:schedule`, sem nenhuma lib externa (só visão de mês, sem redimensionar) — pra comparar |
+| `/index.xhtml` | — | List with a link to each page below |
+| `/panel.xhtml` | `b:panel` | Box with an optional title |
+| `/confirm.xhtml` | `b:confirm` | Inline confirmation before an action, as a behavior nested in an `h:commandLink` and as a plain `data-box-confirm` attribute (no Faces component) |
+| `/editor.xhtml` | `b:editor` | Rich text editor (Quill): bold, italic, font, color, lists, pasting images, etc. |
+| `/growl.xhtml` | `b:growl` | Messages (`FacesMessage`) shown as floating toasts, equivalent to `p:growl` |
+| `/schedule.xhtml` | `b:schedule` | Event calendar (FullCalendar): month/week/day, create/move/resize an event, click an event |
+| `/schedule2.xhtml` | `b:schedule2` | Same idea as `b:schedule`, with no external lib (month view only, no resizing) — for comparison |
+| `/popup.xhtml` | `b:popup` | Modal popup based on the native `<dialog>` element |
+| `/datatable.xhtml` | `b:datatable` | Table with lazy pagination, sorting and per-column filtering |
 
-Cada página de componente tem uma tabela "Atributos" e/ou "Client
-behaviors" documentando a API, e um bloco `EXEMPLO` com o trecho de XHTML
-exato usado na própria demonstração.
+Each component page has an "Attributes" and/or "Client behaviors" table
+documenting the API, and an `EXAMPLE` block with the exact XHTML snippet
+used in the demonstration itself.
 
-## Estado das demonstrações
+## State of the demonstrations
 
-Os beans por trás de cada página (`ConfirmDemoBean`, `EditorDemoBean`,
-`ScheduleDemoBean`, `Schedule2DemoBean`) são `@SessionScoped`: o estado
-(itens excluídos, conteúdo do editor, eventos movidos) persiste enquanto
-a sessão do navegador durar, e volta ao normal numa aba anônima nova ou
-depois que a sessão expirar. Não precisa limpar nada manualmente — não
-tem banco de dados por trás, é tudo em memória.
+The beans behind each page (`ConfirmDemoBean`, `EditorDemoBean`,
+`ScheduleDemoBean`, `Schedule2DemoBean`) are `@SessionScoped`: the state
+(deleted items, editor content, moved events) persists for as long as
+the browser session lasts, and resets in a new incognito tab or after
+the session expires. No need to manually clean anything up — there's no
+database behind it, it's all in memory.
 
-## Testes end-to-end
+## End-to-end tests
 
-`box-showcase/src/e2e-test/java/.../e2e/*IT.java` (Playwright) cobrem os
-comportamentos interativos dos componentes (editor continuar editável
-após um ajax, popups de confirmação, arrastar um evento no calendário,
-etc.). Rodam via `mvn verify -Pe2e` — ver a seção "Testes" do `BUILD.md`
-na raiz do repositório para os detalhes (por que é um profile separado,
-como instalar o Chromium do Playwright na primeira vez, etc.).
+`box-showcase/src/e2e-test/java/.../e2e/*IT.java` (Playwright) cover the
+components' interactive behaviors (editor staying editable after an
+ajax update, confirmation popups, dragging an event on the calendar,
+etc.). They run via `mvn verify -Pe2e` — see the "Tests" section of
+`BUILD.md` in the repository root for details (why it's a separate
+profile, how to install Playwright's Chromium the first time, etc.).

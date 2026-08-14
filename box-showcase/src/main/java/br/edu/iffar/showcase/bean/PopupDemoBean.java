@@ -9,28 +9,29 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Estado da página de demonstração do b:popup (/popup.xhtml): o popup em si
- * é 100% client-side (Box.popup.abrir/fechar) - nenhuma propriedade
- * "aberto"/"visible" aqui. "salvar" só mostra como o bean manda o cliente
- * fechar o popup depois de uma ação, via
- * PartialViewContext.getScriptsToExecute() (o canal nativo do Jakarta
- * Faces pra executar JS arbitrário junto da resposta ajax).
+ * State for the b:popup demo page (/popup.xhtml): the popup itself is
+ * 100% client-side (Box.popup.open/close) - no "open"/"visible" property
+ * here. "save" just shows how the bean tells the client to close the
+ * popup after an action, via
+ * PartialViewContext.getEvalScripts() (the native Jakarta Faces channel
+ * for running arbitrary JS alongside the ajax response), equivalent to
+ * PrimeFaces' RequestContext.execute().
  */
 @Named
 @SessionScoped
 public class PopupDemoBean implements Serializable {
 
-    private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    private String ultimoSalvamento;
+    private String lastSaved;
 
-    public String getUltimoSalvamento() {
-        return ultimoSalvamento;
+    public String getLastSaved() {
+        return lastSaved;
     }
 
-    public void salvar() {
-        ultimoSalvamento = "Salvo às " + LocalTime.now().format(FORMATO_HORA);
+    public void save() {
+        lastSaved = "Saved at " + LocalTime.now().format(TIME_FORMAT);
         FacesContext.getCurrentInstance().getPartialViewContext()
-                .getEvalScripts().add("Box.popup.fechar('formPopupServidor:dlgServidor')");
+                .getEvalScripts().add("Box.popup.close('formPopupServidor:dlgServidor')");
     }
 }

@@ -14,32 +14,32 @@
     <packaging>war</packaging>
 
     <name>box-showcase</name>
-    <description>Vitrine dos componentes da lib box: uma pagina de demonstracao (exemplo ao vivo + trecho de
-        uso) por componente, e onde ficam os testes end-to-end que garantem o funcionamento deles. Sem banco
-        de dados - os componentes do box nao precisam de persistencia.</description>
+    <description>Showcase of the box lib components: one demonstration page (live example + usage snippet)
+        per component, and where the end-to-end tests that guarantee they work live. No database - box
+        components don't need persistence.</description>
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
-        <!-- Verificar no Maven Central se ha versoes mais recentes antes do build -->
+        <!-- Check Maven Central for newer versions before building -->
         <version.liberty-maven-plugin>3.11.2</version.liberty-maven-plugin>
         <version.build-helper-plugin>3.6.1</version.build-helper-plugin>
 
-        <!-- Porta diferente da do bpm-app (9080/9443): da pra rodar os dois
-             servidores ao mesmo tempo sem conflito. -->
+        <!-- Different port than bpm-app (9080/9443): both servers can run
+             at the same time without conflict. -->
         <liberty.var.default.http.port>9081</liberty.var.default.http.port>
         <liberty.var.default.https.port>9444</liberty.var.default.https.port>
     </properties>
 
     <dependencies>
-        <!-- box: componentes Jakarta Faces deste reactor, o que esta sendo vitrinado -->
+        <!-- box: Jakarta Faces components from this reactor, what's being showcased -->
         <dependency>
             <groupId>br.edu.iffar</groupId>
             <artifactId>box</artifactId>
         </dependency>
 
         <!-- Jakarta EE 11 Web Profile: CDI, Faces, Bean Validation, etc. -->
-        <!-- Fornecido em runtime pelo Open Liberty; usado apenas para compilacao. -->
+        <!-- Provided at runtime by Open Liberty; only used here to compile. -->
         <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-web-api</artifactId>
@@ -47,7 +47,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Jakarta Faces 4.1 (parte administrativa) -->
+        <!-- Jakarta Faces 4.1 (build-time bookkeeping) -->
         <dependency>
             <groupId>jakarta.faces</groupId>
             <artifactId>jakarta.faces-api</artifactId>
@@ -57,10 +57,10 @@
     <build>
         <finalName>box-showcase</finalName>
         <plugins>
-            <!-- Executa/empacota a aplicacao no Open Liberty (mvn liberty:dev /
-                 liberty:run pra uso manual, primeiro plano). O profile e2e
-                 (ver <profiles> abaixo) adiciona execucoes start/stop pros
-                 testes end-to-end. -->
+            <!-- Runs/packages the application on Open Liberty (mvn liberty:dev /
+                 liberty:run for manual use, foreground). The e2e profile
+                 (see <profiles> below) adds start/stop executions for the
+                 end-to-end tests. -->
             <plugin>
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
@@ -70,13 +70,14 @@
     </build>
 
     <profiles>
-        <!-- Testes end-to-end dos componentes do box (src/e2e-test/java,
-             Playwright): isolados num profile em vez de ligados direto no
-             build pelo mesmo motivo documentado em bpm-app (antes de mover
-             pra ca) - a fase verify vem ANTES de install no ciclo de vida
-             padrao do Maven, entao sem isolar todo "mvn install" subiria/
-             derrubaria um Liberty de verdade so pra compilar. Ativar com
-             "mvn verify -Pe2e" (ver BUILD.md). -->
+        <!-- End-to-end tests for the box components (src/e2e-test/java,
+             Playwright): isolated in a profile instead of wired directly
+             into the build for the same reason documented in bpm-app
+             (before this moved here) - the verify phase comes BEFORE
+             install in Maven's default lifecycle, so without isolating
+             it every "mvn install" would spin up/tear down a real
+             Liberty server just to compile. Activate with
+             "mvn verify -Pe2e" (see BUILD.md). -->
         <profile>
             <id>e2e</id>
             <dependencies>
@@ -99,7 +100,7 @@
                         <version>${version.build-helper-plugin}</version>
                         <executions>
                             <execution>
-                                <id>adicionar-fonte-dos-testes-e2e</id>
+                                <id>add-e2e-test-source</id>
                                 <phase>generate-test-sources</phase>
                                 <goals>
                                     <goal>add-test-source</goal>
@@ -116,45 +117,44 @@
                         <groupId>io.openliberty.tools</groupId>
                         <artifactId>liberty-maven-plugin</artifactId>
                         <executions>
-                            <!-- liberty:start sozinho nao cria o servidor, nao
-                                 resolve as features do server.xml nem copia o
-                                 WAR pro servidor (diferente de liberty:run/dev,
-                                 que encadeiam create + install-feature + deploy
-                                 por baixo dos panos) - sem estes passos o
-                                 servidor "inicia" sem feature nenhuma instalada
-                                 e/ou sem a aplicacao implantada, apesar do log
-                                 dizer "pronto" (ver historico no bpm-app antes
-                                 desta mudanca). -->
+                            <!-- liberty:start alone doesn't create the server, doesn't
+                                 resolve the server.xml features, and doesn't copy the
+                                 WAR to the server (unlike liberty:run/dev, which chain
+                                 create + install-feature + deploy under the hood) -
+                                 without these steps the server "starts" with no
+                                 feature installed and/or no application deployed,
+                                 despite the log saying "ready" (see the bpm-app
+                                 history before this change). -->
                             <execution>
-                                <id>criar-servidor-antes-dos-testes-e2e</id>
+                                <id>create-server-before-e2e-tests</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>create</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>resolver-features-antes-dos-testes-e2e</id>
+                                <id>resolve-features-before-e2e-tests</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>install-feature</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>implantar-war-antes-dos-testes-e2e</id>
+                                <id>deploy-war-before-e2e-tests</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>deploy</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>subir-servidor-antes-dos-testes-e2e</id>
+                                <id>start-server-before-e2e-tests</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>start</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>derrubar-servidor-depois-dos-testes-e2e</id>
+                                <id>stop-server-after-e2e-tests</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>stop</goal>

@@ -14,64 +14,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Estado da página de demonstração do b:schedule (/schedule.xhtml).
- * SessionScoped pelo mesmo motivo dos outros beans de demo: sobrevive a
- * reload da página, útil pros testes E2E inspecionarem o estado.
+ * State for the b:schedule demo page (/schedule.xhtml).
+ * SessionScoped for the same reason as the other demo beans: survives a
+ * page reload, useful for the E2E tests to inspect the state.
  */
 @Named
 @SessionScoped
 public class ScheduleDemoBean implements Serializable {
 
-    private List<ScheduleEvent> eventos;
-    private String ultimaAcao = "";
+    private List<ScheduleEvent> events;
+    private String lastAction = "";
 
     @PostConstruct
-    void iniciar() {
-        LocalDate hoje = LocalDate.now();
-        eventos = new ArrayList<>();
-        eventos.add(new ScheduleEvent("1", "Reunião de equipe", hoje.atTime(10, 0), hoje.atTime(11, 0)));
-        eventos.add(new ScheduleEvent("2", "Entrega do relatório", hoje.plusDays(2).atTime(14, 0), hoje.plusDays(2).atTime(15, 0)));
+    void init() {
+        LocalDate today = LocalDate.now();
+        events = new ArrayList<>();
+        events.add(new ScheduleEvent("1", "Team meeting", today.atTime(10, 0), today.atTime(11, 0)));
+        events.add(new ScheduleEvent("2", "Report submission", today.plusDays(2).atTime(14, 0), today.plusDays(2).atTime(15, 0)));
     }
 
-    public List<ScheduleEvent> getEventos() {
-        return eventos;
+    public List<ScheduleEvent> getEvents() {
+        return events;
     }
 
-    public String getUltimaAcao() {
-        return ultimaAcao;
+    public String getLastAction() {
+        return lastAction;
     }
 
-    public void aoSelecionar(AjaxBehaviorEvent evento) {
-        Schedule schedule = (Schedule) evento.getComponent();
-        LocalDateTime inicio = schedule.getInicio();
-        LocalDateTime fim = schedule.getFim();
+    public void onSelect(AjaxBehaviorEvent event) {
+        Schedule schedule = (Schedule) event.getComponent();
+        LocalDateTime start = schedule.getStart();
+        LocalDateTime end = schedule.getEnd();
         String id = String.valueOf(System.currentTimeMillis());
-        eventos.add(new ScheduleEvent(id, "Novo evento", inicio, fim));
-        ultimaAcao = "select: " + inicio + " até " + fim;
+        events.add(new ScheduleEvent(id, "New event", start, end));
+        lastAction = "select: " + start + " to " + end;
     }
 
-    public void aoMover(AjaxBehaviorEvent evento) {
-        Schedule schedule = (Schedule) evento.getComponent();
-        atualizarEvento(schedule.getEventoId(), schedule.getInicio(), schedule.getFim());
-        ultimaAcao = "move: evento " + schedule.getEventoId() + " para " + schedule.getInicio() + " até " + schedule.getFim();
+    public void onMove(AjaxBehaviorEvent event) {
+        Schedule schedule = (Schedule) event.getComponent();
+        updateEvent(schedule.getEventId(), schedule.getStart(), schedule.getEnd());
+        lastAction = "move: event " + schedule.getEventId() + " to " + schedule.getStart() + " until " + schedule.getEnd();
     }
 
-    public void aoRedimensionar(AjaxBehaviorEvent evento) {
-        Schedule schedule = (Schedule) evento.getComponent();
-        atualizarEvento(schedule.getEventoId(), schedule.getInicio(), schedule.getFim());
-        ultimaAcao = "resize: evento " + schedule.getEventoId() + " até " + schedule.getFim();
+    public void onResize(AjaxBehaviorEvent event) {
+        Schedule schedule = (Schedule) event.getComponent();
+        updateEvent(schedule.getEventId(), schedule.getStart(), schedule.getEnd());
+        lastAction = "resize: event " + schedule.getEventId() + " until " + schedule.getEnd();
     }
 
-    public void aoClicar(AjaxBehaviorEvent evento) {
-        Schedule schedule = (Schedule) evento.getComponent();
-        ultimaAcao = "click: evento " + schedule.getEventoId();
+    public void onClick(AjaxBehaviorEvent event) {
+        Schedule schedule = (Schedule) event.getComponent();
+        lastAction = "click: evento " + schedule.getEventId();
     }
 
-    private void atualizarEvento(String id, LocalDateTime inicio, LocalDateTime fim) {
-        for (ScheduleEvent evento : eventos) {
-            if (evento.getId().equals(id)) {
-                evento.setInicio(inicio);
-                evento.setFim(fim);
+    private void updateEvent(String id, LocalDateTime start, LocalDateTime end) {
+        for (ScheduleEvent event : events) {
+            if (event.getId().equals(id)) {
+                event.setStart(start);
+                event.setEnd(end);
                 return;
             }
         }

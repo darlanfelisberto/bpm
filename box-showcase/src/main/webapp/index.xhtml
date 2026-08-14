@@ -3,69 +3,69 @@
       xmlns:ui="jakarta.faces.facelets"
       xmlns:h="jakarta.faces.html">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
-    <ui:define name="titulo">box-showcase</ui:define>
-    <ui:define name="conteudo">
+    <ui:define name="title">box-showcase</ui:define>
+    <ui:define name="content">
 
         <h2>box-showcase</h2>
         <p>
-            Vitrine dos componentes Jakarta Faces nativos da lib <code>box</code>
-            (módulo <code>br.edu.iffar:box</code>, reutilizável entre projetos do
-            IFFar). Cada página abaixo mostra o componente funcionando de verdade
-            e o trecho de código XHTML pra reproduzi-lo.
+            Showcase of the native Jakarta Faces components from the <code>box</code>
+            lib (module <code>br.edu.iffar:box</code>, reusable across IFFar
+            projects). Each page below shows the component working for real
+            and the XHTML snippet to reproduce it.
         </p>
 
         <div class="card">
             <h3><h:link outcome="/panel" value="b:panel"/></h3>
-            <p>Quadro com título opcional (equivalente a um card).</p>
+            <p>Box with an optional title (equivalent to a card).</p>
         </div>
 
         <div class="card">
             <h3><h:link outcome="/confirm" value="b:confirm"/></h3>
-            <p>Confirmação inline antes de uma ação (ex.: excluir), nas duas
-                formas: aninhado num <code>h:commandLink</code>/<code>h:commandButton</code>
-                ou via atributo <code>data-box-confirm</code>, sem nenhum componente Faces.</p>
+            <p>Inline confirmation before an action (e.g. delete), in both
+                forms: nested inside an <code>h:commandLink</code>/<code>h:commandButton</code>
+                or via the plain <code>data-box-confirm</code> attribute, with no Faces component.</p>
         </div>
 
         <div class="card">
             <h3><h:link outcome="/editor" value="b:editor"/></h3>
-            <p>Editor de texto rico (Quill): negrito, itálico, sublinhado,
-                tachado, fonte, tamanho, cor, alinhamento, listas, citação,
-                código, link, colar imagens.</p>
+            <p>Rich text editor (Quill): bold, italic, underline,
+                strikethrough, font, size, color, alignment, lists, quote,
+                code, link, pasting images.</p>
         </div>
 
         <div class="card">
             <h3><h:link outcome="/popup" value="b:popup"/></h3>
-            <p>Popup modal, equivalente ao <code>p:dialog</code>, baseado no
-                elemento nativo <code>&lt;dialog&gt;</code> — foco, Esc e
-                backdrop vêm de graça do browser.</p>
+            <p>Modal popup, equivalent to <code>p:dialog</code>, based on the
+                native <code>&lt;dialog&gt;</code> element — focus, Esc and
+                backdrop come for free from the browser.</p>
         </div>
 
         <div class="card">
             <h3><h:link outcome="/growl" value="b:growl"/></h3>
-            <p>Mensagens (<code>FacesMessage</code>) exibidas como toasts
-                flutuantes, equivalente ao <code>p:growl</code>.</p>
+            <p>Messages (<code>FacesMessage</code>) shown as floating toasts,
+                equivalent to <code>p:growl</code>.</p>
         </div>
 
         <div class="card">
             <h3><h:link outcome="/schedule" value="b:schedule"/></h3>
-            <p>Agenda de eventos (FullCalendar): visões mês/semana/dia,
-                criar evento selecionando um intervalo, mover e redimensionar
-                eventos arrastando, clicar num evento — tudo reportado via
-                <code>f:ajax</code> aninhado.</p>
+            <p>Event calendar (FullCalendar): month/week/day views,
+                create an event by selecting a range, move and resize
+                events by dragging, click an event — all reported via
+                nested <code>f:ajax</code>.</p>
         </div>
 
         <div class="card">
             <h3><h:link outcome="/schedule2" value="b:schedule2"/></h3>
-            <p>Mesma ideia do <code>b:schedule</code>, mas sem nenhuma lib
-                externa — só visão de mês, escrita à mão em JS vanilla, pra
-                comparar com a versão que usa FullCalendar.</p>
+            <p>Same idea as <code>b:schedule</code>, but with no external
+                lib — only month view, hand-written in vanilla JS, to
+                compare against the FullCalendar-based version.</p>
         </div>
 
         <div class="card">
             <h3><h:link outcome="/datatable" value="b:datatable"/></h3>
-            <p>Tabela com paginação, ordenação e filtro por coluna,
-                lazy — cada interação chama de novo o backend, sem guardar
-                linhas no estado da view.</p>
+            <p>Table with pagination, sorting and per-column filtering,
+                lazy — every interaction calls the backend again, without
+                keeping rows in the view state.</p>
         </div>
 
     </ui:define>
