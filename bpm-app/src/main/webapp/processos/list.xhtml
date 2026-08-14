@@ -34,7 +34,7 @@
                         <h:commandLink action="#{processoBean.excluir(p)}" styleClass="link-danger"
                                        p:aria-label="Excluir #{p.nome}" title="Excluir">
                             <i class="bi bi-trash"/>
-                            <b:confirm mensagem="Excluir o processo #{p.nome}?"/>
+                            <b:confirm message="Excluir o processo #{p.nome}?"/>
                             <f:ajax render=":formLista"/>
                         </h:commandLink>
                     </h:column>
