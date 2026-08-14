@@ -114,7 +114,6 @@ public class Popup extends UIComponentBase {
                 writer.startElement("button", this);
                 writer.writeAttribute("type", "button", null);
                 writer.writeAttribute("class", "box-popup-close", null);
-                writer.writeAttribute("aria-label", "Close", null);
                 writer.writeText("×", null);
                 writer.endElement("button");
             }

@@ -29,6 +29,7 @@
 
         var closeButton = dialog.querySelector('.box-popup-close');
         if (closeButton) {
+            closeButton.setAttribute('aria-label', window.Box.t('popup.close'));
             closeButton.addEventListener('click', function () {
                 dialog.close();
             });

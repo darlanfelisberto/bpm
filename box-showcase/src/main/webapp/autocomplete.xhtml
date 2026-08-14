@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="title">b:autocomplete</ui:define>
+    <ui:define name="content">
+
+        <h2>b:autocomplete</h2>
+        <p>Text input with server-driven suggestions dropdown, equivalent to
+            PrimeFaces' <code>p:autoComplete</code>. Integrates natively with
+            standard JSF form submission (<code>UIInput</code>) and supports
+            both plain string lists and complex objects with a
+            <code>Converter</code>.</p>
+
+        <h4>Data loading</h4>
+        <p>The <code>completeMethod</code> attribute points to a bean method that
+            takes the typed query string and returns a <code>List&lt;T&gt;</code> of
+            matching items. Queries are automatically debounced (default 300ms)
+            and only sent when the input length reaches <code>minQueryLength</code>
+            (default 1).</p>
+
+        <h4>Attributes — b:autocomplete</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>value</code></td><td>Yes</td><td>Value binding for the selected object or text (standard <code>UIInput</code> value).</td></tr>
+            <tr><td><code>completeMethod</code></td><td>Yes</td><td>Method expression that returns suggestion items (e.g. <code>\#{bean.complete(query)}</code>).</td></tr>
+            <tr><td><code>var</code></td><td>No</td><td>Name of the EL variable exposed when iterating over POJO suggestions.</td></tr>
+            <tr><td><code>itemLabel</code></td><td>No</td><td>Label shown in suggestions and in the input when an item is selected (e.g. <code>\#{p.name}</code>).</td></tr>
+            <tr><td><code>itemValue</code></td><td>No</td><td>Value of the item passed to the converter/model (e.g. <code>\#{p}</code>).</td></tr>
+            <tr><td><code>converter</code></td><td>No</td><td>Converter for transforming between object instances and string identifiers.</td></tr>
+            <tr><td><code>minQueryLength</code></td><td>No</td><td>Minimum number of characters required to trigger query (default <code>1</code>).</td></tr>
+            <tr><td><code>queryDelay</code></td><td>No</td><td>Debounce delay in milliseconds before sending query (default <code>300</code>).</td></tr>
+            <tr><td><code>dropdown</code></td><td>No</td><td>If <code>true</code>, displays a dropdown button to trigger suggestions without typing (default <code>false</code>).</td></tr>
+            <tr><td><code>dropdownMode</code></td><td>No</td><td>When dropdown button is clicked: <code>blank</code> sends empty query (default), <code>current</code> sends current input text.</td></tr>
+            <tr><td><code>forceSelection</code></td><td>No</td><td>If <code>true</code>, reverts to previously selected value if free text does not match any suggestion (default <code>false</code>).</td></tr>
+            <tr><td><code>placeholder</code></td><td>No</td><td>Placeholder text for the input field.</td></tr>
+            <tr><td><code>emptyMessage</code></td><td>No</td><td>Message shown when no results are found. Defaults to translated text (<code>autocomplete.noResults</code>).</td></tr>
+            <tr><td><code>maxResults</code></td><td>No</td><td>Maximum number of suggestions displayed.</td></tr>
+            <tr><td><code>disabled</code></td><td>No</td><td>Disables input and dropdown button (default <code>false</code>).</td></tr>
+            <tr><td><code>readonly</code></td><td>No</td><td>Makes the input read-only (default <code>false</code>).</td></tr>
+            <tr><td><code>style</code> / <code>styleClass</code></td><td>No</td><td>CSS style and style class for the root container.</td></tr>
+            <tr><td><code>inputStyle</code> / <code>inputStyleClass</code></td><td>No</td><td>CSS style and style class for the text input.</td></tr>
+        </table>
+
+        <h4>Client behaviors (nested f:ajax)</h4>
+        <table class="attributes-table">
+            <tr><th>Event</th><th>Fires when</th></tr>
+            <tr><td><code>itemSelect</code></td><td>a suggestion item is selected (default event).</td></tr>
+            <tr><td><code>change</code></td><td>the input value changes.</td></tr>
+            <tr><td><code>clear</code></td><td>the clear button (×) is clicked.</td></tr>
+            <tr><td><code>query</code></td><td>a search query is dispatched to the backend.</td></tr>
+        </table>
+
+        <h4>Example</h4>
+        <pre class="code-example">&lt;!-- Plain string autocomplete with dropdown button --&gt;
+&lt;b:autocomplete value="\#{bean.selectedCity}"
+                completeMethod="\#{bean.completeCity}"
+                dropdown="true"
+                placeholder="Type or click dropdown..."&gt;
+    &lt;f:ajax event="itemSelect" listener="\#{bean.onCitySelect}" render=":result"/&gt;
+&lt;/b:autocomplete&gt;
+
+&lt;!-- POJO autocomplete with Converter and forceSelection --&gt;
+&lt;b:autocomplete value="\#{bean.selectedPerson}"
+                completeMethod="\#{bean.completePerson}"
+                var="p"
+                itemLabel="\#{p.name}"
+                itemValue="\#{p}"
+                converter="\#{personConverter}"
+                forceSelection="true"
+                dropdown="true"
+                placeholder="Search person by name, email or role..."&gt;
+    &lt;f:ajax event="itemSelect" listener="\#{bean.onPersonSelect}" render=":result"/&gt;
+&lt;/b:autocomplete&gt;</pre>
+
+        <h3>Interactive Demos</h3>
+
+        <h:form id="formAutocomplete">
+            <div class="card">
+                <h3>1. Simple String Autocomplete</h3>
+                <p>Searches cities with a dropdown button (click arrow to list all cities, or type to filter):</p>
+                <div class="field" style="max-width: 380px;">
+                    <label for="formAutocomplete:cityAuto_input">City</label>
+                    <b:autocomplete id="cityAuto"
+                                    value="#{autocompleteDemoBean.selectedCity}"
+                                    completeMethod="#{autocompleteDemoBean.completeCity}"
+                                    dropdown="true"
+                                    placeholder="Search city...">
+                        <f:ajax event="itemSelect" listener="#{autocompleteDemoBean.onCitySelect}" render=":resultado"/>
+                    </b:autocomplete>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>2. POJO Autocomplete (Person) with Converter</h3>
+                <p>Searches <code>Person</code> objects with <code>itemLabel="#{p.name}"</code>, <code>converter="#{personConverter}"</code>, and <code>forceSelection="true"</code>:</p>
+                <div class="field" style="max-width: 380px;">
+                    <label for="formAutocomplete:personAuto_input">Person</label>
+                    <b:autocomplete id="personAuto"
+                                    value="#{autocompleteDemoBean.selectedPerson}"
+                                    completeMethod="#{autocompleteDemoBean.completePerson}"
+                                    var="p"
+                                    itemLabel="#{p.name}"
+                                    itemValue="#{p}"
+                                    converter="#{personConverter}"
+                                    forceSelection="true"
+                                    dropdown="true"
+                                    placeholder="Search person...">
+                        <f:ajax event="itemSelect" listener="#{autocompleteDemoBean.onPersonSelect}" render=":resultado"/>
+                    </b:autocomplete>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>3. Custom Suggestion Item Layout</h3>
+                <p>Custom template inside <code>b:autocomplete</code> displaying the person's name, role, and email:</p>
+                <div class="field" style="max-width: 480px;">
+                    <label for="formAutocomplete:customPersonAuto_input">Person (Custom layout)</label>
+                    <b:autocomplete id="customPersonAuto"
+                                    value="#{autocompleteDemoBean.selectedPersonCustom}"
+                                    completeMethod="#{autocompleteDemoBean.completePerson}"
+                                    var="p"
+                                    itemLabel="#{p.name}"
+                                    itemValue="#{p}"
+                                    converter="#{personConverter}"
+                                    dropdown="true"
+                                    placeholder="Search with custom template...">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <strong>#{p.name}</strong>
+                                <div style="font-size: 0.8rem; color: var(--color-text-muted);">#{p.email}</div>
+                            </div>
+                            <span style="font-size: 0.75rem; background: var(--color-bg); padding: 0.2rem 0.5rem; border-radius: 4px;">#{p.role}</span>
+                        </div>
+                        <f:ajax event="itemSelect" listener="#{autocompleteDemoBean.onPersonCustomSelect}" render=":resultado"/>
+                    </b:autocomplete>
+                </div>
+            </div>
+
+            <div class="actions">
+                <h:commandButton value="Submit form">
+                    <f:ajax execute="@form" render=":resultado"/>
+                </h:commandButton>
+                <h:commandButton value="Reset" action="#{autocompleteDemoBean.reset}">
+                    <f:ajax render="@form :resultado"/>
+                </h:commandButton>
+            </div>
+        </h:form>
+
+        <h4>Last Selection / Submitted State</h4>
+        <h:panelGroup id="resultado" layout="block" styleClass="card">
+            <div><strong>Selected City:</strong> #{autocompleteDemoBean.selectedCity != null ? autocompleteDemoBean.selectedCity : '(none)'}</div>
+            <div><strong>Selected Person:</strong> #{autocompleteDemoBean.selectedPerson != null ? autocompleteDemoBean.selectedPerson : '(none)'}</div>
+            <div><strong>Selected Person (Custom):</strong> #{autocompleteDemoBean.selectedPersonCustom != null ? autocompleteDemoBean.selectedPersonCustom : '(none)'}</div>
+            <div style="margin-top: 0.5rem; color: var(--color-primary);"><strong>Ajax Event:</strong> #{autocompleteDemoBean.lastSelection}</div>
+        </h:panelGroup>
+
+    </ui:define>
+</ui:composition>
+</html>

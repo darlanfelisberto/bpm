@@ -1,0 +1,177 @@
+.box-autocomplete {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    color: var(--color-text, #1f2933);
+    font-family: inherit;
+}
+
+.box-autocomplete-wrap {
+    display: flex;
+    align-items: stretch;
+    position: relative;
+    width: 100%;
+}
+
+.box-autocomplete-input {
+    flex: 1 1 auto;
+    width: 100%;
+    padding: 0.45rem 2.2rem 0.45rem 0.65rem;
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    background: var(--color-surface, #ffffff);
+    color: var(--color-text, #1f2933);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    box-sizing: border-box;
+}
+
+.box-autocomplete-input::placeholder {
+    color: var(--color-text-muted, #616e7c);
+}
+
+.box-autocomplete-input:hover:not(:disabled):not(:read-only) {
+    border-color: var(--color-border-hover, #c3ccd4);
+}
+
+.box-autocomplete-input:focus {
+    outline: none;
+    border-color: var(--color-primary, #2f6f4f);
+    box-shadow: 0 0 0 3px rgba(47, 111, 79, 0.18);
+}
+
+.box-autocomplete-input:disabled {
+    background: var(--color-bg, #f4f6f8);
+    color: var(--color-text-muted, #616e7c);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* When dropdown button is present */
+.box-autocomplete:has(.box-autocomplete-dropdown) .box-autocomplete-input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.box-autocomplete-dropdown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+    background: var(--color-bg, #f4f6f8);
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-left: none;
+    color: var(--color-text-muted, #616e7c);
+    cursor: pointer;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.8rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    user-select: none;
+}
+
+.box-autocomplete-dropdown:hover:not(:disabled) {
+    background: #e9ecef;
+    color: var(--color-text, #1f2933);
+}
+
+.box-autocomplete-dropdown:disabled {
+    background: var(--color-bg, #f4f6f8);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Action icons inside the input: clear button and loading spinner */
+.box-autocomplete-clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.15rem;
+    line-height: 1;
+    color: var(--color-text-muted, #616e7c);
+    cursor: pointer;
+    padding: 0.15rem 0.35rem;
+    border-radius: 50%;
+    z-index: 2;
+    transition: color 0.15s ease;
+}
+
+.box-autocomplete:has(.box-autocomplete-dropdown) .box-autocomplete-clear {
+    right: 2.5rem;
+}
+
+.box-autocomplete-clear:hover {
+    color: var(--color-danger, #b3261e);
+}
+
+.box-autocomplete-loading {
+    position: absolute;
+    right: 0.65rem;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border: 2px solid var(--color-border, #dfe4ea);
+    border-top-color: var(--color-primary, #2f6f4f);
+    border-radius: 50%;
+    animation: box-ac-spin 0.6s linear infinite;
+    z-index: 2;
+    box-sizing: border-box;
+}
+
+.box-autocomplete:has(.box-autocomplete-dropdown) .box-autocomplete-loading {
+    right: 2.65rem;
+}
+
+@keyframes box-ac-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Dropdown Panel */
+.box-autocomplete-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 240px;
+    overflow-y: auto;
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: 6px;
+    box-shadow: 0 4px 14px rgba(16, 24, 32, 0.12);
+    z-index: 1050;
+}
+
+.box-autocomplete-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem 0;
+}
+
+.box-autocomplete-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.92rem;
+    color: var(--color-text, #1f2933);
+    transition: background-color 0.1s ease, color 0.1s ease;
+    user-select: none;
+}
+
+.box-autocomplete-item:hover,
+.box-autocomplete-item.box-autocomplete-active {
+    background-color: #f0f7f4;
+    color: var(--color-primary, #2f6f4f);
+    font-weight: 500;
+}
+
+.box-autocomplete-empty {
+    padding: 0.75rem 1rem;
+    color: var(--color-text-muted, #616e7c);
+    font-size: 0.88rem;
+    text-align: center;
+}

@@ -68,6 +68,22 @@
                 keeping rows in the view state.</p>
         </div>
 
+        <div class="card">
+            <h3><h:link outcome="/autocomplete" value="b:autocomplete"/></h3>
+            <p>Text input with server-driven suggestions dropdown,
+                equivalent to <code>p:autoComplete</code> — supports string
+                lists or POJOs with a <code>Converter</code>, debounce,
+                dropdown button, and custom item layout.</p>
+        </div>
+
+        <div class="card">
+            <h3><h:link outcome="/i18n" value="Multilingual text"/></h3>
+            <p>How box components resolve user-visible text (button
+                labels, placeholders, etc.) entirely in JS — switch
+                language live and see <code>b:confirm</code> react, with
+                no server round trip.</p>
+        </div>
+
     </ui:define>
 </ui:composition>
 </html>

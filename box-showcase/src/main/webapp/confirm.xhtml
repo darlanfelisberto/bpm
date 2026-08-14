@@ -26,7 +26,7 @@
         <h4>Attributes</h4>
         <table class="attributes-table">
             <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
-            <tr><td><code>message</code></td><td>Yes</td><td>Text shown in the popup. Accepts EL.</td></tr>
+            <tr><td><code>message</code></td><td>No</td><td>Text shown in the popup. Accepts EL. Omitted, falls back to a translated default message (see <h:link outcome="/i18n" value="Multilingual text"/>).</td></tr>
         </table>
 
         <pre class="code-example">&lt;h:commandLink action="\#{bean.delete(item)}" styleClass="link-danger"&gt;

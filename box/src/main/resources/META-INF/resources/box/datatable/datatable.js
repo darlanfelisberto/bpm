@@ -95,12 +95,24 @@
             button.addEventListener('click', onPaginationButtonClick);
         });
         wrapper.querySelectorAll('.box-datatable-filter-input').forEach(function (input) {
+            input.placeholder = window.Box.t('datatable.filterPlaceholder');
+            input.setAttribute('aria-label', window.Box.t('datatable.filterBy', input.dataset.fieldLabel));
             input.addEventListener('change', onFilterChange);
             input.addEventListener('keydown', onFilterKeyDown);
         });
         wrapper.querySelectorAll('.box-datatable-row').forEach(function (row) {
             row.addEventListener('click', onRowClick);
         });
+
+        var info = wrapper.querySelector('.box-datatable-pagination-info');
+        if (info) {
+            var pagination = info.closest('.box-datatable-pagination');
+            var total = parseInt(pagination.dataset.totalRecords, 10) || 0;
+            info.textContent = total === 0
+                ? window.Box.t('datatable.noRecords')
+                : window.Box.t('datatable.paginationInfo',
+                    pagination.dataset.firstRecord, pagination.dataset.lastRecord, total);
+        }
     }
 
     function initAll(root) {

@@ -45,7 +45,7 @@
         var closeButton = document.createElement('button');
         closeButton.type = 'button';
         closeButton.className = 'box-growl-toast-close';
-        closeButton.setAttribute('aria-label', 'Close');
+        closeButton.setAttribute('aria-label', window.Box.t('growl.close'));
         closeButton.textContent = '×';
         closeButton.addEventListener('click', function () {
             closeToast(toast);

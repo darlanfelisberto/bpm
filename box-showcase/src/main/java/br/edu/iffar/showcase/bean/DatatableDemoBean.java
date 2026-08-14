@@ -139,4 +139,18 @@ public class DatatableDemoBean implements Serializable, DatatableLazyModel<Perso
     Person findById(long id) {
         return people.stream().filter(person -> person.getId() == id).findFirst().orElse(null);
     }
+
+    /** Reconstructs person by matching name, email, or formatted string. */
+    Person findByName(String text) {
+        if (text == null || text.isBlank()) {
+            return null;
+        }
+        String trimmed = text.trim().toLowerCase(Locale.ROOT);
+        return people.stream()
+                .filter(p -> p.getName().toLowerCase(Locale.ROOT).equals(trimmed)
+                        || p.toString().toLowerCase(Locale.ROOT).equals(trimmed)
+                        || (p.getName() + " (" + p.getRole() + ")").toLowerCase(Locale.ROOT).equals(trimmed))
+                .findFirst()
+                .orElse(null);
+    }
 }

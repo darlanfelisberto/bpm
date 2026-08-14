@@ -452,8 +452,7 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
                     writer.writeAttribute("type", "text", null);
                     writer.writeAttribute("class", "box-datatable-filter-input", null);
                     writer.writeAttribute("data-field", field, null);
-                    writer.writeAttribute("placeholder", "Filter…", null);
-                    writer.writeAttribute("aria-label", "Filter by " + filterLabel, null);
+                    writer.writeAttribute("data-field-label", filterLabel, null);
                     String currentValue = filters.get(field);
                     if (currentValue != null) {
                         writer.writeAttribute("value", currentValue, null);
@@ -543,13 +542,18 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         writer.writeAttribute("class", "box-datatable-pagination", null);
         writer.writeAttribute("data-current-page", String.valueOf(page), null);
         writer.writeAttribute("data-total-pages", String.valueOf(totalPages), null);
+        writer.writeAttribute("data-first-record", String.valueOf(firstRecord), null);
+        writer.writeAttribute("data-last-record", String.valueOf(lastRecord), null);
+        writer.writeAttribute("data-total-records", String.valueOf(total), null);
 
         writePaginationButton(writer, "first", "«", page <= 0);
         writePaginationButton(writer, "previous", "‹", page <= 0);
 
+        // Text filled in by datatable.js (initDatatable) from the data-*
+        // attributes above - translated, so kept out of the server-rendered
+        // markup on purpose (see Box.t in box-core.js).
         writer.startElement("span", this);
         writer.writeAttribute("class", "box-datatable-pagination-info", null);
-        writer.writeText(total == 0 ? "No records" : firstRecord + "–" + lastRecord + " of " + total, null);
         writer.endElement("span");
 
         writePaginationButton(writer, "next", "›", page + 1 >= totalPages);

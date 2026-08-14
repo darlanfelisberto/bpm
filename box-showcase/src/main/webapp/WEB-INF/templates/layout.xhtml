@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets">
+      xmlns:ui="jakarta.faces.facelets"
+      lang="#{facesContext.viewRoot.locale.language}">
 <h:head>
     <title><ui:insert name="title">box-showcase</ui:insert></title>
     <h:outputStylesheet library="css" name="app.css"/>
@@ -11,7 +12,9 @@
          via the plain data-box-confirm attribute (no Faces component at
          all), nothing else asks JSF to include the resource - so it's
          included here manually, once, for the whole application (same
-         pattern as bpm-app). -->
+         pattern as bpm-app). confirm.js works standalone, with no
+         box-core.js dependency (it only uses it opportunistically for
+         translations, when another box component already loaded it). -->
     <h:outputStylesheet library="box" name="confirm/confirm.css"/>
     <h:outputScript library="box" name="confirm/confirm.js"/>
     <ui:insert name="head-extra"/>
@@ -29,6 +32,8 @@
             <h:link outcome="/schedule2" value="b:schedule2"/>
             <h:link outcome="/popup" value="b:popup"/>
             <h:link outcome="/datatable" value="b:datatable"/>
+            <h:link outcome="/autocomplete" value="b:autocomplete"/>
+            <h:link outcome="/i18n" value="Multilingual text"/>
         </nav>
     </header>
     <main class="app-content">

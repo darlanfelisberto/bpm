@@ -37,24 +37,24 @@ import java.util.Map;
 @FacesBehavior(value = Confirm.BEHAVIOR_ID)
 @ResourceDependencies({
         @ResourceDependency(library = "box", name = "confirm/confirm.css", target = "head"),
+        @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "confirm/confirm.js", target = "head")
 })
 public class Confirm extends ClientBehaviorBase {
 
     public static final String BEHAVIOR_ID = "br.edu.iffar.box.Confirm";
 
-    private static final String DEFAULT_MESSAGE = "Are you sure?";
-
     private final Map<String, ValueExpression> bindings = new HashMap<>();
     private String messageLiteral;
 
+    /** Empty when not configured - confirm.js falls back to a translated default message in that case. */
     public String getMessage() {
         ValueExpression expression = bindings.get("message");
         if (expression != null) {
             Object value = expression.getValue(FacesContext.getCurrentInstance().getELContext());
-            return value != null ? value.toString() : DEFAULT_MESSAGE;
+            return value != null ? value.toString() : "";
         }
-        return messageLiteral != null ? messageLiteral : DEFAULT_MESSAGE;
+        return messageLiteral != null ? messageLiteral : "";
     }
 
     public void setMessage(String message) {

@@ -38,8 +38,47 @@
         window.faces.ajax.request(wrapper.id, null, options);
     }
 
+    // User-visible text for every box component, English only - the box
+    // lib itself never assumes/ships any other language. An app that wants
+    // the UI in another language includes its own small JS, after this
+    // file, registering the missing language: Box.messages.pt = {
+    // 'confirm.yes': 'Confirmar', ... } (same keys, translated values).
+    var messages = {
+        en: {
+            'confirm.yes': 'Confirm',
+            'confirm.no': 'Cancel',
+            'confirm.defaultMessage': 'Are you sure?',
+            'popup.close': 'Close',
+            'growl.close': 'Close',
+            'datatable.filterPlaceholder': 'Filter…',
+            'datatable.filterBy': 'Filter by {0}',
+            'datatable.noRecords': 'No records',
+            'datatable.paginationInfo': '{0}–{1} of {2}',
+            'autocomplete.noResults': 'No results found',
+            'autocomplete.clear': 'Clear selection',
+            'autocomplete.loading': 'Loading…'
+        }
+    };
+
+    // Resolves the text for `key` in the page's own language (document.
+    // documentElement.lang, first segment only - "pt-BR" matches a "pt"
+    // dictionary), falling back to English when there's no dictionary for
+    // that language or the key is missing from it. Extra arguments fill in
+    // {0}/{1}/... placeholders, positionally.
+    function t(key) {
+        var lang = (document.documentElement.lang || 'en').split('-')[0];
+        var dictionary = messages[lang] || messages.en;
+        var text = dictionary[key] || messages.en[key] || key;
+        var args = Array.prototype.slice.call(arguments, 1);
+        return text.replace(/\{(\d+)\}/g, function (match, index) {
+            return args[index] !== undefined ? args[index] : match;
+        });
+    }
+
     window.Box = {
         onReadyOrAjax: onReadyOrAjax,
-        trigger: trigger
+        trigger: trigger,
+        messages: messages,
+        t: t
     };
 })();

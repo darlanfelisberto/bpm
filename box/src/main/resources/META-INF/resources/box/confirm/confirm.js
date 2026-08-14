@@ -1,6 +1,21 @@
 (function () {
     'use strict';
 
+    // data-box-confirm works standalone, with no Faces component/behavior
+    // and no other box resource on the page (see the click listener at the
+    // bottom of this file) - so it can't hard-require box-core.js just for
+    // Box.t. Uses the shared dictionary when box-core.js happens to be
+    // loaded (e.g. because b:confirm or another box component is also on
+    // the page), falls back to English otherwise - never breaks either way.
+    var FALLBACK = { yes: 'Confirm', no: 'Cancel', defaultMessage: 'Are you sure?' };
+
+    function t(key, fallbackKey) {
+        if (window.Box && window.Box.t) {
+            return window.Box.t(key);
+        }
+        return FALLBACK[fallbackKey];
+    }
+
     var activePopup = null;
 
     function closePopup() {
@@ -75,17 +90,17 @@
         popup.className = 'box-confirm-popup';
 
         var text = document.createElement('p');
-        text.textContent = message;
+        text.textContent = message || t('confirm.defaultMessage', 'defaultMessage');
 
         var yesButton = document.createElement('button');
         yesButton.type = 'button';
         yesButton.className = 'box-confirm-yes';
-        yesButton.textContent = 'Confirm';
+        yesButton.textContent = t('confirm.yes', 'yes');
 
         var noButton = document.createElement('button');
         noButton.type = 'button';
         noButton.className = 'box-confirm-no';
-        noButton.textContent = 'Cancel';
+        noButton.textContent = t('confirm.no', 'no');
 
         popup.appendChild(text);
         popup.appendChild(yesButton);
