@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="titulo">b:datatable</ui:define>
+    <ui:define name="conteudo">
+
+        <h2>b:datatable</h2>
+        <p>Tabela com paginação, ordenação e filtro por coluna, tudo resolvido
+            no backend — cada interação dispara um postback que chama de novo
+            o método <code>carregar(...)</code> da fonte de dados. Nenhuma
+            linha fica guardada entre requisições: só primitivos de controle
+            (página, campo/direção de ordenação, filtros digitados) vão pro
+            estado da view, o que faz o componente funcionar bem mesmo com
+            datasets grandes demais pra carregar inteiros de uma vez.</p>
+
+        <h4>Fonte de dados</h4>
+        <p>O atributo <code>value</code> aponta pra um objeto que implementa
+            <code>DatatableLazyModel&lt;T&gt;</code> — normalmente o próprio
+            bean. Cada chamada de <code>carregar(DatatableConsulta)</code>
+            recebe o offset/tamanho da página, o campo/direção de ordenação e
+            os filtros (campo → texto digitado) e devolve uma
+            <code>DatatablePage&lt;T&gt;</code> (linhas da página + total de
+            registros). O tamanho de página pode vir do atributo
+            <code>linhasPorPagina</code> (útil quando o próprio bean
+            controla, ex.: um seletor construído fora do componente) ou, se
+            omitido, do método <code>linhasPorPaginaPadrao()</code> da
+            própria interface — este exemplo usa esse segundo caminho.</p>
+
+        <h4>Atributos — b:datatable</h4>
+        <table class="descricao-atributos">
+            <tr><th>Atributo</th><th>Obrigatório</th><th>Descrição</th></tr>
+            <tr><td><code>value</code></td><td>Sim</td><td>A fonte de dados (<code>DatatableLazyModel&lt;T&gt;</code>).</td></tr>
+            <tr><td><code>var</code></td><td>Sim</td><td>Nome que expõe a linha atual em EL pros filhos das colunas (igual ao <code>var</code> do <code>h:dataTable</code>).</td></tr>
+            <tr><td><code>linhasPorPagina</code></td><td>Não</td><td>Tamanho da página. Sem valor, usa <code>modelo.linhasPorPaginaPadrao()</code>.</td></tr>
+            <tr><td><code>converter</code></td><td>Não</td><td>Necessário só pro evento <code>select</code> — converte a linha clicada num id (e de volta) sem guardar a linha em nenhum lugar. Normalmente um <code>Converter</code> gerenciado por CDI (ver exemplo abaixo).</td></tr>
+            <tr><td><code>ordenarPorPadrao</code></td><td>Não</td><td>Campo usado como ordenação inicial, antes de qualquer clique num cabeçalho.</td></tr>
+            <tr><td><code>ordenarAscendentePadrao</code></td><td>Não</td><td>Direção da ordenação inicial. Padrão <code>true</code>.</td></tr>
+        </table>
+
+        <h4>Atributos — b:column</h4>
+        <table class="descricao-atributos">
+            <tr><th>Atributo</th><th>Obrigatório</th><th>Descrição</th></tr>
+            <tr><td><code>field</code></td><td>Não</td><td>Propriedade lida do objeto de linha (<code>var</code>) e enviada ao backend como chave de ordenação/filtro. Sem filhos na coluna, também define o que é exibido na célula.</td></tr>
+            <tr><td><code>header</code></td><td>Não</td><td>Rótulo do cabeçalho. Sem valor, usa o próprio <code>field</code>.</td></tr>
+            <tr><td><code>sortable</code></td><td>Não</td><td>Se <code>true</code>, clicar no cabeçalho ordena por essa coluna (nenhum → asc → desc → nenhum). Padrão <code>false</code>.</td></tr>
+            <tr><td><code>filterable</code></td><td>Não</td><td>Se <code>true</code>, mostra um campo de texto abaixo do cabeçalho pra filtrar por essa coluna. Padrão <code>false</code>.</td></tr>
+        </table>
+
+        <h4>Facets</h4>
+        <table class="descricao-atributos">
+            <tr><th>Facet</th><th>Descrição</th></tr>
+            <tr><td><code>header</code></td><td>Bloco acima da tabela — título, contador, barra de ações.</td></tr>
+            <tr><td><code>footer</code></td><td>Bloco abaixo da paginação — normalmente ações em lote.</td></tr>
+            <tr><td><code>empty</code></td><td>Substitui o corpo da tabela quando a página atual não tem nenhuma linha (tipicamente por causa de um filtro). Sem essa facet, a tabela só fica com o cabeçalho e a paginação mostra "Nenhum registro".</td></tr>
+        </table>
+
+        <h4>Client behaviors (f:ajax aninhado)</h4>
+        <table class="descricao-atributos">
+            <tr><th>Evento</th><th>Dispara quando</th></tr>
+            <tr><td><code>page</code></td><td>clica num botão de paginação</td></tr>
+            <tr><td><code>sort</code></td><td>clica num cabeçalho ordenável</td></tr>
+            <tr><td><code>filter</code></td><td>sai de um campo de filtro (ou aperta Enter) depois de mudar o valor</td></tr>
+            <tr><td><code>select</code></td><td>clica numa linha — evento default, não re-renderiza a tabela sozinho</td></tr>
+        </table>
+
+        <h4>Exemplo</h4>
+        <pre class="exemplo-codigo">&lt;b:datatable value="\#{bean}" var="item" converter="\#{pessoaConverter}"&gt;
+    &lt;f:facet name="header"&gt;
+        &lt;h2&gt;Pessoas&lt;/h2&gt;
+    &lt;/f:facet&gt;
+    &lt;b:column field="nome" header="Nome" sortable="true" filterable="true"/&gt;
+    &lt;b:column field="email" header="E-mail" filterable="true"/&gt;
+    &lt;b:column field="cargo" header="Cargo" sortable="true" filterable="true"/&gt;
+    &lt;b:column field="dataAdmissao" header="Admissão" sortable="true"/&gt;
+    &lt;f:facet name="empty"&gt;Nenhuma pessoa encontrada com esse filtro.&lt;/f:facet&gt;
+    &lt;f:ajax event="select" listener="\#{bean.aoSelecionar}" render=":resultado"/&gt;
+&lt;/b:datatable&gt;
+
+// PessoaConverter.java - Converter gerenciado por CDI (@Named, sem
+// @FacesConverter), pra poder @Inject um repositório/DAO e reconstruir a
+// linha selecionada a partir só do id, sem guardar ela em lugar nenhum.
+\@Named
+public class PessoaConverter implements Converter&lt;Pessoa&gt; { ... }</pre>
+
+        <h:form id="formDatatable">
+            <b:datatable id="tabela" value="#{datatableDemoBean}" var="item"
+                         converter="#{pessoaConverter}">
+                <f:facet name="header">
+                    <h:panelGroup layout="block" styleClass="box-datatable-topo-conteudo">
+                        <h3 style="margin: 0;">Pessoas</h3>
+                    </h:panelGroup>
+                </f:facet>
+
+                <b:column field="nome" header="Nome" sortable="true" filterable="true"/>
+                <b:column field="email" header="E-mail" filterable="true"/>
+                <b:column field="cargo" header="Cargo" sortable="true" filterable="true"/>
+                <b:column field="dataAdmissao" header="Admissão" sortable="true"/>
+
+                <f:facet name="empty">Nenhuma pessoa encontrada com esse filtro.</f:facet>
+
+                <f:facet name="footer">
+                    <h:commandButton value="Restaurar dados" action="#{datatableDemoBean.restaurar}">
+                        <f:ajax render=":formDatatable"/>
+                    </h:commandButton>
+                </f:facet>
+
+                <f:ajax event="select" listener="#{datatableDemoBean.aoSelecionar}" render=":resultado"/>
+            </b:datatable>
+        </h:form>
+
+        <h4>Última linha selecionada</h4>
+        <h:panelGroup id="resultado" layout="block" styleClass="card">
+            <span id="ultima-selecao">#{datatableDemoBean.ultimaSelecao}</span>
+        </h:panelGroup>
+
+    </ui:define>
+</ui:composition>
+</html>

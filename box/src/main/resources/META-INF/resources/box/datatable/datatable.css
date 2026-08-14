@@ -1,0 +1,136 @@
+.box-datatable {
+    color: var(--color-text, #1f2933);
+    font-family: inherit;
+}
+
+.box-datatable-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.box-datatable-rodape {
+    margin-top: 0.75rem;
+}
+
+.box-datatable-tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.box-datatable-tabela th,
+.box-datatable-tabela td {
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+}
+
+.box-datatable-tabela tbody td {
+    border-bottom: 1px solid var(--color-border, #dfe4ea);
+}
+
+/* A borda que separa cabeçalho/filtro do corpo da tabela fica só na
+   última linha do thead (cabeçalho sozinho, ou filtro quando existe) -
+   evita duas bordas coladas (uma do cabeçalho, outra do filtro logo
+   abaixo) apertando visualmente a linha de filtros. */
+.box-datatable-tabela thead tr:last-child th,
+.box-datatable-tabela thead tr:last-child td {
+    border-bottom: 2px solid var(--color-border, #dfe4ea);
+}
+
+.box-datatable-cabecalho th {
+    font-weight: 600;
+    color: var(--color-text-muted, #616e7c);
+    white-space: nowrap;
+}
+
+.box-datatable-filtros td {
+    padding-top: 0;
+    padding-bottom: 0.6rem;
+}
+
+.box-datatable-cabecalho-ordenavel {
+    cursor: pointer;
+    user-select: none;
+}
+
+.box-datatable-cabecalho-ordenavel:hover {
+    color: var(--color-text, #1f2933);
+}
+
+.box-datatable-indicador-ordenacao {
+    font-size: 0.75em;
+}
+
+.box-datatable-filtro-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: var(--color-bg, #f4f6f8);
+    color: inherit;
+    font: inherit;
+    font-size: 0.9em;
+    font-weight: 400;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.box-datatable-filtro-input::placeholder {
+    color: var(--color-text-muted, #616e7c);
+}
+
+.box-datatable-filtro-input:hover {
+    border-color: var(--color-border, #dfe4ea);
+}
+
+.box-datatable-filtro-input:focus {
+    outline: none;
+    background: var(--color-surface, #fff);
+    border-color: var(--color-primary, #2f6f4f);
+    box-shadow: 0 0 0 3px rgba(47, 111, 79, 0.18);
+}
+
+.box-datatable-linha-vazia td {
+    padding: 1.5rem 0.75rem;
+    text-align: center;
+    color: var(--color-text-muted, #616e7c);
+}
+
+.box-datatable-linha {
+    cursor: pointer;
+}
+
+.box-datatable-linha:hover {
+    background: var(--color-bg, #f4f6f8);
+}
+
+.box-datatable-paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+}
+
+.box-datatable-paginacao-info {
+    color: var(--color-text-muted, #616e7c);
+    margin: 0 0.5rem;
+}
+
+.box-datatable-paginacao-botao {
+    background: none;
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: 4px;
+    color: var(--color-text, #1f2933);
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    line-height: 1;
+}
+
+.box-datatable-paginacao-botao:disabled {
+    color: var(--color-text-muted, #616e7c);
+    cursor: default;
+    opacity: 0.5;
+}

@@ -47,6 +47,17 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- jakarta.json-api acima e' so a API (implementacao vem do Open
+             Liberty em runtime) - Parsson e' a implementacao de referencia,
+             so em teste, pra Json.createReader/createArrayBuilder
+             funcionarem rodando os testes unitarios fora do Liberty
+             (ex.: DatatableTest, parse do JSON de filtros). -->
+        <dependency>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+            <version>${version.parsson}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
