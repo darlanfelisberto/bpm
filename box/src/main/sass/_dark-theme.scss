@@ -1,0 +1,47 @@
+$dark-primary:          #4ade80;
+$dark-primary-dark:     #22c55e;
+$dark-primary-contrast: #052e16;
+$dark-danger:           #f87171;
+$dark-warn:             #fbbf24;
+$dark-success:          #4ade80;
+$dark-text:             #e2e8f0;
+$dark-text-muted:       #94a3b8;
+$dark-surface:          #1e293b;
+$dark-bg:               #0f172a;
+$dark-border:           #334155;
+$dark-shadow:           0 1px 4px rgba(0, 0, 0, 0.4);
+$dark-radius:           8px;
+
+.box-theme-dark {
+  --color-primary:          #{$dark-primary};
+  --color-primary-dark:     #{$dark-primary-dark};
+  --color-primary-contrast: #{$dark-primary-contrast};
+  --color-danger:           #{$dark-danger};
+  --color-warn:             #{$dark-warn};
+  --color-success:          #{$dark-success};
+  --color-text:             #{$dark-text};
+  --color-text-muted:       #{$dark-text-muted};
+  --color-surface:          #{$dark-surface};
+  --color-bg:               #{$dark-bg};
+  --color-border:           #{$dark-border};
+  --shadow:                 #{$dark-shadow};
+  --radius:                 #{$dark-radius};
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.box-theme-default):not(.box-theme-dark) {
+    --color-primary:          #{$dark-primary};
+    --color-primary-dark:     #{$dark-primary-dark};
+    --color-primary-contrast: #{$dark-primary-contrast};
+    --color-danger:           #{$dark-danger};
+    --color-warn:             #{$dark-warn};
+    --color-success:          #{$dark-success};
+    --color-text:             #{$dark-text};
+    --color-text-muted:       #{$dark-text-muted};
+    --color-surface:          #{$dark-surface};
+    --color-bg:               #{$dark-bg};
+    --color-border:           #{$dark-border};
+    --shadow:                 #{$dark-shadow};
+    --radius:                 #{$dark-radius};
+  }
+}

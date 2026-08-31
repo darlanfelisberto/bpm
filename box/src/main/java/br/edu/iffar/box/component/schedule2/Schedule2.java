@@ -53,7 +53,7 @@ import java.util.Map;
         tagName = "schedule2",
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "schedule2/schedule2.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box.css", target = "head"),
         @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "schedule2/schedule2.js", target = "head")
 })

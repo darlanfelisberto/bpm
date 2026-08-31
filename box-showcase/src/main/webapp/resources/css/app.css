@@ -1,17 +1,11 @@
 :root {
-    --color-bg: #f4f6f8;
-    --color-surface: #ffffff;
-    --color-text: #1f2933;
-    --color-text-muted: #616e7c;
-    --color-border: #dfe4ea;
-    --color-primary: #2f6f4f;
-    --color-primary-dark: #24563e;
-    --color-primary-contrast: #ffffff;
     --color-header: #1f2933;
     --color-header-contrast: #f5f7fa;
-    --color-danger: #b3261e;
-    --radius: 8px;
-    --shadow: 0 1px 2px rgba(16, 24, 32, 0.06), 0 1px 6px rgba(16, 24, 32, 0.04);
+}
+
+html.box-theme-dark {
+    --color-header: #0b1120;
+    --color-header-contrast: #e2e8f0;
 }
 
 * {
@@ -21,9 +15,10 @@
 body {
     font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    background: var(--color-bg);
-    color: var(--color-text);
+    background: var(--color-bg, #f4f6f8);
+    color: var(--color-text, #1f2933);
     line-height: 1.5;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 h1, h2, h3, h4 {
@@ -62,7 +57,8 @@ a {
     color: var(--color-header-contrast);
     padding: 1rem 1.5rem;
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    justify-content: space-between;
     gap: 1.5rem;
     flex-wrap: wrap;
 }
@@ -77,6 +73,7 @@ a {
 .app-header nav {
     display: flex;
     gap: 1.25rem;
+    flex-wrap: wrap;
 }
 
 .app-header nav a {
@@ -90,6 +87,35 @@ a {
 
 .app-header nav a:hover {
     color: #ffffff;
+    border-color: var(--color-primary);
+}
+
+.theme-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+}
+
+.theme-switcher-label {
+    font-size: 0.8rem;
+    color: #c3ccd4;
+    font-weight: 500;
+}
+
+.theme-switcher-select {
+    background: #2f3e4e;
+    color: #ffffff;
+    border: 1px solid #486581;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.theme-switcher-select:focus {
+    outline: none;
     border-color: var(--color-primary);
 }
 
@@ -238,4 +264,26 @@ a.link-danger:hover {
 .box-confirm-yes--custom {
     background: var(--color-primary);
     border-color: var(--color-primary);
+}
+
+/* Dark theme showcase overrides */
+.box-theme-dark table.grid th {
+    background: #1e293b;
+    color: var(--color-text-muted);
+}
+
+.box-theme-dark table.grid tbody tr:hover {
+    background: #334155;
+}
+
+.box-theme-dark .code-example {
+    background: #0f172a;
+    border: 1px solid var(--color-border);
+}
+
+.box-theme-dark input[type="text"],
+.box-theme-dark textarea {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border);
 }

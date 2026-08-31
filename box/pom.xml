@@ -70,10 +70,37 @@
                 <directory>src/main/resources</directory>
             </resource>
             <resource>
+                <directory>${project.build.directory}/generated-resources/sass</directory>
+            </resource>
+            <resource>
                 <directory>${project.build.directory}/vendor-download</directory>
             </resource>
         </resources>
         <plugins>
+            <!-- Compiles SASS sources to bundled box/box.css during generate-resources.
+                 The compiled CSS is placed in target/generated-resources/sass so no
+                 derived CSS files are tracked in git. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>compile-sass</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>/home/darlan/.nvm/versions/node/v22.17.0/bin/sass</executable>
+                            <arguments>
+                                <argument>${project.basedir}/src/main/sass/box.scss:${project.build.directory}/generated-resources/sass/META-INF/resources/box/box.css</argument>
+                                <argument>--style=compressed</argument>
+                                <argument>--no-source-map</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Downloads Quill (JS/CSS) straight from jsdelivr on every build,
                  instead of versioning the files in git. To update: change
                  version.quill in the root pom.xml and the matching sha256

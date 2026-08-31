@@ -52,7 +52,7 @@ import java.util.Map;
         tagName = "autocomplete",
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "autocomplete/autocomplete.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box.css", target = "head"),
         @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "autocomplete/autocomplete.js", target = "head")
 })

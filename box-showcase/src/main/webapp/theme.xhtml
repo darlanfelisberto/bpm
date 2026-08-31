@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:b="http://iffar.edu.br/box">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="title">Themes - box-showcase</ui:define>
+    <ui:define name="content">
+
+        <h2>Theming and CSS Architecture</h2>
+        <p>
+            The <code>box</code> component library is built on CSS custom properties (variables)
+            managed via Dart Sass. Themes can be switched dynamically per-page or per-container,
+            and respect system dark mode preferences automatically.
+        </p>
+
+        <!-- Live theme switcher test card -->
+        <div class="card">
+            <h3>Live Theme Preview</h3>
+            <p>
+                Use the buttons below to switch the theme dynamically across the showcase,
+                or use the selector in the top navigation bar. Preferences are saved in <code>localStorage</code>.
+            </p>
+            <div class="actions" style="margin-bottom: 1.25rem;">
+                <button type="button" onclick="switchTheme('default')">Apply Default (Light)</button>
+                <button type="button" onclick="switchTheme('dark')">Apply Dark Theme</button>
+            </div>
+
+            <h4>Interactive Component Samples in Current Theme</h4>
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start; margin-top: 1rem;">
+                <!-- Menu Sample -->
+                <div style="width: 240px; flex-shrink: 0;">
+                    <b:menu header="Navigation">
+                        <b:menuitem outcome="/index" label="Home" icon="bi bi-house"/>
+                        <b:menuitem outcome="/theme" label="Themes" icon="bi bi-palette" active="true"/>
+                        <b:submenu label="Components" expanded="true">
+                            <b:menuitem outcome="/panel" label="Panel" badge="New"/>
+                            <b:menuitem outcome="/autocomplete" label="Autocomplete"/>
+                        </b:submenu>
+                    </b:menu>
+                </div>
+
+                <!-- Autocomplete and Button Sample -->
+                <div style="flex: 1; min-width: 260px;">
+                    <b:panel header="Panel &amp; Form Elements">
+                        <p>All colors, shadows, borders and focus rings adapt instantly when switching themes.</p>
+                        <div class="field">
+                            <label>Sample Input</label>
+                            <input type="text" placeholder="Type something..."/>
+                        </div>
+                        <div class="actions">
+                            <button type="button">Primary Action</button>
+                            <button type="button" style="background: var(--color-danger); border-color: var(--color-danger);">Danger Action</button>
+                        </div>
+                    </b:panel>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scoped Theme Example -->
+        <div class="card">
+            <h3>Scoped Themes (Container-level)</h3>
+            <p>
+                A theme class (such as <code>box-theme-dark</code> or <code>box-theme-default</code>)
+                can be applied to any container element, allowing dark cards inside light pages or vice-versa.
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <!-- Explicit Light Box -->
+                <div class="box-theme-default card" style="margin-bottom: 0;">
+                    <h4 style="margin-top: 0; color: var(--color-primary);">Forced Light Container (.box-theme-default)</h4>
+                    <p>Always rendered with the light theme palette regardless of page theme.</p>
+                    <b:menu header="Light Menu">
+                        <b:menuitem outcome="/theme" label="Dashboard" icon="bi bi-speedometer2" active="true"/>
+                        <b:menuitem outcome="/theme" label="Profile" icon="bi bi-person"/>
+                    </b:menu>
+                </div>
+
+                <!-- Explicit Dark Box -->
+                <div class="box-theme-dark card" style="margin-bottom: 0;">
+                    <h4 style="margin-top: 0; color: var(--color-primary);">Forced Dark Container (.box-theme-dark)</h4>
+                    <p>Always rendered with the dark theme palette regardless of page theme.</p>
+                    <b:menu header="Dark Menu">
+                        <b:menuitem outcome="/theme" label="Dashboard" icon="bi bi-speedometer2" active="true"/>
+                        <b:menuitem outcome="/theme" label="Profile" icon="bi bi-person"/>
+                    </b:menu>
+                </div>
+            </div>
+        </div>
+
+        <!-- CSS Variables Documentation -->
+        <div class="card">
+            <h3>Theme CSS Variables</h3>
+            <p>Components consume standard CSS custom properties defined in <code>box.css</code>:</p>
+
+            <table class="attributes-table">
+                <thead>
+                <tr>
+                    <th>CSS Variable</th>
+                    <th>Default (Light)</th>
+                    <th>Dark</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>--color-primary</code></td>
+                    <td><code>#2f6f4f</code> (IFFar Green)</td>
+                    <td><code>#4ade80</code></td>
+                    <td>Main brand color for active items, borders and accents</td>
+                </tr>
+                <tr>
+                    <td><code>--color-primary-dark</code></td>
+                    <td><code>#24563e</code></td>
+                    <td><code>#22c55e</code></td>
+                    <td>Hover and pressed states for primary elements</td>
+                </tr>
+                <tr>
+                    <td><code>--color-primary-contrast</code></td>
+                    <td><code>#ffffff</code></td>
+                    <td><code>#052e16</code></td>
+                    <td>Text color on top of primary background</td>
+                </tr>
+                <tr>
+                    <td><code>--color-surface</code></td>
+                    <td><code>#ffffff</code></td>
+                    <td><code>#1e293b</code></td>
+                    <td>Cards, dropdown panels, popups and menus background</td>
+                </tr>
+                <tr>
+                    <td><code>--color-bg</code></td>
+                    <td><code>#f4f6f8</code></td>
+                    <td><code>#0f172a</code></td>
+                    <td>Page background and secondary surfaces</td>
+                </tr>
+                <tr>
+                    <td><code>--color-text</code></td>
+                    <td><code>#1f2933</code></td>
+                    <td><code>#e2e8f0</code></td>
+                    <td>Primary body text color</td>
+                </tr>
+                <tr>
+                    <td><code>--color-text-muted</code></td>
+                    <td><code>#616e7c</code></td>
+                    <td><code>#94a3b8</code></td>
+                    <td>Secondary labels, headers and placeholders</td>
+                </tr>
+                <tr>
+                    <td><code>--color-border</code></td>
+                    <td><code>#dfe4ea</code></td>
+                    <td><code>#334155</code></td>
+                    <td>Component borders and dividers</td>
+                </tr>
+                <tr>
+                    <td><code>--color-danger</code></td>
+                    <td><code>#b3261e</code></td>
+                    <td><code>#f87171</code></td>
+                    <td>Error messages, destructive actions, danger badges</td>
+                </tr>
+                <tr>
+                    <td><code>--color-warn</code></td>
+                    <td><code>#b58105</code></td>
+                    <td><code>#fbbf24</code></td>
+                    <td>Warning toasts and notices</td>
+                </tr>
+                <tr>
+                    <td><code>--radius</code></td>
+                    <td><code>8px</code></td>
+                    <td><code>8px</code></td>
+                    <td>Default border radius for containers</td>
+                </tr>
+                <tr>
+                    <td><code>--shadow</code></td>
+                    <td><code>0 1px 2px rgba(16,24,32,0.06)</code></td>
+                    <td><code>0 1px 4px rgba(0,0,0,0.4)</code></td>
+                    <td>Component shadow elevation</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- How to create a new theme snippet -->
+        <div class="card">
+            <h3>Creating a Custom Theme</h3>
+            <p>
+                To create a custom theme (e.g. <code>.box-theme-ocean</code>), define the custom properties in a SASS partial:
+            </p>
+            <pre class="code-example"><code>/* src/main/sass/themes/_ocean-theme.scss */
+.box-theme-ocean {
+  --color-primary:          #0284c7;
+  --color-primary-dark:     #0369a1;
+  --color-primary-contrast: #ffffff;
+  --color-danger:           #e11d48;
+  --color-warn:             #f59e0b;
+  --color-success:          #10b981;
+  --color-text:             #0f172a;
+  --color-text-muted:       #64748b;
+  --color-surface:          #ffffff;
+  --color-bg:               #f0f9ff;
+  --color-border:           #bae6fd;
+  --shadow:                 0 1px 3px rgba(2, 132, 199, 0.1);
+  --radius:                 8px;
+}</code></pre>
+            <p>Import it in <code>src/main/sass/box.scss</code> and recompile via <code>mvn install -pl box</code>.</p>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</html>

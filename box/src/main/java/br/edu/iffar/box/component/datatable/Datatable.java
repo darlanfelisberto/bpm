@@ -68,7 +68,7 @@ import java.util.Map;
         tagName = "datatable",
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "datatable/datatable.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box.css", target = "head"),
         @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "datatable/datatable.js", target = "head")
 })

@@ -30,7 +30,7 @@ import java.io.IOException;
         tagName = "menu",
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
-        @ResourceDependency(library = "box", name = "menu/menu.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box.css", target = "head"),
         @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "menu/menu.js", target = "head")
 })

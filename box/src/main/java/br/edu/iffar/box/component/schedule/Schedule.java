@@ -53,7 +53,7 @@ import java.util.Map;
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
         @ResourceDependency(library = "box", name = "vendor/fullcalendar/fullcalendar.js", target = "head"),
-        @ResourceDependency(library = "box", name = "schedule/schedule.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box.css", target = "head"),
         @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "schedule/schedule.js", target = "head")
 })

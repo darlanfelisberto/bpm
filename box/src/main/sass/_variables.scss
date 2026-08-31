@@ -1,0 +1,11 @@
+// Component-level SASS variables (not the CSS custom properties defined in themes)
+$box-prefix: 'box' !default;
+$box-menu-max-width: 280px !default;
+$box-panel-max-height: 240px !default;
+$box-z-index-dropdown: 1050 !default;
+$box-z-index-confirm: 1000 !default;
+$box-z-index-growl: 2000 !default;
+
+// Transition defaults
+$box-transition-duration: 0.15s !default;
+$box-transition-easing: ease !default;

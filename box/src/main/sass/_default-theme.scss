@@ -1,0 +1,30 @@
+$default-primary:          #2f6f4f;
+$default-primary-dark:     #24563e;
+$default-primary-contrast: #ffffff;
+$default-danger:           #b3261e;
+$default-warn:             #b58105;
+$default-success:          #2f6f4f;
+$default-text:             #1f2933;
+$default-text-muted:       #616e7c;
+$default-surface:          #ffffff;
+$default-bg:               #f4f6f8;
+$default-border:           #dfe4ea;
+$default-shadow:           0 1px 2px rgba(16, 24, 32, 0.06);
+$default-radius:           8px;
+
+:root,
+.box-theme-default {
+  --color-primary:          #{$default-primary};
+  --color-primary-dark:     #{$default-primary-dark};
+  --color-primary-contrast: #{$default-primary-contrast};
+  --color-danger:           #{$default-danger};
+  --color-warn:             #{$default-warn};
+  --color-success:          #{$default-success};
+  --color-text:             #{$default-text};
+  --color-text-muted:       #{$default-text-muted};
+  --color-surface:          #{$default-surface};
+  --color-bg:               #{$default-bg};
+  --color-border:           #{$default-border};
+  --shadow:                 #{$default-shadow};
+  --radius:                 #{$default-radius};
+}

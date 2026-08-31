@@ -1,0 +1,16 @@
+@use 'variables' as v;
+
+@mixin box-transition($props...) {
+  transition: #{$props} v.$box-transition-duration v.$box-transition-easing;
+}
+
+@mixin box-focus-ring($color-var: --color-primary, $fallback: #2f6f4f) {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(#{$fallback}, 0.18);
+}
+
+@mixin box-theme($selector) {
+  #{$selector} {
+    @content;
+  }
+}

@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
         @ResourceDependency(library = "box", name = "vendor/quill/quill.snow.css", target = "head"),
-        @ResourceDependency(library = "box", name = "editor/editor.css", target = "head"),
+        @ResourceDependency(library = "box", name = "box.css", target = "head"),
         @ResourceDependency(library = "box", name = "vendor/quill/quill.js", target = "head"),
         @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "editor/editor.js", target = "head")
