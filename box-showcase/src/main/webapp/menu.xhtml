@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="title">b:menu</ui:define>
+    <ui:define name="content">
+
+        <h2>b:menu</h2>
+        <p>Vertical navigation menu container for statically declared items in XML.
+            Supports navigation links (<code>outcome</code>, <code>url</code>),
+            server/ajax actions, badges, icons, grouping via <code>b:submenu</code>
+            (with collapsible behavior) and section dividers via <code>b:separator</code>.</p>
+
+        <h4>Attributes — b:menu</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>header</code></td><td>No</td><td>Title shown at the top of the menu container.</td></tr>
+            <tr><td><code>style</code></td><td>No</td><td>Inline CSS style.</td></tr>
+            <tr><td><code>styleClass</code></td><td>No</td><td>Custom CSS class.</td></tr>
+        </table>
+
+        <h4>Attributes — b:menuitem</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>value</code> / <code>label</code></td><td>No</td><td>Text label shown for this menu item.</td></tr>
+            <tr><td><code>outcome</code></td><td>No</td><td>Target view ID for bookmarkable JSF GET navigation (e.g. <code>/index</code>).</td></tr>
+            <tr><td><code>url</code> / <code>href</code></td><td>No</td><td>Target URL for direct/external link (e.g. <code>https://example.com</code>).</td></tr>
+            <tr><td><code>icon</code></td><td>No</td><td>CSS icon class (e.g. <code>bi bi-house</code>).</td></tr>
+            <tr><td><code>badge</code></td><td>No</td><td>Badge text or counter displayed at the right edge.</td></tr>
+            <tr><td><code>badgeClass</code></td><td>No</td><td>CSS class applied to the badge.</td></tr>
+            <tr><td><code>target</code></td><td>No</td><td>Target browsing context for links (e.g. <code>_blank</code>).</td></tr>
+            <tr><td><code>active</code></td><td>No</td><td>Explicitly mark item as active. If omitted, matches current view ID automatically.</td></tr>
+            <tr><td><code>disabled</code></td><td>No</td><td>Disables click and applies disabled style. Defaults to <code>false</code>.</td></tr>
+            <tr><td><code>action</code></td><td>No</td><td>MethodExpression invoked when clicking the item (submit/ajax).</td></tr>
+            <tr><td><code>actionListener</code></td><td>No</td><td>MethodExpression for action listener.</td></tr>
+            <tr><td><code>onclick</code></td><td>No</td><td>Client-side click handler script.</td></tr>
+        </table>
+
+        <h4>Attributes — b:submenu</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>label</code></td><td>No</td><td>Header title for the grouped section.</td></tr>
+            <tr><td><code>icon</code></td><td>No</td><td>CSS icon class for the section header.</td></tr>
+            <tr><td><code>expanded</code></td><td>No</td><td>Whether the submenu starts open. Defaults to <code>true</code>.</td></tr>
+            <tr><td><code>collapsible</code></td><td>No</td><td>Whether clicking the section header toggles open/closed. Defaults to <code>true</code>.</td></tr>
+        </table>
+
+        <h4>Attributes — b:separator</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>label</code></td><td>No</td><td>Optional section label displayed on the divider line.</td></tr>
+        </table>
+
+        <h4>Example 1 — Navigation menu with groups, icons and badges</h4>
+        <pre class="code-example">&lt;b:menu header="Navigation"&gt;
+    &lt;b:menuitem value="Home" outcome="/index" icon="bi bi-house"/&gt;
+    &lt;b:submenu label="Components" icon="bi bi-collection"&gt;
+        &lt;b:menuitem value="Panel" outcome="/panel" icon="bi bi-card-text"/&gt;
+        &lt;b:menuitem value="Popup" outcome="/popup" icon="bi bi-window"/&gt;
+        &lt;b:menuitem value="Datatable" outcome="/datatable" icon="bi bi-table" badge="New"/&gt;
+        &lt;b:menuitem value="Disabled Item" outcome="/index" icon="bi bi-slash-circle" disabled="true"/&gt;
+    &lt;/b:submenu&gt;
+    &lt;b:separator label="External Links"/&gt;
+    &lt;b:menuitem value="Documentation" url="https://jakarta.ee" target="_blank" icon="bi bi-box-arrow-up-right"/&gt;
+&lt;/b:menu&gt;</pre>
+
+        <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
+            <b:menu header="Navigation" style="max-width: 260px;">
+                <b:menuitem value="Home" outcome="/index" icon="bi bi-house"/>
+                <b:submenu label="Components" icon="bi bi-collection">
+                    <b:menuitem value="Panel" outcome="/panel" icon="bi bi-card-text"/>
+                    <b:menuitem value="Popup" outcome="/popup" icon="bi bi-window"/>
+                    <b:menuitem value="Datatable" outcome="/datatable" icon="bi bi-table" badge="New"/>
+                    <b:menuitem value="Disabled Item" outcome="/index" icon="bi bi-slash-circle" disabled="true"/>
+                </b:submenu>
+                <b:separator label="External Links"/>
+                <b:menuitem value="Documentation" url="https://jakarta.ee" target="_blank" icon="bi bi-box-arrow-up-right"/>
+            </b:menu>
+        </div>
+
+        <h4>Example 2 — Actions with AJAX</h4>
+        <p>Menu items without <code>outcome</code> or <code>url</code> behave as command buttons
+            triggering server actions and AJAX updates.</p>
+        <pre class="code-example">&lt;h:form id="menuForm"&gt;
+    &lt;b:growl/&gt;
+    &lt;b:menu header="Quick Actions" style="max-width: 260px;"&gt;
+        &lt;b:menuitem value="Sync Database" icon="bi bi-arrow-repeat" action="\#{menuDemoBean.executeAction('Sync Database')}"&gt;
+            &lt;f:ajax execute="@this" render="@form"/&gt;
+        &lt;/b:menuitem&gt;
+        &lt;b:menuitem value="Generate Report" icon="bi bi-file-earmark-pdf" action="\#{menuDemoBean.executeAction('Generate Report')}"&gt;
+            &lt;f:ajax execute="@this" render="@form"/&gt;
+        &lt;/b:menuitem&gt;
+    &lt;/b:menu&gt;
+    &lt;h:outputText id="actionResult" value="\#{menuDemoBean.lastAction}"/&gt;
+&lt;/h:form&gt;</pre>
+
+        <h:form id="menuForm">
+            <b:growl/>
+            <div style="display: flex; align-items: flex-start; gap: 2rem; flex-wrap: wrap;">
+                <b:menu header="Quick Actions" style="max-width: 260px;">
+                    <b:menuitem value="Sync Database" icon="bi bi-arrow-repeat" action="#{menuDemoBean.executeAction('Sync Database')}">
+                        <f:ajax execute="@this" render="@form"/>
+                    </b:menuitem>
+                    <b:menuitem value="Generate Report" icon="bi bi-file-earmark-pdf" action="#{menuDemoBean.executeAction('Generate Report')}">
+                        <f:ajax execute="@this" render="@form"/>
+                    </b:menuitem>
+                </b:menu>
+                <div class="card" style="flex-grow: 1; min-width: 240px;">
+                    <h4>Result</h4>
+                    <p><h:outputText id="actionResult" value="#{menuDemoBean.lastAction != null ? menuDemoBean.lastAction : 'No action triggered yet.'}"/></p>
+                </div>
+            </div>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

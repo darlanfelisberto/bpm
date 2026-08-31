@@ -46,6 +46,10 @@ public class Editor extends UIInput {
     public static final String COMPONENT_TYPE = "br.edu.iffar.box.Editor";
     public static final String COMPONENT_FAMILY = "br.edu.iffar.box.Editor";
 
+    public Editor() {
+        setRendererType(null);
+    }
+
     // Allowlist for the HTML Quill produces (via quill.getSemanticHTML(),
     // not quill.root.innerHTML — avoids the editor's internal markers like
     // <span class="ql-ui" contenteditable="false"> that don't make sense
