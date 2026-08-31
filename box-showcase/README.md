@@ -22,6 +22,7 @@ From the repository root:
 ```bash
 cd box-showcase
 mvn -o liberty:run
+mvn -pl box-showcase liberty:dev
 ```
 
 - Application: **http://localhost:9081**
