@@ -4,6 +4,7 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:b="http://iffar.edu.br/box">
+<f:view transient="true">
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
     <ui:define name="title">b:datatable</ui:define>
     <ui:define name="content">
@@ -120,4 +121,5 @@ public class PersonConverter implements Converter&lt;Person&gt; { ... }</pre>
 
     </ui:define>
 </ui:composition>
+</f:view>
 </html>

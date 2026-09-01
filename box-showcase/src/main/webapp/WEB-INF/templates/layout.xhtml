@@ -2,74 +2,85 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets"
-      lang="#{facesContext.viewRoot.locale.language}">
-<h:head>
-    <title><ui:insert name="title">box-showcase</ui:insert></title>
-    <!-- box.css bundle containing all component styles and themes -->
-    <h:outputStylesheet library="box" name="box.css"/>
-    <h:outputStylesheet library="css" name="app.css"/>
-    <h:outputScript library="box" name="confirm/confirm.js"/>
-    <script>
-        (function() {
-            var savedTheme = localStorage.getItem('box-showcase-theme') || 'default';
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('box-theme-dark');
-            } else {
-                document.documentElement.classList.add('box-theme-default');
-            }
-        })();
+      xmlns:ui="jakarta.faces.facelets">
+<f:view transient="true">
+    <h:head>
+        <title><ui:insert name="title">box-showcase</ui:insert></title>
+        <!-- box.css bundle containing all component styles and themes -->
+        <h:outputStylesheet library="box" name="box.css"/>
+        <h:outputStylesheet library="css" name="app.css"/>
+        <h:outputScript library="box" name="confirm/confirm.js"/>
+        <script>
+            (function() {
+                var savedTheme = localStorage.getItem('box-showcase-theme') || 'default';
+                if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('box-theme-dark');
+                } else {
+                    document.documentElement.classList.add('box-theme-default');
+                }
+            })();
 
-        function switchTheme(theme) {
-            document.documentElement.classList.remove('box-theme-default', 'box-theme-dark');
-            if (theme === 'dark') {
-                document.documentElement.classList.add('box-theme-dark');
-            } else if (theme === 'default') {
-                document.documentElement.classList.add('box-theme-default');
+            function switchTheme(theme) {
+                document.documentElement.classList.remove('box-theme-default', 'box-theme-dark');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('box-theme-dark');
+                } else if (theme === 'default') {
+                    document.documentElement.classList.add('box-theme-default');
+                }
+                localStorage.setItem('box-showcase-theme', theme);
+                var select = document.getElementById('theme-switcher-select');
+                if (select) select.value = theme;
             }
-            localStorage.setItem('box-showcase-theme', theme);
-            var select = document.getElementById('theme-switcher-select');
-            if (select) select.value = theme;
-        }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var savedTheme = localStorage.getItem('box-showcase-theme') || 'default';
-            var select = document.getElementById('theme-switcher-select');
-            if (select) {
-                select.value = savedTheme;
-            }
-        });
-    </script>
-    <ui:insert name="head-extra"/>
-</h:head>
-<h:body>
-    <header class="app-header">
-        <h1><h:link outcome="/index" value="box-showcase" style="color: inherit; text-decoration: none;"/></h1>
-        <nav>
-            <h:link outcome="/index" value="Home"/>
-            <h:link outcome="/theme" value="Themes"/>
-            <h:link outcome="/panel" value="b:panel"/>
-            <h:link outcome="/confirm" value="box-confirm"/>
-            <h:link outcome="/editor" value="b:editor"/>
-            <h:link outcome="/growl" value="b:growl"/>
-            <h:link outcome="/schedule" value="b:schedule"/>
-            <h:link outcome="/schedule2" value="b:schedule2"/>
-            <h:link outcome="/popup" value="b:popup"/>
-            <h:link outcome="/datatable" value="b:datatable"/>
-            <h:link outcome="/autocomplete" value="b:autocomplete"/>
-            <h:link outcome="/menu" value="b:menu"/>
-            <h:link outcome="/i18n" value="Multilingual text"/>
-        </nav>
-        <div class="theme-switcher">
-            <label for="theme-switcher-select" class="theme-switcher-label">Theme:</label>
-            <select id="theme-switcher-select" onchange="switchTheme(this.value)" class="theme-switcher-select">
-                <option value="default">Default (Light)</option>
-                <option value="dark">Dark</option>
-            </select>
-        </div>
-    </header>
-    <main class="app-content">
-        <ui:insert name="content"/>
-    </main>
-</h:body>
+            document.addEventListener('DOMContentLoaded', function() {
+                var savedTheme = localStorage.getItem('box-showcase-theme') || 'default';
+                var select = document.getElementById('theme-switcher-select');
+                if (select) {
+                    select.value = savedTheme;
+                }
+            });
+        </script>
+        <ui:insert name="head-extra"/>
+    </h:head>
+    <h:body>
+        <header class="app-header">
+            <h1><h:link outcome="/index" value="box-showcase" style="color: inherit; text-decoration: none;"/></h1>
+            <nav>
+                <h:link outcome="/index" value="Home"/>
+                <h:link outcome="/theme" value="Themes"/>
+                <h:link outcome="/panel" value="b:panel"/>
+                <h:link outcome="/confirm" value="box-confirm"/>
+                <h:link outcome="/editor" value="b:editor"/>
+                <h:link outcome="/growl" value="b:growl"/>
+                <h:link outcome="/schedule" value="b:schedule"/>
+                <h:link outcome="/schedule2" value="b:schedule2"/>
+                <h:link outcome="/popup" value="b:popup"/>
+                <h:link outcome="/datatable" value="b:datatable"/>
+                <h:link outcome="/autocomplete" value="b:autocomplete"/>
+                <h:link outcome="/menu" value="b:menu"/>
+                <h:link outcome="/question" value="b:question"/>
+                <h:link outcome="/i18n" value="Multilingual text"/>
+            </nav>
+            <div class="header-tools" style="display: flex; align-items: center; gap: 1rem; margin-left: auto;">
+                <span class="active-sessions-badge" title="Active HTTP Sessions (tracked via ActiveSessionListener)">
+                    <i class="bi bi-people-fill" style="margin-right: 0.3rem;"></i>
+                    <h:outputText value="#{appStatsBean.activeSessions} active #{appStatsBean.activeSessions eq 1 ? 'session' : 'sessions'}"/>
+                </span>
+                <div class="theme-switcher">
+                    <label for="theme-switcher-select" class="theme-switcher-label">Theme:</label>
+                    <select id="theme-switcher-select" onchange="switchTheme(this.value)" class="theme-switcher-select">
+                        <option value="default">Default (Light)</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+        <main class="app-content">
+            <ui:insert name="content"/>
+        </main>
+        <footer class="app-footer">
+            <p>box-showcase &amp;middot; <h:outputText value="#{appStatsBean.activeSessions} active #{appStatsBean.activeSessions eq 1 ? 'session' : 'sessions'}"/> tracked by <code>ActiveSessionListener</code></p>
+        </footer>
+    </h:body>
+</f:view>
 </html>

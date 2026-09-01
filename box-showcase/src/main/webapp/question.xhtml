@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
+<f:view transient="true">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="title">b:question</ui:define>
+    <ui:define name="content">
+
+        <h2>b:question</h2>
+        <p>A native assessment and survey question component. Renders questions in either
+            <strong>Descriptive</strong> format (multi-line <code>&lt;textarea&gt;</code>) or
+            <strong>Choice</strong> format (single-choice <code>&lt;input type="radio"&gt;</code> list).
+            Designed for seamless integration with database entities via generic Java interfaces
+            (<code>QuestionModel</code>, <code>QuestionOption</code>, <code>QuestionType</code>), as well
+            as direct declarative attribute usage.</p>
+
+        <h4>Attributes — b:question</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>value</code></td><td>No</td><td>The current answer value bound to a bean property (String for descriptive, Option ID/value for choice).</td></tr>
+            <tr><td><code>model</code></td><td>No</td><td>Instance of <code>QuestionModel</code> supplying prompt, type, options, required flag, etc.</td></tr>
+            <tr><td><code>prompt</code></td><td>No</td><td>Question statement or prompt text. Overrides <code>model.prompt</code> if specified.</td></tr>
+            <tr><td><code>type</code></td><td>No</td><td>Format of the question: <code>DESCRIPTIVE</code> or <code>CHOICE</code>.</td></tr>
+            <tr><td><code>options</code></td><td>No</td><td>Collection of options (items implementing <code>QuestionOption</code>, <code>SelectItem</code>, or plain Objects).</td></tr>
+            <tr><td><code>number</code></td><td>No</td><td>Display index or label (e.g. <code>1</code>, <code>"Questão 1"</code>).</td></tr>
+            <tr><td><code>description</code></td><td>No</td><td>Supplementary instructions or help text displayed below the prompt.</td></tr>
+            <tr><td><code>placeholder</code></td><td>No</td><td>Placeholder text for the descriptive <code>&lt;textarea&gt;</code>.</td></tr>
+            <tr><td><code>rows</code></td><td>No</td><td>Visible line rows for descriptive textarea (default: <code>3</code>).</td></tr>
+            <tr><td><code>cols</code></td><td>No</td><td>Visible columns for descriptive textarea.</td></tr>
+            <tr><td><code>required</code></td><td>No</td><td>Whether an answer is required. Displays an asterisk indicator.</td></tr>
+            <tr><td><code>disabled</code></td><td>No</td><td>Disables user input and renders a muted style.</td></tr>
+            <tr><td><code>readonly</code></td><td>No</td><td>Prevents changing value while keeping normal appearance.</td></tr>
+            <tr><td><code>style</code></td><td>No</td><td>Inline CSS style for the outer container.</td></tr>
+            <tr><td><code>styleClass</code></td><td>No</td><td>Custom CSS class for the outer container.</td></tr>
+        </table>
+
+        <h4>Client Behaviors</h4>
+        <table class="attributes-table">
+            <tr><th>Event</th><th>Description</th></tr>
+            <tr><td><code>change</code> / <code>valueChange</code></td><td>Fired when the user selects a radio alternative or finishes editing the descriptive textarea.</td></tr>
+            <tr><td><code>click</code></td><td>Fired when a choice option is clicked.</td></tr>
+        </table>
+
+        <h4>Example 1 — Model-Driven Assessment (Database Entity Simulation)</h4>
+        <p>Iterating through a list of questions retrieved from the database with AJAX auto-saving and full form submission:</p>
+
+        <pre class="code-example">&lt;ui:repeat value="#{questionDemoBean.assessmentQuestions}" var="q" varStatus="st"&gt;
+    &lt;b:question model="#{q}"
+                number="#{st.index + 1}"
+                value="#{questionDemoBean.answers[q.id]}"&gt;
+        &lt;f:ajax event="change"
+                listener="#{questionDemoBean.onAjaxAnswerChange(q.id)}"
+                render=":demoForm:ajaxLog :demoForm:growlMsg"/&gt;
+    &lt;/b:question&gt;
+&lt;/ui:repeat&gt;</pre>
+
+        <h:form id="demoForm">
+            <b:growl id="growlMsg"/>
+
+            <div style="max-width: 720px; margin-bottom: 2rem;">
+                <ui:repeat value="#{questionDemoBean.assessmentQuestions}" var="q" varStatus="st">
+                    <b:question model="#{q}"
+                                number="#{st.index + 1}"
+                                value="#{questionDemoBean.answers[q.id]}">
+                        <f:ajax event="change"
+                                listener="#{questionDemoBean.onAjaxAnswerChange(q.id)}"
+                                render=":demoForm:ajaxLog :demoForm:growlMsg"/>
+                    </b:question>
+                </ui:repeat>
+
+                <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
+                    <h:commandButton value="Submit Assessment"
+                                     action="#{questionDemoBean.submitAssessment}"
+                                     styleClass="button-primary">
+                        <f:ajax execute="@form" render="@form"/>
+                    </h:commandButton>
+                </div>
+
+                <h:panelGroup id="ajaxLog" layout="block" style="margin-top: 1rem;">
+                    <h:panelGroup rendered="#{not empty questionDemoBean.lastAjaxLog}" layout="block" class="card" style="padding: 0.75rem 1rem; font-size: 0.9rem; background: rgba(47, 111, 79, 0.08); border-left: 4px solid var(--color-primary);">
+                        <i class="bi bi-cloud-check" style="margin-right: 0.4rem;"></i>
+                        <h:outputText value="#{questionDemoBean.lastAjaxLog}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+                <h:panelGroup id="resultBox" layout="block" style="margin-top: 1rem;">
+                    <h:panelGroup rendered="#{not empty questionDemoBean.submissionResult}" layout="block" class="card" style="white-space: pre-wrap; font-family: monospace; font-size: 0.9rem;">
+                        <h:outputText value="#{questionDemoBean.submissionResult}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </div>
+        </h:form>
+
+        <h4>Example 2 — Declarative Questions (Static XML Usage)</h4>
+        <p>Using <code>b:question</code> directly without external models:</p>
+
+        <pre class="code-example">&lt;!-- Choice Question --&gt;
+&lt;b:question prompt="Select the issue priority level:"
+            type="CHOICE"
+            options="#{questionDemoBean.priorityOptions}"
+            value="#{questionDemoBean.selectedPriority}"
+            required="true"/&gt;
+
+&lt;!-- Descriptive Question --&gt;
+&lt;b:question prompt="Describe your feedback in detail:"
+            type="DESCRIPTIVE"
+            placeholder="Type your feedback here..."
+            rows="4"
+            value="#{questionDemoBean.feedbackText}"/&gt;</pre>
+
+        <div style="max-width: 720px; margin-bottom: 2rem;">
+            <b:question prompt="Select the issue priority level:"
+                        type="CHOICE"
+                        options="#{questionDemoBean.priorityOptions}"
+                        value="#{questionDemoBean.selectedPriority}"
+                        required="true"/>
+
+            <b:question prompt="Describe your feedback in detail:"
+                        type="DESCRIPTIVE"
+                        placeholder="Type your feedback here..."
+                        rows="4"
+                        value="#{questionDemoBean.feedbackText}"/>
+        </div>
+
+        <h4>Example 3 — Disabled and Readonly States</h4>
+        <div style="max-width: 720px; margin-bottom: 2rem;">
+            <b:question prompt="Archived evaluation question (Disabled):"
+                        type="CHOICE"
+                        options="#{questionDemoBean.priorityOptions}"
+                        value="HIGH"
+                        disabled="true"/>
+        </div>
+
+        <h4>Database Entity Integration Guide</h4>
+        <p>To use JPA entities directly with <code>b:question</code>, simply implement the <code>QuestionModel</code> and <code>QuestionOption</code> interfaces:</p>
+
+        <pre class="code-example">@Entity
+@Table(name = "questao", schema = "avaliacao")
+public class Questao implements QuestionModel, Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String enunciado;
+
+    @Enumerated(EnumType.STRING)
+    private TipoQuestao tipo;
+
+    @OneToMany(mappedBy = "questao")
+    private List&lt;OpcaoQuestao&gt; opcoes;
+
+    // Bridge methods satisfying QuestionModel:
+    @Override public Object getId() { return id; }
+    @Override public String getPrompt() { return enunciado; }
+    @Override public QuestionType getType() {
+        return tipo == TipoQuestao.TEXTO_LIVRE ? QuestionType.DESCRIPTIVE : QuestionType.CHOICE;
+    }
+    @Override public List&lt;? extends QuestionOption&gt; getOptions() { return opcoes; }
+}</pre>
+
+    </ui:define>
+</ui:composition>
+</f:view>
+</html>

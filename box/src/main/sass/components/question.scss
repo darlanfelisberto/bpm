@@ -1,0 +1,175 @@
+@use '../variables' as v;
+
+/* Box Question Component - Assessment & Survey questions */
+
+.box-question {
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: var(--radius, 8px);
+    box-shadow: var(--shadow, 0 1px 2px rgba(16, 24, 32, 0.06));
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    box-sizing: border-box;
+    transition: border-color v.$box-transition-duration v.$box-transition-easing,
+                box-shadow v.$box-transition-duration v.$box-transition-easing;
+}
+
+.box-question:focus-within {
+    border-color: var(--color-primary, #2f6f4f);
+}
+
+.box-question-header {
+    margin-bottom: 1rem;
+}
+
+.box-question-number {
+    font-weight: 700;
+    color: var(--color-primary, #2f6f4f);
+    margin-right: 0.5rem;
+    font-size: 1.05rem;
+}
+
+.box-question-prompt {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--color-text, #1f2933);
+    line-height: 1.45;
+    cursor: default;
+}
+
+.box-question-required {
+    color: var(--color-danger, #b3261e);
+    font-weight: 700;
+    margin-left: 0.2rem;
+}
+
+.box-question-description {
+    font-size: 0.88rem;
+    color: var(--color-text-muted, #616e7c);
+    margin-top: 0.35rem;
+    line-height: 1.4;
+}
+
+.box-question-body {
+    width: 100%;
+}
+
+/* Descriptive (Textarea) */
+
+.box-question-descriptive {
+    width: 100%;
+}
+
+.box-question-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 0.85rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text, #1f2933);
+    background: var(--color-bg, #f4f6f8);
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: calc(var(--radius, 8px) - 2px);
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color v.$box-transition-duration v.$box-transition-easing,
+                background-color v.$box-transition-duration v.$box-transition-easing,
+                box-shadow v.$box-transition-duration v.$box-transition-easing;
+}
+
+.box-question-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary, #2f6f4f);
+    background: var(--color-surface, #ffffff);
+    box-shadow: 0 0 0 3px rgba(47, 111, 79, 0.15);
+}
+
+.box-question-textarea::placeholder {
+    color: var(--color-text-muted, #616e7c);
+    opacity: 0.7;
+}
+
+/* Choice / Alternatives (Radio buttons) */
+
+.box-question-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.box-question-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: calc(var(--radius, 8px) - 2px);
+    background: var(--color-bg, #f4f6f8);
+    cursor: pointer;
+    transition: background-color v.$box-transition-duration v.$box-transition-easing,
+                border-color v.$box-transition-duration v.$box-transition-easing,
+                box-shadow v.$box-transition-duration v.$box-transition-easing;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.box-question-option:hover {
+    background: rgba(47, 111, 79, 0.05);
+    border-color: var(--color-primary, #2f6f4f);
+}
+
+.box-question-option.is-selected {
+    background: rgba(47, 111, 79, 0.08);
+    border-color: var(--color-primary, #2f6f4f);
+    box-shadow: 0 0 0 1px var(--color-primary, #2f6f4f);
+}
+
+.box-question-option input[type="radio"] {
+    margin-top: 0.2rem;
+    cursor: pointer;
+    accent-color: var(--color-primary, #2f6f4f);
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+}
+
+.box-question-option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex-grow: 1;
+}
+
+.box-question-option-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text, #1f2933);
+    line-height: 1.4;
+}
+
+.box-question-option-desc {
+    font-size: 0.82rem;
+    color: var(--color-text-muted, #616e7c);
+    line-height: 1.35;
+}
+
+/* States */
+
+.box-question.is-disabled,
+.box-question-option.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.box-question.is-readonly textarea,
+.box-question.is-readonly input {
+    pointer-events: none;
+}
+
+.box-question.is-invalid {
+    border-color: var(--color-danger, #b3261e);
+    box-shadow: 0 0 0 1px var(--color-danger, #b3261e);
+}

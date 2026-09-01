@@ -1,8 +1,10 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="jakarta.faces.facelets"
-      xmlns:h="jakarta.faces.html">
-<ui:composition template="/WEB-INF/templates/layout.xhtml">
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="jakarta.faces.facelets"
+        xmlns:h="jakarta.faces.html"
+        xmlns:f="jakarta.faces.core"
+        template="/WEB-INF/templates/layout.xhtml">
+    <f:view transient="true">
     <ui:define name="title">box-showcase</ui:define>
     <ui:define name="content">
 
@@ -88,6 +90,11 @@
         </div>
 
         <div class="card">
+            <h3><h:link outcome="/question" value="b:question"/></h3>
+            <p>Assessment and survey question component — renders descriptive textareas or single-choice radio lists from database models or direct attributes.</p>
+        </div>
+
+        <div class="card">
             <h3><h:link outcome="/i18n" value="Multilingual text"/></h3>
             <p>How box components resolve user-visible text (button
                 labels, placeholders, etc.) entirely in JS — switch
@@ -96,5 +103,5 @@
         </div>
 
     </ui:define>
+    </f:view>
 </ui:composition>
-</html>

@@ -90,11 +90,24 @@ a {
     border-color: var(--color-primary);
 }
 
+.active-sessions-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #e2e8f0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+    user-select: none;
+}
+
 .theme-switcher {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    margin-left: auto;
 }
 
 .theme-switcher-label {
@@ -123,6 +136,25 @@ a {
     max-width: 960px;
     margin: 0 auto;
     padding: 2rem 1.5rem 4rem;
+}
+
+.app-footer {
+    border-top: 1px solid var(--color-border);
+    padding: 1.5rem 1.5rem 2.5rem;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    background: var(--color-surface);
+}
+
+.app-footer p {
+    margin: 0;
+}
+
+.app-footer code {
+    background: var(--color-bg);
+    padding: 0.15rem 0.35rem;
+    border-radius: 4px;
 }
 
 .card {
