@@ -78,6 +78,12 @@
     &lt;b:column field="email" header="Email" filterable="true"/&gt;
     &lt;b:column field="role" header="Role" sortable="true" filterable="true"/&gt;
     &lt;b:column field="hireDate" header="Hire date" sortable="true"/&gt;
+    &lt;b:column header="Action"&gt;
+        &lt;h:commandLink value="Select" action="\#{bean.selectPersonById}"&gt;
+            &lt;f:param name="personId" value="\#{item.id}"/&gt;
+            &lt;f:ajax render=":resultado"/&gt;
+        &lt;/h:commandLink&gt;
+    &lt;/b:column&gt;
     &lt;f:facet name="empty"&gt;No people found for this filter.&lt;/f:facet&gt;
     &lt;f:ajax event="select" listener="\#{bean.onSelect}" render=":resultado"/&gt;
 &lt;/b:datatable&gt;
@@ -101,12 +107,18 @@ public class PersonConverter implements Converter&lt;Person&gt; { ... }</pre>
                 <b:column field="email" header="Email" filterable="true"/>
                 <b:column field="role" header="Role" sortable="true" filterable="true"/>
                 <b:column field="hireDate" header="Hire date" sortable="true"/>
+                <b:column header="Action">
+                    <h:commandLink value="Select" action="#{datatableDemoBean.selectPersonById}">
+                        <f:param name="personId" value="#{item.id}"/>
+                        <f:ajax render=":resultado"/>
+                    </h:commandLink>
+                </b:column>
 
                 <f:facet name="empty">No people found for this filter.</f:facet>
 
                 <f:facet name="footer">
                     <h:commandButton value="Reset data" action="#{datatableDemoBean.reset}">
-                        <f:ajax render=":formDatatable"/>
+                        <f:ajax render=":formDatatable :resultado"/>
                     </h:commandButton>
                 </f:facet>
 
@@ -114,9 +126,24 @@ public class PersonConverter implements Converter&lt;Person&gt; { ... }</pre>
             </b:datatable>
         </h:form>
 
-        <h4>Last selected row</h4>
+        <h4>Selected person details</h4>
         <h:panelGroup id="resultado" layout="block" styleClass="card">
-            <span id="last-selection">#{datatableDemoBean.lastSelection}</span>
+            <h:panelGroup rendered="#{not empty datatableDemoBean.selectedPerson}">
+                <p style="margin: 0.25rem 0;"><strong>ID:</strong> <h:outputText value="#{datatableDemoBean.selectedPerson.id}"/></p>
+                <p style="margin: 0.25rem 0;"><strong>Name:</strong> <h:outputText value="#{datatableDemoBean.selectedPerson.name}"/></p>
+                <p style="margin: 0.25rem 0;"><strong>Email:</strong> <h:outputText value="#{datatableDemoBean.selectedPerson.email}"/></p>
+                <p style="margin: 0.25rem 0;"><strong>Role:</strong> <h:outputText value="#{datatableDemoBean.selectedPerson.role}"/></p>
+                <p style="margin: 0.25rem 0;"><strong>Hire date:</strong> <h:outputText value="#{datatableDemoBean.selectedPerson.hireDate}"/></p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: var(--color-text-muted);">
+                    <i class="bi bi-check2-circle" style="margin-right: 0.25rem;"></i>
+                    <h:outputText value="#{datatableDemoBean.lastSelection}"/>
+                </p>
+            </h:panelGroup>
+            <h:panelGroup rendered="#{empty datatableDemoBean.selectedPerson}">
+                <span id="last-selection" style="color: var(--color-text-muted);">
+                    <h:outputText value="#{not empty datatableDemoBean.lastSelection ? datatableDemoBean.lastSelection : 'No person selected yet. Click any row or click the Select link.'}"/>
+                </span>
+            </h:panelGroup>
         </h:panelGroup>
 
     </ui:define>

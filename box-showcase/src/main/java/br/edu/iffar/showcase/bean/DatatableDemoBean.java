@@ -60,21 +60,55 @@ public class DatatableDemoBean implements Serializable, DatatableLazyModel<Perso
         }
     }
 
+    private Person selectedPerson;
+
     public String getLastSelection() {
         return lastSelection;
+    }
+
+    public Person getSelectedPerson() {
+        return selectedPerson;
+    }
+
+    public void setSelectedPerson(Person selectedPerson) {
+        this.selectedPerson = selectedPerson;
+    }
+
+    public void onSelect() {
     }
 
     public void onSelect(AjaxBehaviorEvent event) {
         Datatable datatable = (Datatable) event.getComponent();
         Object selected = datatable.getSelectedObject();
-        lastSelection = selected != null
-                ? "select: " + selected
-                : "select: id " + datatable.getRowId() + " not found";
+        if (selected instanceof Person p) {
+            this.selectedPerson = p;
+            this.lastSelection = "Row clicked: " + p;
+        } else {
+            this.selectedPerson = null;
+            this.lastSelection = "select: id " + datatable.getRowId() + " not found";
+        }
+    }
+
+    public void selectPersonById() {
+        jakarta.faces.context.FacesContext context = jakarta.faces.context.FacesContext.getCurrentInstance();
+        String idParam = context.getExternalContext().getRequestParameterMap().get("personId");
+        if (idParam != null && !idParam.isBlank()) {
+            try {
+                long id = Long.parseLong(idParam);
+                Person p = findById(id);
+                if (p != null) {
+                    this.selectedPerson = p;
+                    this.lastSelection = "commandLink clicked: " + p;
+                }
+            } catch (NumberFormatException ignored) {
+            }
+        }
     }
 
     public void reset() {
         populate();
         lastSelection = "";
+        selectedPerson = null;
     }
 
     @Override

@@ -24,10 +24,19 @@ import java.io.Serializable;
  * DatatableDemoBean injected below.
  */
 @Named
+@Dependent
 public class PersonConverter implements Converter<Person>, Serializable {
 
     @Inject
     private DatatableDemoBean datatableDemoBean;
+
+    private DatatableDemoBean resolveBean(FacesContext context) {
+        if (datatableDemoBean != null) {
+            return datatableDemoBean;
+        }
+        return (DatatableDemoBean) context.getApplication().getELResolver()
+                .getValue(context.getELContext(), null, "datatableDemoBean");
+    }
 
     @Override
     public Person getAsObject(FacesContext context, UIComponent component, String value) {
@@ -35,7 +44,8 @@ public class PersonConverter implements Converter<Person>, Serializable {
             return null;
         }
         try {
-            return datatableDemoBean.findById(Long.parseLong(value));
+            DatatableDemoBean bean = resolveBean(context);
+            return bean != null ? bean.findById(Long.parseLong(value)) : null;
         } catch (NumberFormatException error) {
             return null;
         }

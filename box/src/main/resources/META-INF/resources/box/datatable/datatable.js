@@ -75,6 +75,9 @@
     }
 
     function onRowClick(event) {
+        if (event.target.closest('a, button, input, select, label')) {
+            return;
+        }
         var row = event.currentTarget;
         var wrapper = row.closest('.box-datatable');
         var data = {};
