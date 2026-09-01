@@ -1,6 +1,7 @@
 package br.edu.iffar.box.component.question;
 
 import jakarta.el.ValueExpression;
+import jakarta.faces.application.FacesMessage;
 import jakarta.faces.application.ResourceDependencies;
 import jakarta.faces.application.ResourceDependency;
 import jakarta.faces.component.FacesComponent;
@@ -18,10 +19,16 @@ import java.util.*;
  * Question component capable of rendering descriptive (multi-line textarea)
  * or multiple choice (radio button list) questions from a data model or direct attributes.
  *
+ * Supports rendering either a single question or a list/collection of questions
+ * directly through the {@code model} attribute.
+ *
  * Usage:
  * <pre>
- *   &lt;!-- Model-driven --&gt;
- *   &lt;b:question model="#{q}" value="#{bean.answers[q.id]}" /&gt;
+ *   &lt;!-- Multiple Questions Model-driven (List / Collection) --&gt;
+ *   &lt;b:question model="#{bean.questionList}" value="#{bean.answersMap}" /&gt;
+ *
+ *   &lt;!-- Single Question Model-driven --&gt;
+ *   &lt;b:question model="#{q}" value="#{bean.answer}" /&gt;
  *
  *   &lt;!-- Declarative Descriptive --&gt;
  *   &lt;b:question prompt="Describe your feedback:"
@@ -86,16 +93,50 @@ public class Question extends UIInput implements ClientBehaviorHolder {
 
     // --- Attributes ---
 
-    public QuestionModel getModel() {
-        return (QuestionModel) getStateHelper().eval("model");
+    public Object getModel() {
+        return getStateHelper().eval("model");
     }
 
-    public void setModel(QuestionModel model) {
+    public void setModel(Object model) {
         getStateHelper().put("model", model);
     }
 
+    public boolean isMultipleQuestions() {
+        Object m = getModel();
+        return m instanceof Collection<?> || m instanceof Object[];
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<QuestionModel> resolveQuestionList() {
+        Object m = getModel();
+        if (m instanceof List<?> list) {
+            return (List<QuestionModel>) list;
+        } else if (m instanceof Collection<?> col) {
+            return new ArrayList<>((Collection<QuestionModel>) col);
+        } else if (m instanceof Object[] arr) {
+            List<QuestionModel> list = new ArrayList<>();
+            for (Object item : arr) {
+                if (item instanceof QuestionModel qm) {
+                    list.add(qm);
+                }
+            }
+            return list;
+        } else if (m instanceof QuestionModel qm) {
+            return List.of(qm);
+        }
+        return List.of();
+    }
+
+    public QuestionModel resolveSingleModel() {
+        Object m = getModel();
+        if (m instanceof QuestionModel qm) {
+            return qm;
+        }
+        return null;
+    }
+
     public String getPrompt() {
-        QuestionModel model = getModel();
+        QuestionModel model = resolveSingleModel();
         return (String) getStateHelper().eval("prompt", model != null ? model.getPrompt() : null);
     }
 
@@ -104,7 +145,7 @@ public class Question extends UIInput implements ClientBehaviorHolder {
     }
 
     public QuestionType getType() {
-        QuestionModel model = getModel();
+        QuestionModel model = resolveSingleModel();
         Object val = getStateHelper().eval("type", model != null ? model.getType() : null);
         return QuestionType.parse(val);
     }
@@ -115,7 +156,7 @@ public class Question extends UIInput implements ClientBehaviorHolder {
 
     @Override
     public boolean isRequired() {
-        QuestionModel model = getModel();
+        QuestionModel model = resolveSingleModel();
         Object val = getStateHelper().eval("required", model != null ? model.isRequired() : false);
         return Boolean.TRUE.equals(val);
     }
@@ -127,7 +168,7 @@ public class Question extends UIInput implements ClientBehaviorHolder {
     }
 
     public String getDescription() {
-        QuestionModel model = getModel();
+        QuestionModel model = resolveSingleModel();
         return (String) getStateHelper().eval("description", model != null ? model.getDescription() : null);
     }
 
@@ -208,7 +249,7 @@ public class Question extends UIInput implements ClientBehaviorHolder {
     }
 
     public Object getOptions() {
-        QuestionModel model = getModel();
+        QuestionModel model = resolveSingleModel();
         return getStateHelper().eval("options", model != null ? model.getOptions() : null);
     }
 
@@ -217,19 +258,18 @@ public class Question extends UIInput implements ClientBehaviorHolder {
     }
 
     @SuppressWarnings("unchecked")
-    public List<?> resolveOptionsList() {
-        Object val = getOptions();
-        if (val instanceof List<?> list) {
+    public List<?> resolveOptionsList(Object rawOptions) {
+        if (rawOptions instanceof List<?> list) {
             return list;
-        } else if (val instanceof Collection<?> col) {
+        } else if (rawOptions instanceof Collection<?> col) {
             return new ArrayList<>(col);
-        } else if (val instanceof Object[] arr) {
+        } else if (rawOptions instanceof Object[] arr) {
             return Arrays.asList(arr);
         }
         return List.of();
     }
 
-    // --- Decode ---
+    // --- Decode & Model Update ---
 
     @Override
     public void decode(FacesContext context) {
@@ -240,16 +280,36 @@ public class Question extends UIInput implements ClientBehaviorHolder {
         String clientId = getClientId(context);
         Map<String, String> requestParams = context.getExternalContext().getRequestParameterMap();
 
-        if (requestParams.containsKey(clientId)) {
-            String submitted = requestParams.get(clientId);
-            setSubmittedValue(submitted);
+        if (isMultipleQuestions()) {
+            List<QuestionModel> questions = resolveQuestionList();
+            Map<Object, Object> submittedMap = new HashMap<>();
+            boolean hasSubmission = false;
+
+            for (int i = 0; i < questions.size(); i++) {
+                QuestionModel q = questions.get(i);
+                Object key = q.getId() != null ? q.getId() : i;
+                String inputName = clientId + "_" + key;
+                if (requestParams.containsKey(inputName)) {
+                    submittedMap.put(key, requestParams.get(inputName));
+                    hasSubmission = true;
+                }
+            }
+
+            if (hasSubmission) {
+                setSubmittedValue(submittedMap);
+            }
+        } else {
+            if (requestParams.containsKey(clientId)) {
+                String submitted = requestParams.get(clientId);
+                setSubmittedValue(submitted);
+            }
         }
 
         // Decode ClientBehavior if source matches this component
         String source = requestParams.get("jakarta.faces.source");
         String behaviorEvent = requestParams.get("jakarta.faces.behavior.event");
 
-        if (clientId.equals(source) && behaviorEvent != null) {
+        if (source != null && (source.equals(clientId) || source.startsWith(clientId + "_")) && behaviorEvent != null) {
             List<ClientBehavior> behaviorList = behaviors.get(behaviorEvent);
             if (behaviorList != null) {
                 for (ClientBehavior behavior : behaviorList) {
@@ -257,6 +317,61 @@ public class Question extends UIInput implements ClientBehaviorHolder {
                 }
             }
         }
+    }
+
+    @Override
+    public void updateModel(FacesContext context) {
+        if (!isMultipleQuestions()) {
+            super.updateModel(context);
+            return;
+        }
+
+        if (!isValid()) {
+            return;
+        }
+
+        ValueExpression ve = getValueExpression("value");
+        if (ve != null) {
+            try {
+                Object currentModelValue = ve.getValue(context.getELContext());
+                Object submitted = getSubmittedValue();
+                if (submitted instanceof Map<?, ?> submittedMap) {
+                    if (currentModelValue instanceof Map map) {
+                        map.putAll(submittedMap);
+                        setValue(map);
+                        setSubmittedValue(null);
+                    } else {
+                        ve.setValue(context.getELContext(), submittedMap);
+                        setValue(submittedMap);
+                        setSubmittedValue(null);
+                    }
+                }
+            } catch (Exception e) {
+                context.addMessage(getClientId(context),
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Update error", e.getMessage()));
+                setValid(false);
+            }
+        }
+    }
+
+    public Object getCurrentAnswer(Object questionKey) {
+        Object submitted = getSubmittedValue();
+        if (submitted instanceof Map<?, ?> map && map.containsKey(questionKey)) {
+            return map.get(questionKey);
+        }
+        Object val = getValue();
+        if (val instanceof Map<?, ?> map && map.containsKey(questionKey)) {
+            return map.get(questionKey);
+        }
+        return null;
+    }
+
+    private Object getCurrentSingleValue() {
+        Object submitted = getSubmittedValue();
+        if (submitted != null) {
+            return submitted;
+        }
+        return getValue();
     }
 
     // --- Encode ---
@@ -269,10 +384,61 @@ public class Question extends UIInput implements ClientBehaviorHolder {
 
         ResponseWriter writer = context.getResponseWriter();
         String clientId = getClientId(context);
-        QuestionType type = getType();
+
+        if (isMultipleQuestions()) {
+            encodeMultipleQuestions(context, writer, clientId);
+        } else {
+            encodeSingleQuestion(context, writer, clientId, resolveSingleModel(), null, 0);
+        }
+    }
+
+    @Override
+    public void encodeEnd(FacesContext context) throws IOException {
+        if (!isRendered()) {
+            return;
+        }
+        ResponseWriter writer = context.getResponseWriter();
+        if (isMultipleQuestions()) {
+            writer.endElement("div"); // .box-questions-container
+        } else {
+            writer.endElement("div"); // .box-question
+        }
+    }
+
+    private void encodeMultipleQuestions(FacesContext context, ResponseWriter writer, String clientId) throws IOException {
+        List<QuestionModel> questions = resolveQuestionList();
+        StringBuilder containerClass = new StringBuilder("box-questions-container");
+        String customClass = getStyleClass();
+        if (customClass != null && !customClass.isBlank()) {
+            containerClass.append(" ").append(customClass);
+        }
+
+        writer.startElement("div", this);
+        writer.writeAttribute("id", clientId, "id");
+        writer.writeAttribute("class", containerClass.toString(), "styleClass");
+
+        String style = getStyle();
+        if (style != null && !style.isBlank()) {
+            writer.writeAttribute("style", style, "style");
+        }
+
+        for (int i = 0; i < questions.size(); i++) {
+            QuestionModel q = questions.get(i);
+            Object key = q.getId() != null ? q.getId() : i;
+            String subId = clientId + "_q" + i;
+            encodeSingleQuestion(context, writer, subId, q, key, i + 1);
+            writer.endElement("div"); // close .box-question for this item
+        }
+    }
+
+    private void encodeSingleQuestion(FacesContext context, ResponseWriter writer,
+                                      String elementId, QuestionModel model,
+                                      Object questionKey, int defaultIndex) throws IOException {
+        String mainClientId = getClientId(context);
+        QuestionType type = model != null ? model.getType() : getType();
         boolean disabled = isDisabled();
         boolean readonly = isReadonly();
-        boolean required = isRequired();
+        boolean required = model != null ? model.isRequired() : isRequired();
         boolean invalid = !isValid();
 
         StringBuilder css = new StringBuilder("box-question");
@@ -286,51 +452,55 @@ public class Question extends UIInput implements ClientBehaviorHolder {
         if (invalid) {
             css.append(" is-invalid");
         }
-        String customClass = getStyleClass();
-        if (customClass != null && !customClass.isBlank()) {
-            css.append(" ").append(customClass);
+
+        // Only add custom class on individual card when not rendering a list container
+        if (!isMultipleQuestions()) {
+            String customClass = getStyleClass();
+            if (customClass != null && !customClass.isBlank()) {
+                css.append(" ").append(customClass);
+            }
         }
 
         writer.startElement("div", this);
-        writer.writeAttribute("id", clientId, "id");
+        writer.writeAttribute("id", elementId, "id");
         writer.writeAttribute("class", css.toString(), "styleClass");
         writer.writeAttribute("data-type", type.name().toLowerCase(Locale.ROOT), null);
 
-        String style = getStyle();
-        if (style != null && !style.isBlank()) {
-            writer.writeAttribute("style", style, "style");
+        if (!isMultipleQuestions()) {
+            String style = getStyle();
+            if (style != null && !style.isBlank()) {
+                writer.writeAttribute("style", style, "style");
+            }
         }
 
         // Question Header
-        encodeHeader(context, writer);
+        String prompt = model != null ? model.getPrompt() : getPrompt();
+        Object number = getNumber();
+        if (number == null && defaultIndex > 0) {
+            number = defaultIndex;
+        }
+        String description = model != null ? model.getDescription() : getDescription();
+        encodeHeader(writer, prompt, number, description, required);
 
         // Question Body
         writer.startElement("div", this);
         writer.writeAttribute("class", "box-question-body", null);
 
+        String inputName = isMultipleQuestions() ? mainClientId + "_" + questionKey : mainClientId;
+        Object currentValue = isMultipleQuestions() ? getCurrentAnswer(questionKey) : getCurrentSingleValue();
+        List<?> optionsList = resolveOptionsList(model != null ? model.getOptions() : getOptions());
+
         if (type == QuestionType.DESCRIPTIVE) {
-            encodeDescriptive(context, writer, clientId, disabled, readonly);
+            encodeDescriptive(context, writer, mainClientId, inputName, elementId + "_input", currentValue, disabled, readonly, required);
         } else {
-            encodeChoice(context, writer, clientId, disabled, readonly);
+            encodeChoice(context, writer, mainClientId, inputName, elementId, optionsList, currentValue, disabled, readonly, required);
         }
 
         writer.endElement("div"); // .box-question-body
     }
 
-    @Override
-    public void encodeEnd(FacesContext context) throws IOException {
-        if (!isRendered()) {
-            return;
-        }
-        context.getResponseWriter().endElement("div"); // .box-question
-    }
-
-    private void encodeHeader(FacesContext context, ResponseWriter writer) throws IOException {
-        String prompt = getPrompt();
-        Object number = getNumber();
-        String description = getDescription();
-        boolean required = isRequired();
-
+    private void encodeHeader(ResponseWriter writer, String prompt, Object number,
+                             String description, boolean required) throws IOException {
         if (prompt == null && number == null && description == null) {
             return;
         }
@@ -371,14 +541,15 @@ public class Question extends UIInput implements ClientBehaviorHolder {
     }
 
     private void encodeDescriptive(FacesContext context, ResponseWriter writer,
-                                   String clientId, boolean disabled, boolean readonly) throws IOException {
+                                   String mainClientId, String inputName, String inputId,
+                                   Object currentValue, boolean disabled, boolean readonly,
+                                   boolean required) throws IOException {
         writer.startElement("div", this);
         writer.writeAttribute("class", "box-question-descriptive", null);
 
         writer.startElement("textarea", this);
-        String inputId = clientId + "_input";
         writer.writeAttribute("id", inputId, "id");
-        writer.writeAttribute("name", clientId, null);
+        writer.writeAttribute("name", inputName, null);
         writer.writeAttribute("class", "box-question-textarea", null);
         writer.writeAttribute("rows", String.valueOf(getRows()), "rows");
 
@@ -398,16 +569,15 @@ public class Question extends UIInput implements ClientBehaviorHolder {
         if (readonly) {
             writer.writeAttribute("readonly", "readonly", "readonly");
         }
-        if (isRequired()) {
+        if (required) {
             writer.writeAttribute("aria-required", "true", null);
         }
 
-        String behaviorScript = buildBehaviorScript(context, clientId, "valueChange", "change");
-        if (behaviorScript != null) {
+        String behaviorScript = buildBehaviorScript(context, mainClientId, "valueChange", "change");
+        if (behaviorScript != null && !disabled && !readonly) {
             writer.writeAttribute("onchange", behaviorScript, null);
         }
 
-        Object currentValue = getCurrentValue();
         if (currentValue != null) {
             writer.writeText(String.valueOf(currentValue), "value");
         }
@@ -417,14 +587,14 @@ public class Question extends UIInput implements ClientBehaviorHolder {
     }
 
     private void encodeChoice(FacesContext context, ResponseWriter writer,
-                             String clientId, boolean disabled, boolean readonly) throws IOException {
+                             String mainClientId, String inputName, String elementId,
+                             List<?> optionsList, Object currentValue,
+                             boolean disabled, boolean readonly, boolean required) throws IOException {
         writer.startElement("div", this);
         writer.writeAttribute("class", "box-question-options", null);
 
-        List<?> optionsList = resolveOptionsList();
-        Object currentValue = getCurrentValue();
         String currentStr = currentValue != null ? String.valueOf(currentValue) : null;
-        String behaviorScript = buildBehaviorScript(context, clientId, "valueChange", "change", "click");
+        String behaviorScript = buildBehaviorScript(context, mainClientId, "valueChange", "change", "click");
 
         int index = 0;
         for (Object item : optionsList) {
@@ -444,7 +614,7 @@ public class Question extends UIInput implements ClientBehaviorHolder {
             }
 
             boolean checked = currentStr != null && currentStr.equals(optValue);
-            String optionId = clientId + "_opt" + index;
+            String optionId = elementId + "_opt" + index;
 
             writer.startElement("label", this);
             StringBuilder optionClass = new StringBuilder("box-question-option");
@@ -460,7 +630,7 @@ public class Question extends UIInput implements ClientBehaviorHolder {
             writer.startElement("input", this);
             writer.writeAttribute("type", "radio", null);
             writer.writeAttribute("id", optionId, "id");
-            writer.writeAttribute("name", clientId, null);
+            writer.writeAttribute("name", inputName, null);
             writer.writeAttribute("value", optValue, null);
             if (checked) {
                 writer.writeAttribute("checked", "checked", null);
@@ -471,7 +641,7 @@ public class Question extends UIInput implements ClientBehaviorHolder {
             if (readonly) {
                 writer.writeAttribute("readonly", "readonly", null);
             }
-            if (isRequired()) {
+            if (required) {
                 writer.writeAttribute("aria-required", "true", null);
             }
             if (behaviorScript != null && !optDisabled && !readonly) {
@@ -501,14 +671,6 @@ public class Question extends UIInput implements ClientBehaviorHolder {
         }
 
         writer.endElement("div"); // .box-question-options
-    }
-
-    private Object getCurrentValue() {
-        Object submitted = getSubmittedValue();
-        if (submitted != null) {
-            return submitted;
-        }
-        return getValue();
     }
 
     private String buildBehaviorScript(FacesContext context, String clientId, String... eventNames) {

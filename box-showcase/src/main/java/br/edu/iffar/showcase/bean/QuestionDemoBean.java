@@ -84,6 +84,17 @@ public class QuestionDemoBean implements Serializable {
         assessmentQuestions.add(q3);
     }
 
+    public void onAssessmentChange(jakarta.faces.event.AjaxBehaviorEvent event) {
+        onAssessmentChange();
+    }
+
+    public void onAssessmentChange() {
+        this.lastAjaxLog = String.format("Auto-saved assessment answers (%d recorded) at %s",
+                answers.size(), LocalTime.now().format(TIME_FORMAT));
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Answers Recorded", this.lastAjaxLog));
+    }
+
     public void onAjaxAnswerChange(Object questionId) {
         String answer = answers.get(questionId);
         this.lastAjaxLog = String.format("Auto-saved question #%s at %s (Answer: %s)",

@@ -448,7 +448,7 @@
         <attribute>
             <name>model</name>
             <required>false</required>
-            <type>br.edu.iffar.box.component.question.QuestionModel</type>
+            <type>java.lang.Object</type>
         </attribute>
         <attribute>
             <name>prompt</name>

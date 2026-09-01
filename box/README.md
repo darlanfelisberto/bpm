@@ -16,6 +16,7 @@ de UI prontos para uso em qualquer aplicação Jakarta EE.
 | `<b:menuitem>` | Item de menu (link bookmarkable ou ação server/AJAX) |
 | `<b:submenu>` | Agrupador colapsível de itens de menu |
 | `<b:separator>` | Separador visual dentro de um menu |
+| `<b:question>` | Questão avaliativa (descritiva com textarea ou alternativas com radio buttons) |
 | `<b:panel>` | Painel com cabeçalho opcional |
 | `<b:popup>` | Diálogo modal (`<dialog>` nativo) |
 | `<b:schedule>` | Calendário (FullCalendar) com eventos via bean |
@@ -64,6 +65,7 @@ src/main/sass/
 │   ├── growl.scss
 │   ├── menu.scss
 │   ├── popup.scss
+│   ├── question.scss
 │   ├── schedule.scss
 │   └── schedule2.scss
 └── box.scss               # Entry point — importa temas + todos os componentes

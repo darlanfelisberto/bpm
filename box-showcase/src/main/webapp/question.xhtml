@@ -44,32 +44,26 @@
             <tr><td><code>click</code></td><td>Fired when a choice option is clicked.</td></tr>
         </table>
 
-        <h4>Example 1 — Model-Driven Assessment (Database Entity Simulation)</h4>
-        <p>Iterating through a list of questions retrieved from the database with AJAX auto-saving and full form submission:</p>
+        <h4>Example 1 — List of Questions via Model (Database Entity Simulation)</h4>
+        <p>Pass a <code>List&lt;QuestionModel&gt;</code> directly to the <code>model</code> attribute with a <code>Map&lt;Object, String&gt;</code> bound to <code>value</code>:</p>
 
-        <pre class="code-example">&lt;ui:repeat value="#{questionDemoBean.assessmentQuestions}" var="q" varStatus="st"&gt;
-    &lt;b:question model="#{q}"
-                number="#{st.index + 1}"
-                value="#{questionDemoBean.answers[q.id]}"&gt;
-        &lt;f:ajax event="change"
-                listener="#{questionDemoBean.onAjaxAnswerChange(q.id)}"
-                render=":demoForm:ajaxLog :demoForm:growlMsg"/&gt;
-    &lt;/b:question&gt;
-&lt;/ui:repeat&gt;</pre>
+        <pre class="code-example">&lt;b:question model="\#{questionDemoBean.assessmentQuestions}"
+            value="\#{questionDemoBean.answers}"&gt;
+    &lt;f:ajax event="change"
+            listener="\#{questionDemoBean.onAssessmentChange}"
+            render=":demoForm:ajaxLog :demoForm:growlMsg"/&gt;
+&lt;/b:question&gt;</pre>
 
         <h:form id="demoForm">
             <b:growl id="growlMsg"/>
 
             <div style="max-width: 720px; margin-bottom: 2rem;">
-                <ui:repeat value="#{questionDemoBean.assessmentQuestions}" var="q" varStatus="st">
-                    <b:question model="#{q}"
-                                number="#{st.index + 1}"
-                                value="#{questionDemoBean.answers[q.id]}">
-                        <f:ajax event="change"
-                                listener="#{questionDemoBean.onAjaxAnswerChange(q.id)}"
-                                render=":demoForm:ajaxLog :demoForm:growlMsg"/>
-                    </b:question>
-                </ui:repeat>
+                <b:question model="#{questionDemoBean.assessmentQuestions}"
+                            value="#{questionDemoBean.answers}">
+                    <f:ajax event="change"
+                            listener="#{questionDemoBean.onAssessmentChange}"
+                            render=":demoForm:ajaxLog :demoForm:growlMsg"/>
+                </b:question>
 
                 <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
                     <h:commandButton value="Submit Assessment"
@@ -100,8 +94,8 @@
         <pre class="code-example">&lt;!-- Choice Question --&gt;
 &lt;b:question prompt="Select the issue priority level:"
             type="CHOICE"
-            options="#{questionDemoBean.priorityOptions}"
-            value="#{questionDemoBean.selectedPriority}"
+            options="\#{questionDemoBean.priorityOptions}"
+            value="\#{questionDemoBean.selectedPriority}"
             required="true"/&gt;
 
 &lt;!-- Descriptive Question --&gt;
@@ -109,7 +103,7 @@
             type="DESCRIPTIVE"
             placeholder="Type your feedback here..."
             rows="4"
-            value="#{questionDemoBean.feedbackText}"/&gt;</pre>
+            value="\#{questionDemoBean.feedbackText}"/&gt;</pre>
 
         <div style="max-width: 720px; margin-bottom: 2rem;">
             <b:question prompt="Select the issue priority level:"
