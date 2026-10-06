@@ -2,6 +2,7 @@ package br.edu.iffar.bpm.avaliacao.bean;
 
 import br.edu.iffar.bpm.avaliacao.model.InstrumentoAvaliativo;
 import br.edu.iffar.bpm.avaliacao.model.Questao;
+import br.edu.iffar.bpm.avaliacao.model.StatusResposta;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -12,11 +13,12 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Relatório essencial (RF09): participação e, por questão, média (escala),
  * contagem por opção (múltipla escolha) ou respostas em texto livre.
- * Considera apenas respostas com status COMPLETO.
+ * Considera apenas respostas com status ENVIADA.
  */
 @Named
 @ViewScoped
@@ -26,13 +28,13 @@ public class RelatorioBean implements Serializable {
     @Inject
     private EntityManager em;
 
-    private Long instrumentoId;
+    private UUID instrumentoId;
 
-    public Long getInstrumentoId() {
+    public UUID getInstrumentoId() {
         return instrumentoId;
     }
 
-    public void setInstrumentoId(Long instrumentoId) {
+    public void setInstrumentoId(UUID instrumentoId) {
         this.instrumentoId = instrumentoId;
     }
 
@@ -41,16 +43,16 @@ public class RelatorioBean implements Serializable {
     }
 
     public long getTotalCompletas() {
-        return contar("COMPLETO");
+        return contar(StatusResposta.ENVIADA);
     }
 
     public long getTotalParciais() {
-        return contar("PARCIAL");
+        return contar(StatusResposta.EM_ANDAMENTO);
     }
 
-    private long contar(String status) {
+    private long contar(StatusResposta status) {
         return em.createQuery(
-                        "select count(r) from RespostaInstrumento r where r.instrumento.id = :iid and r.status = :status",
+                        "select count(r) from RespostaInstrumento r where r.instrumentoAvaliativo.id = :iid and r.status = :status",
                         Long.class)
                 .setParameter("iid", instrumentoId)
                 .setParameter("status", status)
@@ -59,22 +61,24 @@ public class RelatorioBean implements Serializable {
 
     public Double mediaQuestao(Questao questao) {
         return em.createQuery(
-                        "select avg(rq.opcao.valor) from RespostaQuestao rq "
-                                + "where rq.questao.id = :qid and rq.opcao.valor is not null "
-                                + "and rq.respostaInstrumento.status = 'COMPLETO'",
+                        "select avg(rq.opcaoQuestao.valor) from RespostaQuestao rq "
+                                + "where rq.sessaoQuestao.questao.id = :qid and rq.opcaoQuestao.valor is not null "
+                                + "and rq.respostaInstrumento.status = :status",
                         Double.class)
                 .setParameter("qid", questao.getId())
+                .setParameter("status", StatusResposta.ENVIADA)
                 .getSingleResult();
     }
 
     public Map<String, Long> contagemOpcoes(Questao questao) {
         List<Object[]> linhas = em.createQuery(
-                        "select rq.opcao.texto, count(rq) from RespostaQuestao rq "
-                                + "where rq.questao.id = :qid and rq.opcao is not null "
-                                + "and rq.respostaInstrumento.status = 'COMPLETO' "
-                                + "group by rq.opcao.texto, rq.opcao.ordem order by rq.opcao.ordem",
+                        "select rq.opcaoQuestao.texto, count(rq) from RespostaQuestao rq "
+                                + "where rq.sessaoQuestao.questao.id = :qid and rq.opcaoQuestao is not null "
+                                + "and rq.respostaInstrumento.status = :status "
+                                + "group by rq.opcaoQuestao.texto, rq.opcaoQuestao.ordem order by rq.opcaoQuestao.ordem",
                         Object[].class)
                 .setParameter("qid", questao.getId())
+                .setParameter("status", StatusResposta.ENVIADA)
                 .getResultList();
         Map<String, Long> contagem = new LinkedHashMap<>();
         for (Object[] linha : linhas) {
@@ -85,11 +89,12 @@ public class RelatorioBean implements Serializable {
 
     public List<String> respostasTexto(Questao questao) {
         return em.createQuery(
-                        "select rq.textoLivre from RespostaQuestao rq "
-                                + "where rq.questao.id = :qid and rq.textoLivre is not null "
-                                + "and rq.respostaInstrumento.status = 'COMPLETO'",
+                        "select rq.texto from RespostaQuestao rq "
+                                + "where rq.sessaoQuestao.questao.id = :qid and rq.texto is not null "
+                                + "and rq.respostaInstrumento.status = :status",
                         String.class)
                 .setParameter("qid", questao.getId())
+                .setParameter("status", StatusResposta.ENVIADA)
                 .getResultList();
     }
 }

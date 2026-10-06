@@ -1,8 +1,18 @@
 <server description="IFFar BPM">
 
-    <!-- webProfile-11.0 ja inclui Jakarta Faces 4.1, CDI, JPA, JAX-RS, Bean Validation -->
+    <!-- Sem webProfile-11.0: ele traz persistence-3.2 (EclipseLink embutido), que
+         não pode coexistir com persistenceContainer-3.2. O persistenceContainer
+         só fornece a integração JPA do container; o provider (Hibernate) vem
+         empacotado no WAR. -->
     <featureManager>
-        <feature>webProfile-11.0</feature>
+        <feature>faces-4.1</feature>
+        <feature>cdi-4.1</feature>
+        <feature>restfulWS-4.0</feature>
+        <feature>jsonb-3.0</feature>
+        <feature>jsonp-2.1</feature>
+        <feature>validation-3.1</feature>
+        <feature>jdbc-4.3</feature>
+        <feature>persistenceContainer-3.2</feature>
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint"

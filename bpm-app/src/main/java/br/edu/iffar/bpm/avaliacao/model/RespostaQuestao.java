@@ -2,6 +2,7 @@ package br.edu.iffar.bpm.avaliacao.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,35 +11,37 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
 @Table(name = "resposta_questao", schema = "avaliacao")
 public class RespostaQuestao implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "resposta_questao_id", updatable = false, nullable = false)
+    private UUID id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "resposta_instrumento_id", nullable = false)
     private RespostaInstrumento respostaInstrumento;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "questao_id", nullable = false)
-    private Questao questao;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "sessao_questao_id", nullable = false)
+    private SessaoQuestao sessaoQuestao;
 
-    @ManyToOne
-    @JoinColumn(name = "opcao_id")
-    private OpcaoQuestao opcao;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "opcao_questao_id")
+    private OpcaoQuestao opcaoQuestao;
 
-    @Column(name = "texto_livre", columnDefinition = "TEXT")
-    private String textoLivre;
+    @Column(columnDefinition = "TEXT")
+    private String texto;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -50,27 +53,27 @@ public class RespostaQuestao implements Serializable {
         this.respostaInstrumento = respostaInstrumento;
     }
 
-    public Questao getQuestao() {
-        return questao;
+    public SessaoQuestao getSessaoQuestao() {
+        return sessaoQuestao;
     }
 
-    public void setQuestao(Questao questao) {
-        this.questao = questao;
+    public void setSessaoQuestao(SessaoQuestao sessaoQuestao) {
+        this.sessaoQuestao = sessaoQuestao;
     }
 
-    public OpcaoQuestao getOpcao() {
-        return opcao;
+    public OpcaoQuestao getOpcaoQuestao() {
+        return opcaoQuestao;
     }
 
-    public void setOpcao(OpcaoQuestao opcao) {
-        this.opcao = opcao;
+    public void setOpcaoQuestao(OpcaoQuestao opcaoQuestao) {
+        this.opcaoQuestao = opcaoQuestao;
     }
 
-    public String getTextoLivre() {
-        return textoLivre;
+    public String getTexto() {
+        return texto;
     }
 
-    public void setTextoLivre(String textoLivre) {
-        this.textoLivre = textoLivre;
+    public void setTexto(String texto) {
+        this.texto = texto;
     }
 }

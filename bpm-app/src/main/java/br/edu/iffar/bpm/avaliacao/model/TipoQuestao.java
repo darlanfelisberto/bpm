@@ -1,7 +1,8 @@
 package br.edu.iffar.bpm.avaliacao.model;
 
 public enum TipoQuestao {
-    ESCALA,
+    ESCOLHA_UNICA,
     MULTIPLA_ESCOLHA,
-    TEXTO_LIVRE
+    ESCALA,
+    DESCRITIVA
 }

@@ -1,11 +1,13 @@
 package br.edu.iffar.bpm.avaliacao.rest;
 
-import br.edu.iffar.bpm.avaliacao.model.GrupoQuestao;
 import br.edu.iffar.bpm.avaliacao.model.InstrumentoAvaliativo;
+import br.edu.iffar.bpm.avaliacao.model.InstrumentoSessao;
 import br.edu.iffar.bpm.avaliacao.model.OpcaoQuestao;
 import br.edu.iffar.bpm.avaliacao.model.Questao;
 import br.edu.iffar.bpm.avaliacao.model.RespostaInstrumento;
 import br.edu.iffar.bpm.avaliacao.model.RespostaQuestao;
+import br.edu.iffar.bpm.avaliacao.model.SessaoQuestao;
+import br.edu.iffar.bpm.avaliacao.model.StatusResposta;
 import br.edu.iffar.bpm.avaliacao.rest.dto.ErroValidacaoDTO;
 import br.edu.iffar.bpm.avaliacao.rest.dto.GrupoDTO;
 import br.edu.iffar.bpm.avaliacao.rest.dto.InstrumentoRespostaDTO;
@@ -26,16 +28,11 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-/**
- * API consumida pela SPA de resposta (frontend/). O "token" identifica o
- * preenchimento no navegador (ver frontend/src/token.ts): quando o
- * instrumento é anônimo ele não tem nenhuma ligação com a pessoa, só serve
- * para retomar um rascunho (RF06/RF07/RF08).
- */
 @Path("/avaliacao/instrumentos/{instrumentoId}")
 public class AvaliacaoRespostaResource {
 
@@ -45,7 +42,7 @@ public class AvaliacaoRespostaResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response obterInstrumento(@PathParam("instrumentoId") Long instrumentoId) {
+    public Response obterInstrumento(@PathParam("instrumentoId") UUID instrumentoId) {
         InstrumentoAvaliativo instrumento = em.find(InstrumentoAvaliativo.class, instrumentoId);
         if (instrumento == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -57,7 +54,7 @@ public class AvaliacaoRespostaResource {
     @Path("/respostas/{token}")
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response obterResposta(@PathParam("instrumentoId") Long instrumentoId, @PathParam("token") String token) {
+    public Response obterResposta(@PathParam("instrumentoId") UUID instrumentoId, @PathParam("token") String token) {
         RespostaInstrumento resposta = buscarResposta(instrumentoId, token);
         if (resposta == null) {
             return Response.noContent().build();
@@ -70,7 +67,7 @@ public class AvaliacaoRespostaResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response salvarResposta(@PathParam("instrumentoId") Long instrumentoId, @PathParam("token") String token,
+    public Response salvarResposta(@PathParam("instrumentoId") UUID instrumentoId, @PathParam("token") String token,
                                     RespostaEnvioDTO envio) {
         InstrumentoAvaliativo instrumento = em.find(InstrumentoAvaliativo.class, instrumentoId);
         if (instrumento == null) {
@@ -85,20 +82,21 @@ public class AvaliacaoRespostaResource {
         RespostaInstrumento resposta = buscarResposta(instrumentoId, token);
         if (resposta == null) {
             resposta = new RespostaInstrumento();
-            resposta.setInstrumento(instrumento);
-            resposta.setRespondenteRef(token);
-            resposta.setStatus("PARCIAL");
+            resposta.setInstrumentoAvaliativo(instrumento);
+            resposta.setUsuarioRef(token);
+            resposta.setStatus(StatusResposta.EM_ANDAMENTO);
             em.persist(resposta);
         }
 
         List<String> erros = new ArrayList<>();
-        for (GrupoQuestao grupo : instrumento.getGrupos()) {
-            for (Questao questao : grupo.getQuestoes()) {
+        for (InstrumentoSessao sessao : instrumento.getSessoes()) {
+            for (SessaoQuestao sq : sessao.getQuestoes()) {
+                Questao questao = sq.getQuestao();
                 RespostaItemDTO item = buscarItem(envio, questao.getId());
                 boolean respondida = item != null
                         && (item.opcaoId() != null || (item.textoLivre() != null && !item.textoLivre().isBlank()));
 
-                if (envio.completo() && questao.isObrigatoria() && !respondida) {
+                if (envio.completo() && sq.isObrigatoria() && !respondida) {
                     erros.add("Pergunta obrigatória não respondida: " + questao.getEnunciado());
                     continue;
                 }
@@ -106,13 +104,13 @@ public class AvaliacaoRespostaResource {
                     continue;
                 }
 
-                RespostaQuestao rq = buscarOuCriarRespostaQuestao(resposta, questao);
+                RespostaQuestao rq = buscarOuCriarRespostaQuestao(resposta, sq);
                 if (item.opcaoId() != null) {
-                    rq.setOpcao(em.find(OpcaoQuestao.class, item.opcaoId()));
-                    rq.setTextoLivre(null);
+                    rq.setOpcaoQuestao(em.find(OpcaoQuestao.class, item.opcaoId()));
+                    rq.setTexto(null);
                 } else {
-                    rq.setOpcao(null);
-                    rq.setTextoLivre(item.textoLivre());
+                    rq.setOpcaoQuestao(null);
+                    rq.setTexto(item.textoLivre());
                 }
             }
         }
@@ -122,18 +120,18 @@ public class AvaliacaoRespostaResource {
         }
 
         if (envio.completo()) {
-            resposta.setStatus("COMPLETO");
-            resposta.setEnviadoEm(LocalDateTime.now());
+            resposta.setStatus(StatusResposta.ENVIADA);
+            resposta.setDataEnvio(LocalDate.now());
         } else {
-            resposta.setStatus("PARCIAL");
+            resposta.setStatus(StatusResposta.EM_ANDAMENTO);
         }
 
         return Response.ok(paraStatusDTO(resposta)).build();
     }
 
-    private RespostaInstrumento buscarResposta(Long instrumentoId, String token) {
+    private RespostaInstrumento buscarResposta(UUID instrumentoId, String token) {
         List<RespostaInstrumento> existentes = em.createQuery(
-                        "select r from RespostaInstrumento r where r.instrumento.id = :iid and r.respondenteRef = :ref",
+                        "select r from RespostaInstrumento r where r.instrumentoAvaliativo.id = :iid and r.usuarioRef = :ref",
                         RespostaInstrumento.class)
                 .setParameter("iid", instrumentoId)
                 .setParameter("ref", token)
@@ -141,24 +139,24 @@ public class AvaliacaoRespostaResource {
         return existentes.isEmpty() ? null : existentes.get(0);
     }
 
-    private RespostaQuestao buscarOuCriarRespostaQuestao(RespostaInstrumento resposta, Questao questao) {
+    private RespostaQuestao buscarOuCriarRespostaQuestao(RespostaInstrumento resposta, SessaoQuestao sq) {
         List<RespostaQuestao> existentes = em.createQuery(
-                        "select rq from RespostaQuestao rq where rq.respostaInstrumento.id = :rid and rq.questao.id = :qid",
+                        "select rq from RespostaQuestao rq where rq.respostaInstrumento.id = :rid and rq.sessaoQuestao.id = :sqid",
                         RespostaQuestao.class)
                 .setParameter("rid", resposta.getId())
-                .setParameter("qid", questao.getId())
+                .setParameter("sqid", sq.getId())
                 .getResultList();
         if (!existentes.isEmpty()) {
             return existentes.get(0);
         }
         RespostaQuestao rq = new RespostaQuestao();
         rq.setRespostaInstrumento(resposta);
-        rq.setQuestao(questao);
+        rq.setSessaoQuestao(sq);
         em.persist(rq);
         return rq;
     }
 
-    private static RespostaItemDTO buscarItem(RespostaEnvioDTO envio, Long questaoId) {
+    private static RespostaItemDTO buscarItem(RespostaEnvioDTO envio, UUID questaoId) {
         return envio.respostas().stream()
                 .filter(item -> item.questaoId().equals(questaoId))
                 .findFirst()
@@ -173,15 +171,15 @@ public class AvaliacaoRespostaResource {
                 .getResultList();
         List<RespostaItemDTO> respostas = itens.stream()
                 .map(rq -> new RespostaItemDTO(
-                        rq.getQuestao().getId(),
-                        rq.getOpcao() != null ? rq.getOpcao().getId() : null,
-                        rq.getTextoLivre()))
+                        rq.getSessaoQuestao().getQuestao().getId(),
+                        rq.getOpcaoQuestao() != null ? rq.getOpcaoQuestao().getId() : null,
+                        rq.getTexto()))
                 .toList();
-        return new RespostaStatusDTO(resposta.getStatus(), respostas);
+        return new RespostaStatusDTO(resposta.getStatus().name(), respostas);
     }
 
     private static InstrumentoRespostaDTO paraDTO(InstrumentoAvaliativo instrumento) {
-        List<GrupoDTO> grupos = instrumento.getGrupos().stream()
+        List<GrupoDTO> grupos = instrumento.getSessoes().stream()
                 .map(AvaliacaoRespostaResource::paraDTO)
                 .toList();
         return new InstrumentoRespostaDTO(
@@ -193,18 +191,21 @@ public class AvaliacaoRespostaResource {
                 grupos);
     }
 
-    private static GrupoDTO paraDTO(GrupoQuestao grupo) {
-        List<QuestaoDTO> questoes = grupo.getQuestoes().stream()
+    private static GrupoDTO paraDTO(InstrumentoSessao sessao) {
+        List<QuestaoDTO> questoes = sessao.getQuestoes().stream()
                 .map(AvaliacaoRespostaResource::paraDTO)
                 .toList();
-        return new GrupoDTO(grupo.getId(), grupo.getTitulo(), grupo.getDescricao(), questoes);
+        return new GrupoDTO(sessao.getId(), sessao.getTitulo(), sessao.getDescricao(), questoes);
     }
 
-    private static QuestaoDTO paraDTO(Questao questao) {
-        List<OpcaoDTO> opcoes = questao.getOpcoes().stream()
-                .map(o -> new OpcaoDTO(o.getId(), o.getTexto()))
-                .toList();
+    private static QuestaoDTO paraDTO(SessaoQuestao sq) {
+        Questao questao = sq.getQuestao();
+        List<OpcaoDTO> opcoes = questao.getConjuntoOpcao() != null
+                ? questao.getConjuntoOpcao().getOpcoes().stream()
+                    .map(o -> new OpcaoDTO(o.getId(), o.getTexto()))
+                    .toList()
+                : List.of();
         return new QuestaoDTO(questao.getId(), questao.getEnunciado(), questao.getTipo().name(),
-                questao.isObrigatoria(), opcoes);
+                sq.isObrigatoria(), opcoes);
     }
 }

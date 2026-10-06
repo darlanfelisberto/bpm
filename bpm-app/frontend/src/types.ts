@@ -1,12 +1,12 @@
-export type TipoQuestao = 'ESCALA' | 'MULTIPLA_ESCOLHA' | 'TEXTO_LIVRE';
+export type TipoQuestao = 'ESCOLHA_UNICA' | 'MULTIPLA_ESCOLHA' | 'ESCALA' | 'DESCRITIVA';
 
 export interface Opcao {
-  id: number;
+  id: string;
   texto: string;
 }
 
 export interface Questao {
-  id: number;
+  id: string;
   enunciado: string;
   tipo: TipoQuestao;
   obrigatoria: boolean;
@@ -14,14 +14,14 @@ export interface Questao {
 }
 
 export interface Grupo {
-  id: number;
+  id: string;
   titulo: string;
   descricao: string | null;
   questoes: Questao[];
 }
 
 export interface Instrumento {
-  id: number;
+  id: string;
   titulo: string;
   descricao: string | null;
   anonimo: boolean;
@@ -30,13 +30,13 @@ export interface Instrumento {
 }
 
 export interface RespostaItem {
-  questaoId: number;
-  opcaoId: number | null;
+  questaoId: string;
+  opcaoId: string | null;
   textoLivre: string | null;
 }
 
 export interface RespostaStatus {
-  status: 'PARCIAL' | 'COMPLETO';
+  status: 'EM_ANDAMENTO' | 'ENVIADA';
   respostas: RespostaItem[];
 }
 

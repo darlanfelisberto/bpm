@@ -1,66 +1,78 @@
 package br.edu.iffar.bpm.avaliacao.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "questao", schema = "avaliacao")
 public class Questao implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "questao_id", updatable = false, nullable = false)
+    private UUID id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "grupo_id", nullable = false)
-    private GrupoQuestao grupo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conjunto_opcao_id")
+    private ConjuntoOpcao conjuntoOpcao;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String enunciado;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 16)
     private TipoQuestao tipo;
 
-    @Column(nullable = false)
-    private boolean obrigatoria = true;
+    @Column(length = 100)
+    private String assunto;
 
-    @Column(nullable = false)
-    private int ordem;
+    @Column(name = "criado_por", nullable = false, length = 60)
+    private String criadoPor;
 
-    @OneToMany(mappedBy = "questao", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("ordem ASC")
-    private List<OpcaoQuestao> opcoes = new ArrayList<>();
+    @Column(name = "criado_em", nullable = false)
+    private OffsetDateTime criadoEm;
 
-    public Long getId() {
+    @OneToMany(mappedBy = "questao")
+    private List<SessaoQuestao> sessoesQuestao = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        if (criadoEm == null) {
+            criadoEm = OffsetDateTime.now();
+        }
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public GrupoQuestao getGrupo() {
-        return grupo;
+    public ConjuntoOpcao getConjuntoOpcao() {
+        return conjuntoOpcao;
     }
 
-    public void setGrupo(GrupoQuestao grupo) {
-        this.grupo = grupo;
+    public void setConjuntoOpcao(ConjuntoOpcao conjuntoOpcao) {
+        this.conjuntoOpcao = conjuntoOpcao;
     }
 
     public String getEnunciado() {
@@ -79,23 +91,35 @@ public class Questao implements Serializable {
         this.tipo = tipo;
     }
 
-    public boolean isObrigatoria() {
-        return obrigatoria;
+    public String getAssunto() {
+        return assunto;
     }
 
-    public void setObrigatoria(boolean obrigatoria) {
-        this.obrigatoria = obrigatoria;
+    public void setAssunto(String assunto) {
+        this.assunto = assunto;
     }
 
-    public int getOrdem() {
-        return ordem;
+    public String getCriadoPor() {
+        return criadoPor;
     }
 
-    public void setOrdem(int ordem) {
-        this.ordem = ordem;
+    public void setCriadoPor(String criadoPor) {
+        this.criadoPor = criadoPor;
     }
 
-    public List<OpcaoQuestao> getOpcoes() {
-        return opcoes;
+    public OffsetDateTime getCriadoEm() {
+        return criadoEm;
+    }
+
+    public void setCriadoEm(OffsetDateTime criadoEm) {
+        this.criadoEm = criadoEm;
+    }
+
+    public List<SessaoQuestao> getSessoesQuestao() {
+        return sessoesQuestao;
+    }
+
+    public void setSessoesQuestao(List<SessaoQuestao> sessoesQuestao) {
+        this.sessoesQuestao = sessoesQuestao;
     }
 }

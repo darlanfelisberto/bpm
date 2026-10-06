@@ -1,10 +1,13 @@
 package br.edu.iffar.bpm.avaliacao.bean;
 
-import br.edu.iffar.bpm.avaliacao.model.GrupoQuestao;
+import br.edu.iffar.bpm.avaliacao.model.ConjuntoOpcao;
 import br.edu.iffar.bpm.avaliacao.model.InstrumentoAvaliativo;
+import br.edu.iffar.bpm.avaliacao.model.InstrumentoSessao;
 import br.edu.iffar.bpm.avaliacao.model.OpcaoQuestao;
 import br.edu.iffar.bpm.avaliacao.model.Questao;
+import br.edu.iffar.bpm.avaliacao.model.SessaoQuestao;
 import br.edu.iffar.bpm.avaliacao.model.TipoQuestao;
+import br.edu.iffar.bpm.avaliacao.model.TipoSessao;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -12,9 +15,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
- * Edição do conteúdo (grupos, questões e opções) de um instrumento já
+ * Edição do conteúdo (sessões, questões e opções) de um instrumento já
  * cadastrado. O cadastro do instrumento em si (título, período, etc.) é
  * feito em InstrumentoBean.
  */
@@ -26,21 +30,22 @@ public class InstrumentoDetalheBean implements Serializable {
     @Inject
     private EntityManager em;
 
-    private Long instrumentoId;
+    private UUID instrumentoId;
 
-    private GrupoQuestao novoGrupo = new GrupoQuestao();
+    private InstrumentoSessao novoGrupo = new InstrumentoSessao();
+    private UUID grupoSelecionadoId;
 
-    private Long grupoSelecionadoId;
     private Questao novaQuestao = new Questao();
+    private boolean novaQuestaoObrigatoria = true;
+    private UUID questaoSelecionadaId;
 
-    private Long questaoSelecionadaId;
     private OpcaoQuestao novaOpcao = new OpcaoQuestao();
 
-    public Long getInstrumentoId() {
+    public UUID getInstrumentoId() {
         return instrumentoId;
     }
 
-    public void setInstrumentoId(Long instrumentoId) {
+    public void setInstrumentoId(UUID instrumentoId) {
         this.instrumentoId = instrumentoId;
     }
 
@@ -48,28 +53,29 @@ public class InstrumentoDetalheBean implements Serializable {
         return em.find(InstrumentoAvaliativo.class, instrumentoId);
     }
 
-    public GrupoQuestao getNovoGrupo() {
+    public InstrumentoSessao getNovoGrupo() {
         return novoGrupo;
     }
 
     public String salvarGrupo() {
         InstrumentoAvaliativo instrumento = getInstrumento();
-        novoGrupo.setInstrumento(instrumento);
-        novoGrupo.setOrdem(instrumento.getGrupos().size());
+        novoGrupo.setInstrumentoAvaliativo(instrumento);
+        novoGrupo.setTipo(TipoSessao.PAGINA);
+        novoGrupo.setOrdem((short) instrumento.getSessoes().size());
         em.persist(novoGrupo);
-        novoGrupo = new GrupoQuestao();
+        novoGrupo = new InstrumentoSessao();
         return null;
     }
 
-    public void excluirGrupo(GrupoQuestao grupo) {
+    public void excluirGrupo(InstrumentoSessao grupo) {
         em.remove(em.merge(grupo));
     }
 
-    public Long getGrupoSelecionadoId() {
+    public UUID getGrupoSelecionadoId() {
         return grupoSelecionadoId;
     }
 
-    public void setGrupoSelecionadoId(Long grupoSelecionadoId) {
+    public void setGrupoSelecionadoId(UUID grupoSelecionadoId) {
         this.grupoSelecionadoId = grupoSelecionadoId;
     }
 
@@ -77,28 +83,53 @@ public class InstrumentoDetalheBean implements Serializable {
         return novaQuestao;
     }
 
+    public boolean isNovaQuestaoObrigatoria() {
+        return novaQuestaoObrigatoria;
+    }
+
+    public void setNovaQuestaoObrigatoria(boolean novaQuestaoObrigatoria) {
+        this.novaQuestaoObrigatoria = novaQuestaoObrigatoria;
+    }
+
     public TipoQuestao[] getTiposQuestao() {
         return TipoQuestao.values();
     }
 
     public String salvarQuestao() {
-        GrupoQuestao grupo = em.find(GrupoQuestao.class, grupoSelecionadoId);
-        novaQuestao.setGrupo(grupo);
-        novaQuestao.setOrdem(grupo.getQuestoes().size());
+        InstrumentoSessao grupo = em.find(InstrumentoSessao.class, grupoSelecionadoId);
+        novaQuestao.setCriadoPor("admin");
+        if (novaQuestao.getTipo() != TipoQuestao.DESCRITIVA && novaQuestao.getConjuntoOpcao() == null) {
+            ConjuntoOpcao conjunto = new ConjuntoOpcao();
+            String prefixo = novaQuestao.getEnunciado() != null && novaQuestao.getEnunciado().length() > 30
+                    ? novaQuestao.getEnunciado().substring(0, 30)
+                    : (novaQuestao.getEnunciado() != null ? novaQuestao.getEnunciado() : "Opções");
+            conjunto.setNome(prefixo + " (" + UUID.randomUUID().toString().substring(0, 8) + ")");
+            em.persist(conjunto);
+            novaQuestao.setConjuntoOpcao(conjunto);
+        }
         em.persist(novaQuestao);
+
+        SessaoQuestao sq = new SessaoQuestao();
+        sq.setInstrumentoSessao(grupo);
+        sq.setQuestao(novaQuestao);
+        sq.setObrigatoria(novaQuestaoObrigatoria);
+        sq.setOrdem((short) grupo.getQuestoes().size());
+        em.persist(sq);
+
         novaQuestao = new Questao();
+        novaQuestaoObrigatoria = true;
         return null;
     }
 
-    public void excluirQuestao(Questao questao) {
-        em.remove(em.merge(questao));
+    public void excluirQuestao(SessaoQuestao sq) {
+        em.remove(em.merge(sq));
     }
 
-    public Long getQuestaoSelecionadaId() {
+    public UUID getQuestaoSelecionadaId() {
         return questaoSelecionadaId;
     }
 
-    public void setQuestaoSelecionadaId(Long questaoSelecionadaId) {
+    public void setQuestaoSelecionadaId(UUID questaoSelecionadaId) {
         this.questaoSelecionadaId = questaoSelecionadaId;
     }
 
@@ -108,8 +139,15 @@ public class InstrumentoDetalheBean implements Serializable {
 
     public String salvarOpcao() {
         Questao questao = em.find(Questao.class, questaoSelecionadaId);
-        novaOpcao.setQuestao(questao);
-        novaOpcao.setOrdem(questao.getOpcoes().size());
+        ConjuntoOpcao conjunto = questao.getConjuntoOpcao();
+        if (conjunto == null) {
+            conjunto = new ConjuntoOpcao();
+            conjunto.setNome("Opções - " + questao.getId());
+            em.persist(conjunto);
+            questao.setConjuntoOpcao(conjunto);
+        }
+        novaOpcao.setConjuntoOpcao(conjunto);
+        novaOpcao.setOrdem((short) conjunto.getOpcoes().size());
         em.persist(novaOpcao);
         novaOpcao = new OpcaoQuestao();
         return null;

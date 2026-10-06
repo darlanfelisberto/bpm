@@ -2,6 +2,7 @@ package br.edu.iffar.bpm.avaliacao.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,42 +12,47 @@ import jakarta.persistence.Table;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Table(name = "opcao_questao", schema = "avaliacao")
 public class OpcaoQuestao implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "opcao_questao_id", updatable = false, nullable = false)
+    private UUID id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "questao_id", nullable = false)
-    private Questao questao;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "conjunto_opcao_id", nullable = false)
+    private ConjuntoOpcao conjuntoOpcao;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 300)
     private String texto;
 
-    @Column(precision = 10, scale = 2)
+    @Column(precision = 6, scale = 2)
     private BigDecimal valor;
 
     @Column(nullable = false)
-    private int ordem;
+    private boolean correta = false;
 
-    public Long getId() {
+    @Column(nullable = false)
+    private short ordem;
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public Questao getQuestao() {
-        return questao;
+    public ConjuntoOpcao getConjuntoOpcao() {
+        return conjuntoOpcao;
     }
 
-    public void setQuestao(Questao questao) {
-        this.questao = questao;
+    public void setConjuntoOpcao(ConjuntoOpcao conjuntoOpcao) {
+        this.conjuntoOpcao = conjuntoOpcao;
     }
 
     public String getTexto() {
@@ -65,11 +71,19 @@ public class OpcaoQuestao implements Serializable {
         this.valor = valor;
     }
 
-    public int getOrdem() {
+    public boolean isCorreta() {
+        return correta;
+    }
+
+    public void setCorreta(boolean correta) {
+        this.correta = correta;
+    }
+
+    public short getOrdem() {
         return ordem;
     }
 
-    public void setOrdem(int ordem) {
+    public void setOrdem(short ordem) {
         this.ordem = ordem;
     }
 }

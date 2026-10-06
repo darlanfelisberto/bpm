@@ -102,7 +102,7 @@ function renderIdentificacao(instrumento: Instrumento, instrumentoId: string): v
 function renderQuestao(questao: Questao, respondida?: RespostaItem): string {
   const marcaObrigatoria = questao.obrigatoria ? ' <span class="obrigatoria">*</span>' : '';
 
-  if (questao.tipo === 'TEXTO_LIVRE') {
+  if (questao.tipo === 'DESCRITIVA') {
     return `
       <div class="questao">
         <span class="enunciado">${escapeHtml(questao.enunciado)}${marcaObrigatoria}</span>
@@ -143,7 +143,7 @@ async function renderFormulario(instrumento: Instrumento, instrumentoId: string,
     return;
   }
 
-  const respostasPorQuestao = new Map<number, RespostaItem>();
+  const respostasPorQuestao = new Map<string, RespostaItem>();
   resposta?.respostas.forEach((item) => respostasPorQuestao.set(item.questaoId, item));
 
   const grupos = instrumento.grupos
@@ -160,7 +160,7 @@ async function renderFormulario(instrumento: Instrumento, instrumentoId: string,
     <h1>${escapeHtml(instrumento.titulo)}</h1>
     ${instrumento.descricao ? `<p class="descricao">${escapeHtml(instrumento.descricao)}</p>` : ''}
     ${
-      resposta?.status === 'COMPLETO'
+      resposta?.status === 'ENVIADA'
         ? `<div class="msg-info"><strong>Resposta já enviada.</strong> Enquanto o período de aplicação estiver aberto, você pode ajustar suas respostas e enviar novamente.</div>`
         : ''
     }
@@ -180,14 +180,14 @@ async function renderFormulario(instrumento: Instrumento, instrumentoId: string,
   function coletarRespostas(): RespostaItem[] {
     return instrumento.grupos.flatMap((grupo) =>
       grupo.questoes.map((questao) => {
-        if (questao.tipo === 'TEXTO_LIVRE') {
+        if (questao.tipo === 'DESCRITIVA') {
           const textarea = form.querySelector<HTMLTextAreaElement>(`[name="questao-${questao.id}"]`);
           return { questaoId: questao.id, opcaoId: null, textoLivre: textarea?.value.trim() || null };
         }
         const selecionado = form.querySelector<HTMLInputElement>(`[name="questao-${questao.id}"]:checked`);
         return {
           questaoId: questao.id,
-          opcaoId: selecionado ? Number(selecionado.value) : null,
+          opcaoId: selecionado ? selecionado.value : null,
           textoLivre: null,
         };
       }),
@@ -201,7 +201,7 @@ async function renderFormulario(instrumento: Instrumento, instrumentoId: string,
     try {
       const resultado = await salvarResposta(instrumentoId, token, completo, coletarRespostas());
       status.textContent = completo ? 'Enviado.' : 'Rascunho salvo.';
-      if (completo && resultado.status === 'COMPLETO') {
+      if (completo && resultado.status === 'ENVIADA') {
         await renderFormulario(instrumento, instrumentoId, token);
       }
     } catch (err) {
