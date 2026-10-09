@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
+<f:view transient="true">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="title">b:commandButton</ui:define>
+    <ui:define name="content">
+
+        <h2>b:commandButton</h2>
+        <p>
+            Enhanced button component (also available as <code>b:button</code>) that renders a
+            native <code>&lt;button&gt;</code> element instead of <code>&lt;input type="submit"&gt;</code>.
+            Supports icons positioned to the left or right of the label, icon-only mode, visual variants,
+            standard JSF actions and <code>&lt;f:ajax&gt;</code>, and allows nesting child elements like
+            <code>&lt;box-confirm&gt;</code>.
+        </p>
+
+        <h4>Attributes</h4>
+        <table class="attributes-table">
+            <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>value</code> / <code>label</code></td><td>No</td><td>The text label displayed on the button.</td></tr>
+            <tr><td><code>icon</code></td><td>No</td><td>CSS icon class, e.g. <code>bi bi-floppy</code>, <code>bi bi-trash</code>.</td></tr>
+            <tr><td><code>iconPos</code></td><td>No</td><td>Position of the icon relative to the label: <code>left</code> (default) or <code>right</code>.</td></tr>
+            <tr><td><code>variant</code></td><td>No</td><td>Visual style variant: <code>primary</code> (default), <code>secondary</code>, <code>success</code>, <code>danger</code>, <code>warning</code>, <code>outlined</code>, <code>text</code>.</td></tr>
+            <tr><td><code>size</code></td><td>No</td><td>Button size: <code>sm</code>, <code>normal</code> (default), or <code>lg</code>.</td></tr>
+            <tr><td><code>type</code></td><td>No</td><td>HTML button type: <code>submit</code> (default), <code>button</code>, or <code>reset</code>.</td></tr>
+            <tr><td><code>disabled</code></td><td>No</td><td>Disables button interaction. Defaults to <code>false</code>.</td></tr>
+            <tr><td><code>action</code></td><td>No</td><td>MethodExpression invoked when clicking the button.</td></tr>
+            <tr><td><code>actionListener</code></td><td>No</td><td>MethodExpression for the action listener.</td></tr>
+            <tr><td><code>immediate</code></td><td>No</td><td>Executes the action in the Apply Request Values phase. Defaults to <code>false</code>.</td></tr>
+            <tr><td><code>onclick</code></td><td>No</td><td>Client-side JavaScript handler. If it returns <code>false</code>, submission/ajax is canceled.</td></tr>
+            <tr><td><code>title</code></td><td>No</td><td>Advisory tooltip title. Also used as <code>aria-label</code> when no text label is present.</td></tr>
+            <tr><td><code>ariaLabel</code></td><td>No</td><td>Accessible label for screen readers.</td></tr>
+            <tr><td><code>style</code></td><td>No</td><td>Inline CSS styles.</td></tr>
+            <tr><td><code>styleClass</code></td><td>No</td><td>Extra CSS class names.</td></tr>
+        </table>
+
+        <h4>Client Behaviors</h4>
+        <table class="attributes-table">
+            <tr><th>Event</th><th>Default</th><th>Description</th></tr>
+            <tr><td><code>action</code></td><td>Yes</td><td>Fires when the button is activated. Works with <code>&lt;f:ajax&gt;</code> without an explicit event name.</td></tr>
+            <tr><td><code>click</code></td><td>No</td><td>Fires on client-side click.</td></tr>
+            <tr><td><code>dblclick</code></td><td>No</td><td>Fires on client-side double click.</td></tr>
+            <tr><td><code>focus</code></td><td>No</td><td>Fires when button receives focus.</td></tr>
+            <tr><td><code>blur</code></td><td>No</td><td>Fires when button loses focus.</td></tr>
+        </table>
+
+        <div class="card">
+            <h3>1. Icon Placement</h3>
+            <p>Icons can be placed to the left or right of the label, or used alone without label text.</p>
+
+            <pre class="code-example">&lt;!-- Left icon (default) --&gt;
+&lt;b:commandButton value="Save" icon="bi bi-floppy" /&gt;
+
+&lt;!-- Right icon --&gt;
+&lt;b:commandButton value="Next" icon="bi bi-arrow-right" iconPos="right" /&gt;
+
+&lt;!-- Icon only (automatically adapts styling and accessibility) --&gt;
+&lt;b:commandButton icon="bi bi-pencil" title="Edit" /&gt;
+&lt;b:commandButton icon="bi bi-trash" title="Delete" variant="danger" /&gt;</pre>
+
+            <div class="actions" style="margin-top: 1rem;">
+                <b:commandButton value="Save" icon="bi bi-floppy" type="button" />
+                <b:commandButton value="Next" icon="bi bi-arrow-right" iconPos="right" type="button" />
+                <b:commandButton icon="bi bi-pencil" title="Edit" type="button" />
+                <b:commandButton icon="bi bi-trash" title="Delete" variant="danger" type="button" />
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>2. Visual Variants</h3>
+            <p>Built-in variants styled with Box CSS custom properties (light and dark theme compatible).</p>
+
+            <pre class="code-example">&lt;b:commandButton value="Primary" icon="bi bi-check-lg" /&gt;
+&lt;b:commandButton value="Secondary" icon="bi bi-gear" variant="secondary" /&gt;
+&lt;b:commandButton value="Success" icon="bi bi-check-circle" variant="success" /&gt;
+&lt;b:commandButton value="Danger" icon="bi bi-trash" variant="danger" /&gt;
+&lt;b:commandButton value="Warning" icon="bi bi-exclamation-triangle" variant="warning" /&gt;
+&lt;b:commandButton value="Outlined" icon="bi bi-bookmark" variant="outlined" /&gt;
+&lt;b:commandButton value="Text" icon="bi bi-link-45deg" variant="text" /&gt;</pre>
+
+            <div class="actions" style="margin-top: 1rem;">
+                <b:commandButton value="Primary" icon="bi bi-check-lg" type="button" />
+                <b:commandButton value="Secondary" icon="bi bi-gear" variant="secondary" type="button" />
+                <b:commandButton value="Success" icon="bi bi-check-circle" variant="success" type="button" />
+                <b:commandButton value="Danger" icon="bi bi-trash" variant="danger" type="button" />
+                <b:commandButton value="Warning" icon="bi bi-exclamation-triangle" variant="warning" type="button" />
+                <b:commandButton value="Outlined" icon="bi bi-bookmark" variant="outlined" type="button" />
+                <b:commandButton value="Text" icon="bi bi-link-45deg" variant="text" type="button" />
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>3. Button Sizes</h3>
+            <p>Buttons support small (<code>sm</code>), default, and large (<code>lg</code>) sizes.</p>
+
+            <pre class="code-example">&lt;b:commandButton value="Small" icon="bi bi-star" size="sm" /&gt;
+&lt;b:commandButton value="Default" icon="bi bi-star" /&gt;
+&lt;b:commandButton value="Large" icon="bi bi-star" size="lg" /&gt;</pre>
+
+            <div class="actions" style="margin-top: 1rem; align-items: center;">
+                <b:commandButton value="Small" icon="bi bi-star" size="sm" type="button" />
+                <b:commandButton icon="bi bi-star" title="Small star" size="sm" type="button" />
+                <b:commandButton value="Default" icon="bi bi-star" type="button" />
+                <b:commandButton icon="bi bi-star" title="Default star" type="button" />
+                <b:commandButton value="Large" icon="bi bi-star" size="lg" type="button" />
+                <b:commandButton icon="bi bi-star" title="Large star" size="lg" type="button" />
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>4. AJAX Submissions with f:ajax</h3>
+            <p>Seamlessly integrates with <code>&lt;f:ajax&gt;</code> to update portions of the page asynchronously.</p>
+
+            <pre class="code-example">&lt;h:form id="ajaxForm"&gt;
+    &lt;b:commandButton value="Increment Counter"
+                     icon="bi bi-plus-circle"
+                     action="\#{buttonDemoBean.increment}"&gt;
+        &lt;f:ajax render="counterDisplay statusMessage" /&gt;
+    &lt;/b:commandButton&gt;
+
+    &lt;b:commandButton value="Reset"
+                     icon="bi bi-arrow-counterclockwise"
+                     variant="secondary"
+                     action="\#{buttonDemoBean.reset}"&gt;
+        &lt;f:ajax render="counterDisplay statusMessage" /&gt;
+    &lt;/b:commandButton&gt;
+&lt;/h:form&gt;</pre>
+
+            <h:form id="ajaxForm">
+                <div class="actions" style="margin-top: 1rem; align-items: center;">
+                    <b:commandButton value="Increment Counter"
+                                     icon="bi bi-plus-circle"
+                                     action="#{buttonDemoBean.increment}">
+                        <f:ajax render="counterDisplay statusMessage" />
+                    </b:commandButton>
+
+                    <b:commandButton value="Reset"
+                                     icon="bi bi-arrow-counterclockwise"
+                                     variant="secondary"
+                                     action="#{buttonDemoBean.reset}">
+                        <f:ajax render="counterDisplay statusMessage" />
+                    </b:commandButton>
+
+                    <span style="margin-left: 1rem; font-weight: 500;">
+                        Clicks:
+                        <h:outputText id="counterDisplay" value="#{buttonDemoBean.clickCount}"
+                                      style="font-weight: 700; color: var(--color-primary); margin-left: 0.3rem;" />
+                    </span>
+                </div>
+                <div style="margin-top: 0.75rem;">
+                    <small>Status: <h:outputText id="statusMessage" value="#{buttonDemoBean.lastAction}" /></small>
+                </div>
+            </h:form>
+        </div>
+
+        <div class="card">
+            <h3>5. Nested &lt;box-confirm&gt;</h3>
+            <p>
+                Because <code>b:commandButton</code> renders a native <code>&lt;button&gt;</code> container element,
+                <code>&lt;box-confirm&gt;</code> can be nested directly inside it (unlike standard <code>h:commandButton</code>
+                which renders a void <code>&lt;input&gt;</code>).
+            </p>
+
+            <pre class="code-example">&lt;b:commandButton value="Delete Item"
+                 icon="bi bi-trash"
+                 variant="danger"
+                 action="\#{buttonDemoBean.execute('Item Deleted')}"&gt;
+    &lt;box-confirm message="Are you sure you want to permanently delete this item?"
+                 yes-label="Yes, delete"
+                 yes-class="box-button-danger"/&gt;
+    &lt;f:ajax render=":confirmResult" /&gt;
+&lt;/b:commandButton&gt;</pre>
+
+            <h:form id="confirmForm" style="margin-top: 1rem;">
+                <div class="actions" style="align-items: center;">
+                    <b:commandButton value="Delete Item"
+                                     icon="bi bi-trash"
+                                     variant="danger"
+                                     action="#{buttonDemoBean.execute('Item Deleted')}">
+                        <box-confirm message="Are you sure you want to permanently delete this item?"
+                                     yes-label="Yes, delete"
+                                     yes-class="box-button-danger"/>
+                        <f:ajax render=":confirmResult" />
+                    </b:commandButton>
+
+                    <b:commandButton value="Archive Item"
+                                     icon="bi bi-archive"
+                                     variant="secondary"
+                                     action="#{buttonDemoBean.execute('Item Archived')}">
+                        <box-confirm message="Archive this record?"
+                                     yes-label="Archive"/>
+                        <f:ajax render=":confirmResult" />
+                    </b:commandButton>
+                </div>
+            </h:form>
+
+            <div style="margin-top: 0.75rem;">
+                <small>Last result: <h:outputText id="confirmResult" value="#{buttonDemoBean.lastAction}" /></small>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>6. Disabled State</h3>
+            <p>Buttons with <code>disabled="true"</code> apply visual styling and prevent click events.</p>
+
+            <div class="actions">
+                <b:commandButton value="Disabled Primary" icon="bi bi-lock" disabled="true" />
+                <b:commandButton value="Disabled Secondary" icon="bi bi-slash-circle" variant="secondary" disabled="true" />
+                <b:commandButton icon="bi bi-trash" title="Disabled delete" variant="danger" disabled="true" />
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</f:view>
+</html>

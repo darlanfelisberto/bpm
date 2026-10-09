@@ -1,0 +1,229 @@
+@use '../variables' as v;
+
+.box-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.25;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius, 8px);
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast, #ffffff);
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  vertical-align: middle;
+  box-shadow: var(--shadow);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled,
+  &[disabled],
+  &[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  // Icons
+  .box-button-icon,
+  .box-button-icon-left,
+  .box-button-icon-right {
+    font-size: 1.05em;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .box-button-label {
+    line-height: inherit;
+  }
+
+  // Icon only
+  &.box-button-icon-only {
+    padding: 0.5rem;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    gap: 0;
+
+    .box-button-icon {
+      font-size: 1.15em;
+    }
+  }
+
+  // Sizes
+  &.box-button-sm {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.8rem;
+    gap: 0.35rem;
+
+    &.box-button-icon-only {
+      padding: 0.3rem;
+      min-width: 1.75rem;
+      min-height: 1.75rem;
+    }
+  }
+
+  &.box-button-lg {
+    padding: 0.65rem 1.35rem;
+    font-size: 1.05rem;
+    gap: 0.65rem;
+
+    &.box-button-icon-only {
+      padding: 0.65rem;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+    }
+  }
+
+  // Variants
+  &.box-button-secondary {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border);
+
+    &:hover:not(:disabled) {
+      background: var(--color-bg);
+      border-color: var(--color-text-muted);
+    }
+  }
+
+  &.box-button-success {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      filter: brightness(0.9);
+    }
+  }
+
+  &.box-button-danger {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      filter: brightness(0.9);
+    }
+  }
+
+  &.box-button-warn,
+  &.box-button-warning {
+    background: var(--color-warn);
+    border-color: var(--color-warn);
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      filter: brightness(0.9);
+    }
+  }
+
+  &.box-button-outlined,
+  &.box-button-outline {
+    background: transparent;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: none;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary);
+      color: var(--color-primary-contrast, #ffffff);
+    }
+
+    &.box-button-secondary {
+      border-color: var(--color-border);
+      color: var(--color-text);
+
+      &:hover:not(:disabled) {
+        background: var(--color-border);
+        color: var(--color-text);
+      }
+    }
+
+    &.box-button-success {
+      border-color: var(--color-success);
+      color: var(--color-success);
+
+      &:hover:not(:disabled) {
+        background: var(--color-success);
+        color: #ffffff;
+      }
+    }
+
+    &.box-button-danger {
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+
+      &:hover:not(:disabled) {
+        background: var(--color-danger);
+        color: #ffffff;
+      }
+    }
+
+    &.box-button-warn,
+    &.box-button-warning {
+      border-color: var(--color-warn);
+      color: var(--color-warn);
+
+      &:hover:not(:disabled) {
+        background: var(--color-warn);
+        color: #ffffff;
+      }
+    }
+  }
+
+  &.box-button-text {
+    background: transparent;
+    border-color: transparent;
+    color: var(--color-primary);
+    box-shadow: none;
+
+    &:hover:not(:disabled) {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    &.box-button-secondary {
+      color: var(--color-text);
+    }
+
+    &.box-button-danger {
+      color: var(--color-danger);
+      &:hover:not(:disabled) {
+        background: rgba(179, 38, 30, 0.08);
+      }
+    }
+
+    &.box-button-success {
+      color: var(--color-success);
+      &:hover:not(:disabled) {
+        background: rgba(47, 111, 79, 0.08);
+      }
+    }
+  }
+}
+
+.box-theme-dark {
+  .box-button-text:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
