@@ -12,9 +12,15 @@ CREATE SCHEMA avaliacao;
 -- 1. Instrumento (uma aplicacao/ciclo: autoavaliacao 2025, ADPD 2026/1...)
 -- ---------------------------------------------------------------------
 create table avaliacao.tipo_status(
-    tipo_status_id   VARCHAR(12) PRIMARY KEY NOT NULL CHECK (tipo_status_id IN ('RASCUNHO', 'PUBLICADO', 'ENCERRADO', 'CONSOLIDADO')),
-    descricao        VARCHAR(100) NOT NULL
-)
+                                      tipo_status_id   VARCHAR(12) PRIMARY KEY NOT NULL CHECK (tipo_status_id IN ('RASCUNHO', 'PUBLICADO', 'ENCERRADO', 'CONSOLIDADO')),
+                                      descricao        VARCHAR(100) NOT NULL
+);
+
+INSERT INTO avaliacao.tipo_status (tipo_status_id, descricao)VALUES
+    ('RASCUNHO', 'RASCUNHO'),
+    ('PUBLICADO', 'PUBLICADO'),
+    ('ENCERRADO', 'ENCERRADO'),
+    ('CONSOLIDADO', 'CONSOLIDADO');
 
 CREATE TABLE avaliacao.instrumento_avaliativo
 (
@@ -22,20 +28,26 @@ CREATE TABLE avaliacao.instrumento_avaliativo
     instrumento_avaliativo_origem_id UUID REFERENCES avaliacao.instrumento_avaliativo (instrumento_avaliativo_id),
     titulo                           VARCHAR(200) NOT NULL,
     descricao                        TEXT,
-    ciclo_referencia                 VARCHAR(20)  NOT NULL,               -- '2025', '2026/1'
-    inicio_aplicacao                 TIMESTAMPTZ  NOT NULL,               -- RF04
-    fim_aplicacao                    TIMESTAMPTZ  NOT NULL,
+    ciclo_referencia                 VARCHAR(20),               -- '2025', '2026/1'
+    inicio_aplicacao                 TIMESTAMP  NOT NULL,               -- RF04
+    fim_aplicacao                    TIMESTAMP  NOT NULL,
     anonimo                          BOOLEAN      NOT NULL DEFAULT FALSE, -- RF08 / RNF03
     permite_edicao                   BOOLEAN      NOT NULL DEFAULT TRUE,  -- RF07
-    status                           VARCHAR(12)  NOT NULL references avaliacao.tipo_status (tipo_status_id),
-    consolidado_em                   TIMESTAMPTZ,
+    tipo_status_id                           VARCHAR(12)  NOT NULL references avaliacao.tipo_status (tipo_status_id),
+    consolidado_em                   TIMESTAMP,
     criado_por                       VARCHAR(60)  NOT NULL,
-    criado_em                        TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    atualizado_em                    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    criado_em                        TIMESTAMP  NOT NULL DEFAULT now(),
+    atualizado_em                    TIMESTAMP  NOT NULL DEFAULT now(),
     CHECK (fim_aplicacao > inicio_aplicacao),
     CHECK ((status = 'CONSOLIDADO') = (consolidado_em IS NOT NULL)),
     UNIQUE (ciclo_referencia, titulo)
 );
+
+INSERT INTO avaliacao.instrumento_avaliativo
+(instrumento_avaliativo_id, instrumento_avaliativo_origem_id, titulo, descricao, ciclo_referencia, inicio_aplicacao, fim_aplicacao, anonimo, permite_edicao, tipo_status_id, consolidado_em, criado_por, criado_em, atualizado_em)
+VALUES(gen_random_uuid(), null, 'Autoavaliacao', 'descrisao', '2026', '2026-08-08 00:00:00', '2026-08-09 00:00:00', false, true, 'RASCUNHO', null, '2026-08-08 00:00:00', now(), now());
+
+
 
 -- ---------------------------------------------------------------------
 -- 2. Publico-alvo (RF05)

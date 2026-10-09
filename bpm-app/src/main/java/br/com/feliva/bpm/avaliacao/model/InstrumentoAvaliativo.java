@@ -19,6 +19,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +48,10 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
     private String cicloReferencia;
 
     @Column(name = "inicio_aplicacao", nullable = false)
-    private OffsetDateTime inicioAplicacao;
+    private LocalDateTime inicioAplicacao;
 
     @Column(name = "fim_aplicacao", nullable = false)
-    private OffsetDateTime fimAplicacao;
+    private LocalDateTime fimAplicacao;
 
     @Column(nullable = false)
     private boolean anonimo = false;
@@ -58,41 +59,41 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
     @Column(name = "permite_edicao", nullable = false)
     private boolean permiteEdicao = true;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 12)
-    private StatusInstrumento status = StatusInstrumento.RASCUNHO;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tipo_status_id")
+    private TipoStatus tipoStatus;
 
     @Column(name = "consolidado_em")
-    private OffsetDateTime consolidadoEm;
+    private LocalDateTime consolidadoEm;
 
     @Column(name = "criado_por", nullable = false, length = 60)
     private String criadoPor;
 
     @Column(name = "criado_em", nullable = false)
-    private OffsetDateTime criadoEm;
+    private LocalDateTime criadoEm;
 
     @Column(name = "atualizado_em", nullable = false)
-    private OffsetDateTime atualizadoEm;
+    private LocalDateTime atualizadoEm;
 
-    @OneToMany(mappedBy = "instrumentoAvaliativo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PublicoAlvo> publicosAlvo = new ArrayList<>();
-
-    @OneToMany(mappedBy = "instrumentoAvaliativo", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("ordem ASC")
-    private List<InstrumentoSessao> sessoes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "instrumentoAvaliativo")
-    private List<Participacao> participacoes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "instrumentoAvaliativo")
-    private List<RespostaInstrumento> respostas = new ArrayList<>();
-
-    @OneToMany(mappedBy = "instrumentoAvaliativo")
-    private List<Encaminhamento> encaminhamentos = new ArrayList<>();
+//    @OneToMany(mappedBy = "instrumentoAvaliativo", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<PublicoAlvo> publicosAlvo = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "instrumentoAvaliativo", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @OrderBy("ordem ASC")
+//    private List<InstrumentoSessao> sessoes = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "instrumentoAvaliativo")
+//    private List<Participacao> participacoes = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "instrumentoAvaliativo")
+//    private List<RespostaInstrumento> respostas = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "instrumentoAvaliativo")
+//    private List<Encaminhamento> encaminhamentos = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
-        OffsetDateTime agora = OffsetDateTime.now();
+        LocalDateTime agora = LocalDateTime.now();
         if (criadoEm == null) {
             criadoEm = agora;
         }
@@ -103,11 +104,11 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
 
     @PreUpdate
     public void preUpdate() {
-        atualizadoEm = OffsetDateTime.now();
+        atualizadoEm = LocalDateTime.now();
     }
 
     public boolean isAberto() {
-        OffsetDateTime agora = OffsetDateTime.now();
+        LocalDateTime agora = LocalDateTime.now();
         return inicioAplicacao != null && fimAplicacao != null
                 && !agora.isBefore(inicioAplicacao) && !agora.isAfter(fimAplicacao);
     }
@@ -128,20 +129,43 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
         this.instrumentoAvaliativoOrigem = instrumentoAvaliativoOrigem;
     }
 
+
+
+//    public void setPublicoAlvoTipo(String publicoAlvoTipo) {
+//        if (publicoAlvoTipo != null && !publicoAlvoTipo.isBlank()) {
+//            PublicoAlvo pa = publicosAlvo.isEmpty() ? new PublicoAlvo() : publicosAlvo.get(0);
+//            pa.setInstrumentoAvaliativo(this);
+//            pa.setEscopo(EscopoPublicoAlvo.valueOf(publicoAlvoTipo));
+//            if (publicosAlvo.isEmpty()) {
+//                publicosAlvo.add(pa);
+//            }
+//        }
+//    }
+//
+//    public String getPublicoAlvoDescricao() {
+//        return publicosAlvo.isEmpty() ? null : publicosAlvo.get(0).getReferenciaExterna();
+//    }
+//
+//    public void setPublicoAlvoDescricao(String publicoAlvoDescricao) {
+//        if (!publicosAlvo.isEmpty()) {
+//            publicosAlvo.get(0).setReferenciaExterna(publicoAlvoDescricao);
+//        }
+//    }
+
+    public UUID getInstrumentoAvaliativoId() {
+        return instrumentoAvaliativoId;
+    }
+
+    public void setInstrumentoAvaliativoId(UUID instrumentoAvaliativoId) {
+        this.instrumentoAvaliativoId = instrumentoAvaliativoId;
+    }
+
     public String getTitulo() {
         return titulo;
     }
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
-    }
-
-    public String getNome() {
-        return getTitulo();
-    }
-
-    public void setNome(String nome) {
-        setTitulo(nome);
     }
 
     public String getDescricao() {
@@ -160,19 +184,19 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
         this.cicloReferencia = cicloReferencia;
     }
 
-    public OffsetDateTime getInicioAplicacao() {
+    public LocalDateTime getInicioAplicacao() {
         return inicioAplicacao;
     }
 
-    public void setInicioAplicacao(OffsetDateTime inicioAplicacao) {
+    public void setInicioAplicacao(LocalDateTime inicioAplicacao) {
         this.inicioAplicacao = inicioAplicacao;
     }
 
-    public OffsetDateTime getFimAplicacao() {
+    public LocalDateTime getFimAplicacao() {
         return fimAplicacao;
     }
 
-    public void setFimAplicacao(OffsetDateTime fimAplicacao) {
+    public void setFimAplicacao(LocalDateTime fimAplicacao) {
         this.fimAplicacao = fimAplicacao;
     }
 
@@ -192,19 +216,19 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
         this.permiteEdicao = permiteEdicao;
     }
 
-    public StatusInstrumento getStatus() {
-        return status;
+    public TipoStatus getTipoStatus() {
+        return tipoStatus;
     }
 
-    public void setStatus(StatusInstrumento status) {
-        this.status = status;
+    public void setTipoStatus(TipoStatus tipoStatus) {
+        this.tipoStatus = tipoStatus;
     }
 
-    public OffsetDateTime getConsolidadoEm() {
+    public LocalDateTime getConsolidadoEm() {
         return consolidadoEm;
     }
 
-    public void setConsolidadoEm(OffsetDateTime consolidadoEm) {
+    public void setConsolidadoEm(LocalDateTime consolidadoEm) {
         this.consolidadoEm = consolidadoEm;
     }
 
@@ -216,105 +240,20 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
         this.criadoPor = criadoPor;
     }
 
-    public OffsetDateTime getCriadoEm() {
+    public LocalDateTime getCriadoEm() {
         return criadoEm;
     }
 
-    public void setCriadoEm(OffsetDateTime criadoEm) {
+    public void setCriadoEm(LocalDateTime criadoEm) {
         this.criadoEm = criadoEm;
     }
 
-    public OffsetDateTime getAtualizadoEm() {
+    public LocalDateTime getAtualizadoEm() {
         return atualizadoEm;
     }
 
-    public void setAtualizadoEm(OffsetDateTime atualizadoEm) {
+    public void setAtualizadoEm(LocalDateTime atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
-    }
-
-    public List<PublicoAlvo> getPublicosAlvo() {
-        return publicosAlvo;
-    }
-
-    public void setPublicosAlvo(List<PublicoAlvo> publicosAlvo) {
-        this.publicosAlvo = publicosAlvo;
-    }
-
-    public List<InstrumentoSessao> getSessoes() {
-        return sessoes;
-    }
-
-    public List<InstrumentoSessao> getGrupos() {
-        return sessoes;
-    }
-
-    public void setSessoes(List<InstrumentoSessao> sessoes) {
-        this.sessoes = sessoes;
-    }
-
-    public java.time.LocalDateTime getDataInicio() {
-        return inicioAplicacao != null ? inicioAplicacao.toLocalDateTime() : null;
-    }
-
-    public void setDataInicio(java.time.LocalDateTime dataInicio) {
-        this.inicioAplicacao = dataInicio != null ? dataInicio.atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime() : null;
-    }
-
-    public java.time.LocalDateTime getDataFim() {
-        return fimAplicacao != null ? fimAplicacao.toLocalDateTime() : null;
-    }
-
-    public void setDataFim(java.time.LocalDateTime dataFim) {
-        this.fimAplicacao = dataFim != null ? dataFim.atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime() : null;
-    }
-
-    public String getPublicoAlvoTipo() {
-        return publicosAlvo.isEmpty() ? null : publicosAlvo.get(0).getEscopo().name();
-    }
-
-    public void setPublicoAlvoTipo(String publicoAlvoTipo) {
-        if (publicoAlvoTipo != null && !publicoAlvoTipo.isBlank()) {
-            PublicoAlvo pa = publicosAlvo.isEmpty() ? new PublicoAlvo() : publicosAlvo.get(0);
-            pa.setInstrumentoAvaliativo(this);
-            pa.setEscopo(EscopoPublicoAlvo.valueOf(publicoAlvoTipo));
-            if (publicosAlvo.isEmpty()) {
-                publicosAlvo.add(pa);
-            }
-        }
-    }
-
-    public String getPublicoAlvoDescricao() {
-        return publicosAlvo.isEmpty() ? null : publicosAlvo.get(0).getReferenciaExterna();
-    }
-
-    public void setPublicoAlvoDescricao(String publicoAlvoDescricao) {
-        if (!publicosAlvo.isEmpty()) {
-            publicosAlvo.get(0).setReferenciaExterna(publicoAlvoDescricao);
-        }
-    }
-
-    public List<Participacao> getParticipacoes() {
-        return participacoes;
-    }
-
-    public void setParticipacoes(List<Participacao> participacoes) {
-        this.participacoes = participacoes;
-    }
-
-    public List<RespostaInstrumento> getRespostas() {
-        return respostas;
-    }
-
-    public void setRespostas(List<RespostaInstrumento> respostas) {
-        this.respostas = respostas;
-    }
-
-    public List<Encaminhamento> getEncaminhamentos() {
-        return encaminhamentos;
-    }
-
-    public void setEncaminhamentos(List<Encaminhamento> encaminhamentos) {
-        this.encaminhamentos = encaminhamentos;
     }
 
     @Override

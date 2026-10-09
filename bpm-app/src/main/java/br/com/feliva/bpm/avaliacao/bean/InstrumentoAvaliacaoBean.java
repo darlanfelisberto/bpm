@@ -2,7 +2,6 @@ package br.com.feliva.bpm.avaliacao.bean;
 
 import br.com.feliva.bpm.avaliacao.dao.InstrumentoAvaliacaoDAO;
 import br.com.feliva.bpm.avaliacao.model.InstrumentoAvaliativo;
-import br.com.feliva.bpm.avaliacao.model.StatusInstrumento;
 import br.edu.iffar.box.component.datatable.DatatableLazyModel;
 import br.edu.iffar.box.component.datatable.DatatablePage;
 import br.edu.iffar.box.component.datatable.DatatableQuery;
@@ -65,15 +64,15 @@ public class InstrumentoAvaliacaoBean implements Serializable, DatatableLazyMode
     }
 
     public String salvar() {
-        if (novo.getCicloReferencia() == null || novo.getCicloReferencia().isBlank()) {
-            novo.setCicloReferencia(String.valueOf(Year.now().getValue()));
-        }
-        if (novo.getCriadoPor() == null || novo.getCriadoPor().isBlank()) {
-            novo.setCriadoPor("admin");
-        }
-        if (novo.getStatus() == null) {
-            novo.setStatus(StatusInstrumento.RASCUNHO);
-        }
+//        if (novo.getCicloReferencia() == null || novo.getCicloReferencia().isBlank()) {
+//            novo.setCicloReferencia(String.valueOf(Year.now().getValue()));
+//        }
+//        if (novo.getCriadoPor() == null || novo.getCriadoPor().isBlank()) {
+//            novo.setCriadoPor("admin");
+//        }
+//        if (novo.getStatus() == null) {
+//            novo.setStatus(StatusInstrumento.RASCUNHO);
+//        }
 
         try {
             instrumentoAvaliacaoDAO.saveOrUpdate(novo);

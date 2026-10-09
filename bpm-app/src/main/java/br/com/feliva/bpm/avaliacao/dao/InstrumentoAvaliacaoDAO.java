@@ -1,7 +1,7 @@
 package br.com.feliva.bpm.avaliacao.dao;
 
 import br.com.feliva.bpm.avaliacao.model.InstrumentoAvaliativo;
-import br.com.feliva.bpm.avaliacao.model.StatusInstrumento;
+//import br.com.feliva.bpm.avaliacao.model.StatusInstrumento;
 import br.com.feliva.sharedClass.db.InjectEntityManagerDAO;
 import br.edu.iffar.box.component.datatable.DatatablePage;
 import br.edu.iffar.box.component.datatable.DatatableQuery;
@@ -43,13 +43,13 @@ public class InstrumentoAvaliacaoDAO extends InjectEntityManagerDAO<InstrumentoA
                     } else if ("cicloReferencia".equalsIgnoreCase(field)) {
                         where.append(" and lower(i.cicloReferencia) like :").append(paramKey);
                         params.put(paramKey, "%" + val.trim().toLowerCase() + "%");
-                    } else if ("status".equalsIgnoreCase(field)) {
+                    } else if ("tipoStatus".equalsIgnoreCase(field)) {
                         try {
-                            StatusInstrumento st = StatusInstrumento.valueOf(val.trim().toUpperCase());
-                            where.append(" and i.status = :").append(paramKey);
-                            params.put(paramKey, st);
+//                            StatusInstrumento st = StatusInstrumento.valueOf(val.trim().toUpperCase());
+//                            where.append(" and i.status = :").append(paramKey);
+//                            params.put(paramKey, st);
                         } catch (IllegalArgumentException e) {
-                            where.append(" and lower(cast(i.status as string)) like :").append(paramKey);
+                            where.append(" and lower(cast(i.tipoStatus as string)) like :").append(paramKey);
                             params.put(paramKey, "%" + val.trim().toLowerCase() + "%");
                         }
                     } else if ("descricao".equalsIgnoreCase(field)) {
@@ -75,7 +75,7 @@ public class InstrumentoAvaliacaoDAO extends InjectEntityManagerDAO<InstrumentoA
             String prop = switch (sortBy) {
                 case "nome", "titulo" -> "i.titulo";
                 case "cicloReferencia" -> "i.cicloReferencia";
-                case "status" -> "i.status";
+                case "tipoStatus" -> "i.tipoStatus";
                 case "inicioAplicacao" -> "i.inicioAplicacao";
                 case "fimAplicacao" -> "i.fimAplicacao";
                 case "criadoEm" -> "i.criadoEm";

@@ -61,7 +61,7 @@ public class InstrumentoDetalheBean implements Serializable {
         InstrumentoAvaliativo instrumento = getInstrumento();
         novoGrupo.setInstrumentoAvaliativo(instrumento);
         novoGrupo.setTipo(TipoSessao.PAGINA);
-        novoGrupo.setOrdem((short) instrumento.getSessoes().size());
+//        novoGrupo.setOrdem((short) instrumento.getSessoes().size());
         em.persist(novoGrupo);
         novoGrupo = new InstrumentoSessao();
         return null;

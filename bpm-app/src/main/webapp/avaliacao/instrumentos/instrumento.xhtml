@@ -32,15 +32,14 @@
                     <b:datatable id="tabela" value="#{instrumentoAvaliacaoBean}" var="inst" defaultSortBy="titulo">
                         <b:column field="titulo" header="Título" sortable="true" filterable="true"/>
                         <b:column field="cicloReferencia" header="Ciclo" sortable="true" filterable="true"/>
-                        <b:column field="status" header="Status" sortable="true" filterable="true"/>
                         <b:column field="inicioAplicacao" header="Início" sortable="true">
-                            <h:outputText value="#{inst.dataInicio}">
+                            <h:outputText value="#{inst.inicioAplicacao}">
                                 <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
                             </h:outputText>
                         </b:column>
                         <b:column field="fimAplicacao" header="Término" sortable="true">
-                            <h:outputText value="#{inst.dataFim}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
+                            <h:outputText value="#{inst.fimAplicacao}">
+                                <f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" type="localDateTime"/>
                             </h:outputText>
                         </b:column>
                         <b:column header="Ações">
