@@ -400,23 +400,7 @@ public class CommandButton extends UICommand implements ClientBehaviorHolder {
         } catch (Exception e) {
             LOGGER.log(Level.FINE, "CDI resolution of EntityConverter failed: " + e.getMessage(), e);
         }
-        for (String elExpr : new String[]{"#{modelConverter}", "#{entityConverter}"}) {
-            try {
-                Object bean = context.getApplication().evaluateExpressionGet(context, elExpr, Object.class);
-                if (bean instanceof Converter c) {
-                    return c;
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.FINE, "EL evaluation of converter expression (" + elExpr + ") failed: " + e.getMessage(), e);
-            }
-        }
-        for (String convId : new String[]{"modelConverter", "box.entityConverter"}) {
-            Converter c = findConverterById(context, convId);
-            if (c != null) {
-                return c;
-            }
-        }
-        return null;
+        return findConverterById(context, EntityConverter.CONVERTER_ID);
     }
 
     private Converter findConverterById(FacesContext context, String converterId) {

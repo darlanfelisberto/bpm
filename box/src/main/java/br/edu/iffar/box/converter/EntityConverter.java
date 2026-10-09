@@ -32,18 +32,12 @@ public class EntityConverter implements Converter<Object> {
     public static final String CONVERTER_ID = "box.entityConverter";
     public static final String SEPARATOR = "@";
 
-    private static final Map<Integer, Class<?>> CLASS_REGISTRY = new ConcurrentHashMap<>();
+    private static final Map<String, Class<?>> CLASS_REGISTRY = new ConcurrentHashMap<>();
 
     @Inject
     private Instance<EntityResolver> resolverInstance;
 
-    private EntityResolver fallbackResolver;
-
     public EntityConverter() {
-    }
-
-    public EntityConverter(EntityResolver resolver) {
-        this.fallbackResolver = resolver;
     }
 
     @Override
@@ -53,16 +47,14 @@ public class EntityConverter implements Converter<Object> {
         }
 
         int separatorIndex = value.indexOf(SEPARATOR);
-        if (separatorIndex <= 0 || separatorIndex >= value.length() - 1) {
-            return null;
-        }
-
         try {
-            int classKey = Integer.parseInt(value.substring(0, separatorIndex));
+            String classToken = value.substring(0, separatorIndex);
             String idStr = value.substring(separatorIndex + 1);
 
-            Class<?> entityClass = CLASS_REGISTRY.get(classKey);
+            Class<?> entityClass = CLASS_REGISTRY.get(classToken);
+
             if (entityClass == null) {
+                LOGGER.log(Level.WARNING, "Entity class not registered or found for token: " + classToken);
                 return null;
             }
 
@@ -98,7 +90,7 @@ public class EntityConverter implements Converter<Object> {
                 entityClass = superclass;
             }
         }
-        int classKey = entityClass.getName().hashCode();
+        String classKey = String.valueOf(entityClass.getName().hashCode());
         CLASS_REGISTRY.putIfAbsent(classKey, entityClass);
 
         return classKey + SEPARATOR + id;
@@ -106,18 +98,11 @@ public class EntityConverter implements Converter<Object> {
 
     public static void register(Class<?> clazz) {
         if (clazz != null) {
-            CLASS_REGISTRY.put(clazz.getName().hashCode(), clazz);
+            CLASS_REGISTRY.put(String.valueOf(clazz.getName().hashCode()), clazz);
         }
-    }
-
-    public void setEntityResolver(EntityResolver resolver) {
-        this.fallbackResolver = resolver;
     }
 
     protected EntityResolver getResolver() {
-        if (fallbackResolver != null) {
-            return fallbackResolver;
-        }
         if (resolverInstance != null && !resolverInstance.isUnsatisfied()) {
             return resolverInstance.get();
         }
@@ -132,36 +117,12 @@ public class EntityConverter implements Converter<Object> {
         } catch (Exception e) {
             LOGGER.log(Level.FINE, "CDI resolution of EntityResolver failed: " + e.getMessage(), e);
         }
-        try {
-            FacesContext facesContext = FacesContext.getCurrentInstance();
-            if (facesContext != null) {
-                for (String expr : new String[]{"#{modelEntityResolver}", "#{entityResolver}"}) {
-                    try {
-                        Object bean = facesContext.getApplication().evaluateExpressionGet(facesContext, expr, Object.class);
-                        if (bean instanceof EntityResolver er) {
-                            return er;
-                        }
-                    } catch (Exception e) {
-                        LOGGER.log(Level.FINE, "EL evaluation of EntityResolver (" + expr + ") failed: " + e.getMessage(), e);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.FINE, "FacesContext lookup of EntityResolver failed: " + e.getMessage(), e);
-        }
         return null;
     }
 
     private Object parseId(Class<?> entityClass, String idStr) {
         if (idStr == null || idStr.isBlank()) {
             return null;
-        }
-        if (idStr.length() == 36 && idStr.charAt(8) == '-' && idStr.charAt(13) == '-') {
-            try {
-                return UUID.fromString(idStr);
-            } catch (IllegalArgumentException e) {
-                LOGGER.log(Level.FINE, "UUID parse failed for candidate string: " + idStr, e);
-            }
         }
         Class<?> idType = resolveIdType(entityClass);
         if (UUID.class.equals(idType)) {
@@ -171,11 +132,11 @@ public class EntityConverter implements Converter<Object> {
         } else if (Integer.class.equals(idType) || int.class.equals(idType)) {
             return Integer.valueOf(idStr);
         }
-        return idStr;
+        return idStr; //string provavelmente
     }
 
     private Class<?> resolveIdType(Class<?> entityClass) {
-        for (String methodName : new String[]{"getId", "getMMId"}) {
+        for (String methodName : new String[]{"getMMId","getId"}) {
             for (Method method : entityClass.getMethods()) {
                 if (methodName.equals(method.getName()) && !method.isBridge() && method.getParameterCount() == 0) {
                     Class<?> ret = method.getReturnType();

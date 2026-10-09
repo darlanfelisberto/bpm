@@ -60,13 +60,22 @@ class EntityConverterTest {
         }
     }
 
+    private EntityConverter createConverter(EntityResolver resolver) {
+        return new EntityConverter() {
+            @Override
+            protected EntityResolver getResolver() {
+                return resolver;
+            }
+        };
+    }
+
     @Test
     void convertsEntityWithLongIdBothWays() {
         InMemoryResolver resolver = new InMemoryResolver();
         SampleEntity entity = new SampleEntity(42L, "Processo A");
         resolver.put(SampleEntity.class, 42L, entity);
 
-        EntityConverter converter = new EntityConverter(resolver);
+        EntityConverter converter = createConverter(resolver);
 
         String asString = converter.getAsString(null, null, entity);
         assertNotNull(asString);
@@ -85,7 +94,7 @@ class EntityConverterTest {
         SampleModel model = new SampleModel(uuid, "Autoavaliacao");
         resolver.put(SampleModel.class, uuid, model);
 
-        EntityConverter converter = new EntityConverter(resolver);
+        EntityConverter converter = createConverter(resolver);
 
         String asString = converter.getAsString(null, null, model);
         assertNotNull(asString);
@@ -99,7 +108,7 @@ class EntityConverterTest {
 
     @Test
     void handlesNullAndInvalidValuesGracefully() {
-        EntityConverter converter = new EntityConverter(new InMemoryResolver());
+        EntityConverter converter = createConverter(new InMemoryResolver());
 
         assertNull(converter.getAsString(null, null, null));
         assertNull(converter.getAsObject(null, null, null));

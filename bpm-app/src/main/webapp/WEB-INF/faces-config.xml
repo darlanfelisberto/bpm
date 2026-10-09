@@ -8,14 +8,4 @@
               xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_1.xsd"
               version="4.1">
 
-    <converter>
-        <converter-id>box.entityConverter</converter-id>
-        <converter-class>br.edu.iffar.box.converter.EntityConverter</converter-class>
-    </converter>
-
-    <converter>
-        <converter-id>modelConverter</converter-id>
-        <converter-class>br.com.feliva.bpm.converter.ModelConverter</converter-class>
-    </converter>
-
 </faces-config>

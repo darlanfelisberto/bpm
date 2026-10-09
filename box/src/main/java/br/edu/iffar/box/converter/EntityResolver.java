@@ -37,8 +37,7 @@ public interface EntityResolver {
                         .log(java.util.logging.Level.WARNING, "Failed invoking " + methodName + " on entity " + entity, e);
             }
         }
-        java.util.logging.Logger.getLogger(EntityResolver.class.getName())
-                .log(java.util.logging.Level.FINE, "No identifier method (getMMId or getId) found on " + entity.getClass().getName());
+        java.util.logging.Logger.getLogger(EntityResolver.class.getName()).log(java.util.logging.Level.FINE, "No identifier method (getMMId) found on " + entity.getClass().getName());
         return null;
     }
 }
