@@ -27,6 +27,12 @@
             <version>${version.el-api}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+            <version>4.1.0</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- JSON-P: serializes b:schedule's events into the JSON FullCalendar
              reads, with correct escaping (not hand-rolled) - provided at
              runtime by Open Liberty (part of webProfile-11.0/jsonp-2.1),

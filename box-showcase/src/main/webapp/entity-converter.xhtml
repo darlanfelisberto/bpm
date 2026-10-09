@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:b="http://iffar.edu.br/box">
+<f:view transient="true">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="title">b:entityConverter</ui:define>
+    <ui:define name="content">
+
+        <h2>b:entityConverter</h2>
+        <p>
+            Universal Jakarta Faces converter (<code>box.entityConverter</code>) designed to eliminate
+            the need for writing individual <code>Converter</code> classes for every database entity.
+            It serializes any identifiable object into a compact <code>classHashCode@entityId</code> representation
+            and reconstructs the entity on postback by delegating lookups to an application-provided
+            <code>EntityResolver</code>.
+        </p>
+
+        <h4>Key Features</h4>
+        <ul>
+            <li><strong>Database decoupled:</strong> The <code>box</code> module has no JPA or persistence dependencies; applications supply their own lookup via CDI.</li>
+            <li><strong>Zero manual registration:</strong> Entity classes are automatically registered in memory during <code>getAsString</code>.</li>
+            <li><strong>Multi-type ID support:</strong> Automatically parses identifiers typed as <code>UUID</code>, <code>Long</code>, <code>Integer</code>, or <code>String</code>.</li>
+            <li><strong>Automatic key extraction:</strong> Inspects either <code>getId()</code> or <code>getMMId()</code> out of the box.</li>
+        </ul>
+
+        <h4>How It Works</h4>
+        <div class="card">
+            <p style="margin: 0;">
+                When rendering an HTML element (e.g. <code>&lt;option&gt;</code> or <code>data-id</code>), the converter outputs
+                <code>[class.hashCode]@[entity.id]</code>. On submission, it parses the hash code to retrieve the entity class,
+                converts the string ID to the entity's primary key type, and calls the registered <code>EntityResolver.find(entityClass, id)</code>.
+            </p>
+        </div>
+
+        <h4>Providing the EntityResolver (Application Side)</h4>
+        <p>
+            In your application (e.g. <code>bpm-app</code>), implement the <code>EntityResolver</code> CDI interface to delegate lookups to your <code>EntityManager</code>:
+        </p>
+        <pre class="code-example">@ApplicationScoped
+public class JpaEntityResolver implements EntityResolver {
+
+    @Inject
+    private EntityManager em;
+
+    @Override
+    public &lt;T&gt; T find(Class&lt;T&gt; entityClass, Object id) {
+        return em.find(entityClass, id);
+    }
+}</pre>
+
+        <h4>Usage in XHTML</h4>
+        <pre class="code-example">&lt;!-- Option 1: Nested tag --&gt;
+&lt;h:selectOneMenu value="\#{bean.selectedEntity}"&gt;
+    &lt;b:entityConverter/&gt;
+    &lt;f:selectItems value="\#{bean.entities}" var="e" itemLabel="\#{e.name}" itemValue="\#{e}"/&gt;
+&lt;/h:selectOneMenu&gt;
+
+&lt;!-- Option 2: converter attribute by ID --&gt;
+&lt;h:selectOneMenu value="\#{bean.selectedEntity}" converter="box.entityConverter"&gt;
+    &lt;f:selectItems value="\#{bean.entities}" var="e" itemLabel="\#{e.name}" itemValue="\#{e}"/&gt;
+&lt;/h:selectOneMenu&gt;
+
+&lt;!-- Option 3: Automatic conversion via forClass in the application --&gt;
+@Named("modelConverter")
+@ApplicationScoped
+@FacesConverter(value = "modelConverter", forClass = Model.class, managed = true)
+public class ModelConverter extends EntityConverter { }
+&lt;!-- Now any component bound to a Model subtype converts automatically without converter="" --&gt;</pre>
+
+        <div class="card">
+            <h3>Interactive Demo</h3>
+            <p>
+                Select a person below. The options use the full <code>Person</code> object as <code>itemValue</code>.
+                When submitted via AJAX, <code>box.entityConverter</code> reconstructs the selected <code>Person</code> instance:
+            </p>
+
+            <h:form id="formDemo">
+                <div class="grid-12">
+                    <div class="campo col-6">
+                        <h:outputLabel for="personSelect" value="Select a person:"/>
+                        <h:selectOneMenu id="personSelect" value="#{entityConverterDemoBean.selectedPerson}">
+                            <b:entityConverter/>
+                            <f:selectItem itemLabel="-- Choose an option --" itemValue="#{null}"/>
+                            <f:selectItems value="#{entityConverterDemoBean.people}" var="p"
+                                           itemLabel="#{p.name} (#{p.role})" itemValue="#{p}"/>
+                        </h:selectOneMenu>
+                    </div>
+                </div>
+
+                <div class="actions" style="margin-top: 1rem;">
+                    <b:commandButton value="Submit Selection" icon="bi bi-check2-circle" action="#{entityConverterDemoBean.submit}">
+                        <f:ajax execute="@form" render="formDemo:resultPanel"/>
+                    </b:commandButton>
+                </div>
+
+                <h:panelGroup id="resultPanel" layout="block" style="margin-top: 1rem;">
+                    <h:panelGroup rendered="#{not empty entityConverterDemoBean.message}">
+                        <div class="card" style="background: var(--color-bg); margin: 0;">
+                            <strong>Result:</strong> #{entityConverterDemoBean.message}
+                            <br/>
+                            <small style="color: var(--color-text-muted);">
+                                Instance class: #{entityConverterDemoBean.selectedPerson.class.name}
+                            </small>
+                        </div>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </h:form>
+        </div>
+
+    </ui:define>
+</ui:composition>
+</f:view>
+</html>

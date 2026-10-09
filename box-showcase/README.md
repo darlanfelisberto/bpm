@@ -57,6 +57,11 @@ the repository root for more details on this mechanism.)
 | `/schedule2.xhtml` | `b:schedule2` | Same idea as `b:schedule`, with no external lib (month view only, no resizing) — for comparison |
 | `/popup.xhtml` | `b:popup` | Modal popup based on the native `<dialog>` element |
 | `/datatable.xhtml` | `b:datatable` | Table with lazy pagination, sorting and per-column filtering |
+| `/button.xhtml` | `b:commandButton` | Enhanced button with icons, variants, and AJAX support |
+| `/autocomplete.xhtml` | `b:autocomplete` | Server-driven auto-complete suggestions dropdown |
+| `/entity-converter.xhtml` | `b:entityConverter` | Universal entity converter delegating persistence to a pluggable `EntityResolver` |
+| `/menu.xhtml` | `b:menu` | Navigation menu with links, submenus, actions, and icons |
+| `/question.xhtml` | `b:question` | Survey question component with descriptive text or single-choice options |
 
 Each component page has an "Attributes" and/or "Client behaviors" table
 documenting the API, and an `EXAMPLE` block with the exact XHTML snippet

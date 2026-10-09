@@ -926,5 +926,12 @@
         </attribute>
     </tag>
 
+    <tag>
+        <tag-name>entityConverter</tag-name>
+        <converter>
+            <converter-id>box.entityConverter</converter-id>
+        </converter>
+    </tag>
+
 </facelet-taglib>
 

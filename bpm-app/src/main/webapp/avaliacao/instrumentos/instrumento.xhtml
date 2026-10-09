@@ -11,62 +11,147 @@
         <h2>Instrumentos avaliativos</h2>
 
         <h:form id="frmPrincipal">
-            <b:panel header="Busca Instrumento">
-                <div class="grid-12">
-                    <div class="campo col-6">
-                        <h:outputLabel for="nome" value="Nome"/>
-                        <h:inputText id="nome" value="#{instrumentoAvaliacaoBean.nome}" />
+            <h:panelGroup id="pnlBuscaTabela" layout="block" rendered="#{!instrumentoAvaliacaoBean.editando}">
+                <b:panel header="Busca Instrumento">
+                    <div class="grid-12">
+                        <div class="campo col-6">
+                            <h:outputLabel for="nome" value="Nome"/>
+                            <h:inputText id="nome" value="#{instrumentoAvaliacaoBean.nome}" />
+                        </div>
                     </div>
-                </div>
-                <div class="actions">
-                    <b:commandButton action="#{instrumentoAvaliacaoBean.buscar}"
-                                     icon="bi bi-search"
-                                     value="Buscar"
-                                     render="pnlResultado" />
-                    <b:commandButton icon="bi bi-plus" value="Novo" />
-                </div>
-            </b:panel>
+                    <div class="actions">
+                        <b:commandButton action="#{instrumentoAvaliacaoBean.buscar}"
+                                         icon="bi bi-search"
+                                         value="Buscar"
+                                         render="pnlResultado" />
+                        <b:commandButton action="#{instrumentoAvaliacaoBean.novo}"
+                                         icon="bi bi-plus"
+                                         value="Novo"
+                                         render=":frmPrincipal" />
+                    </div>
+                </b:panel>
 
-            <h:panelGroup id="pnlResultado" layout="block" style="margin-top: 1.5rem;">
-                <b:panel header="Instrumentos Cadastrados" rendered="#{instrumentoAvaliacaoBean.buscaRealizada}">
-                    <b:datatable id="tabela" value="#{instrumentoAvaliacaoBean}" var="inst" defaultSortBy="titulo">
-                        <b:column field="titulo" header="Título" sortable="true" filterable="true"/>
-                        <b:column field="cicloReferencia" header="Ciclo" sortable="true" filterable="true"/>
-                        <b:column field="inicioAplicacao" header="Início" sortable="true">
-                            <h:outputText value="#{inst.inicioAplicacao}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
-                            </h:outputText>
-                        </b:column>
-                        <b:column field="fimAplicacao" header="Término" sortable="true">
-                            <h:outputText value="#{inst.fimAplicacao}">
-                                <f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" type="localDateTime"/>
-                            </h:outputText>
-                        </b:column>
-                        <b:column header="Ações">
-                            <h:link outcome="/avaliacao/instrumentos/editar" p:aria-label="Editar questões: #{inst.titulo}" title="Editar questões">
-                                <i class="bi bi-pencil-square"/>
-                                <f:param name="instrumentoId" value="#{inst.id}"/>
-                            </h:link>
-                            &#160;|&#160;
-                            <h:commandLink action="#{instrumentoAvaliacaoBean.excluir(inst)}" styleClass="link-danger"
-                                           p:aria-label="Excluir #{inst.titulo}" title="Excluir">
-                                <i class="bi bi-trash"/>
-                                <box-confirm message="Excluir o instrumento #{inst.titulo}? As respostas recebidas também serão apagadas."/>
-                                <f:ajax render=":frmPrincipal:pnlResultado"/>
-                            </h:commandLink>
-                            &#160;|&#160;
-                            <h:outputLink value="/responder/index.html">
-                                <f:param name="instrumentoId" value="#{inst.id}"/>
-                                Responder
-                            </h:outputLink>
-                            &#160;|&#160;
-                            <h:link outcome="/avaliacao/instrumentos/relatorio" value="Relatório">
-                                <f:param name="instrumentoId" value="#{inst.id}"/>
-                            </h:link>
-                        </b:column>
+                <h:panelGroup id="pnlResultado" layout="block" style="margin-top: 1.5rem;">
+                    <b:panel header="Instrumentos Cadastrados" rendered="#{instrumentoAvaliacaoBean.buscaRealizada}">
+                        <b:datatable id="tabela" value="#{instrumentoAvaliacaoBean}" var="inst" defaultSortBy="titulo">
+                            <b:column field="titulo" header="Título" sortable="true" filterable="true"/>
+                            <b:column field="cicloReferencia" header
+                                    ="Ciclo" sortable="true" filterable="true"/>
+                            <b:column field="inicioAplicacao" header="Início" sortable="true">
+                                <h:outputText value="#{inst.inicioAplicacao}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
+                                </h:outputText>
+                            </b:column>
+                            <b:column field="fimAplicacao" header="Término" sortable="true">
+                                <h:outputText value="#{inst.fimAplicacao}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" type="localDateTime"/>
+                                </h:outputText>
+                            </b:column>
+                            <b:column header="Ações">
+                                <h:commandLink action="#{instrumentoAvaliacaoBean.editar}"
+                                               p:aria-label="Editar #{inst.titulo}" title="Editar">
+                                    <i class="bi bi-pencil-square"/>
+                                    <f:param name="instrumentoId" value="#{inst.id}"/>
+                                    <f:ajax render=":frmPrincipal"/>
+                                </h:commandLink>
+                                &#160;|&#160;
+                                <h:link outcome="/avaliacao/instrumentos/editar" p:aria-label="Editar questões: #{inst.titulo}" title="Editar questões">
+                                    <i class="bi bi-card-checklist"/>
+                                    <f:param name="instrumentoId" value="#{inst.id}"/>
+                                </h:link>
+                                &#160;|&#160;
+                                <h:commandLink action="#{instrumentoAvaliacaoBean.excluir}" styleClass="link-danger"
+                                               p:aria-label="Excluir #{inst.titulo}" title="Excluir">
+                                    <i class="bi bi-trash"/>
+                                    <f:param name="instrumentoId" value="#{inst.id}"/>
+                                    <box-confirm message="Excluir o instrumento #{inst.titulo}? As respostas recebidas também serão apagadas."/>
+                                    <f:ajax render=":frmPrincipal:pnlResultado"/>
+                                </h:commandLink>
+                                &#160;|&#160;
+                                <h:outputLink value="/responder/index.html">
+                                    <f:param name="instrumentoId" value="#{inst.id}"/>
+                                    Responder
+                                </h:outputLink>
+                                &#160;|&#160;
+                                <h:link outcome="/avaliacao/instrumentos/relatorio" value="Relatório">
+                                    <f:param name="instrumentoId" value="#{inst.id}"/>
+                                </h:link>
+                            </b:column>
 
-                        <f:facet name="empty">Nenhum instrumento avaliativo encontrado.</f:facet>
-                    </b:datatable>
+                            <f:facet name="empty">Nenhum instrumento avaliativo encontrado.</f:facet>
+                        </b:datatable>
+                    </b:panel>
+                </h:panelGroup>
+            </h:panelGroup>
+
+            <h:panelGroup id="pnlEdicao" layout="block" rendered="#{instrumentoAvaliacaoBean.editando}">
+                <b:panel header="#{instrumentoAvaliacaoBean.instrumento.id != null ? 'Editar Instrumento' : 'Novo Instrumento'}">
+                    <div class="grid-12">
+                        <div class="campo col-8">
+                            <h:outputLabel for="edtTitulo" value="Título *"/>
+                            <h:inputText id="edtTitulo" value="#{instrumentoAvaliacaoBean.instrumento.titulo}" required="true"/>
+                        </div>
+
+                        <div class="campo col-4">
+                            <h:outputLabel for="edtCiclo" value="Ciclo de referência *"/>
+                            <h:inputText id="edtCiclo" value="#{instrumentoAvaliacaoBean.instrumento.cicloReferencia}" required="true"/>
+                        </div>
+
+                        <div class="campo col-12">
+                            <h:outputLabel for="edtDescricao" value="Descrição"/>
+                            <h:inputTextarea id="edtDescricao" value="#{instrumentoAvaliacaoBean.instrumento.descricao}" rows="3"/>
+                        </div>
+
+                        <div class="campo col-4">
+                            <h:outputLabel for="edtInicio" value="Início da aplicação *"/>
+                            <h:inputText id="edtInicio" value="#{instrumentoAvaliacaoBean.instrumento.inicioAplicacao}" required="true" p:type="datetime-local">
+                                <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
+                            </h:inputText>
+                        </div>
+
+                        <div class="campo col-4">
+                            <h:outputLabel for="edtFim" value="Término da aplicação *"/>
+                            <h:inputText id="edtFim" value="#{instrumentoAvaliacaoBean.instrumento.fimAplicacao}" required="true" p:type="datetime-local">
+                                <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
+                            </h:inputText>
+                        </div>
+
+                        <div class="campo col-4">
+                            <h:outputLabel for="edtStatus" value="Status *"/>
+                            <h:selectOneMenu id="edtStatus" value="#{instrumentoAvaliacaoBean.tipoStatusId}" required="true">
+                                <f:selectItems value="#{instrumentoAvaliacaoBean.tiposStatus}" var="st"
+                                               itemValue="#{st.tipoStatusId}" itemLabel="#{st.descricao}"/>
+                            </h:selectOneMenu>
+                        </div>
+
+                        <div class="campo col-6" style="margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <h:selectBooleanCheckbox id="edtAnonimo" value="#{instrumentoAvaliacaoBean.instrumento.anonimo}"/>
+                                Respostas anônimas
+                            </label>
+                        </div>
+
+                        <div class="campo col-6" style="margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <h:selectBooleanCheckbox id="edtPermiteEdicao" value="#{instrumentoAvaliacaoBean.instrumento.permiteEdicao}"/>
+                                Permite edição das respostas pelo respondente
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="actions" style="margin-top: 1.5rem;">
+                        <b:commandButton action="#{instrumentoAvaliacaoBean.salvar}"
+                                         icon="bi bi-check-lg"
+                                         value="Salvar"
+                                         render=":frmPrincipal" />
+                        <b:commandButton action="#{instrumentoAvaliacaoBean.cancelar}"
+                                         icon="bi bi-x-lg"
+                                         value="Cancelar"
+                                         immediate="true"
+                                         variant="secondary"
+                                         render=":frmPrincipal" />
+                    </div>
+                    <h:messages errorClass="msg-error" infoClass="msg-info" style="margin-top: 1rem;"/>
                 </b:panel>
             </h:panelGroup>
         </h:form>

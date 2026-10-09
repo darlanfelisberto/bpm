@@ -2,6 +2,7 @@ package br.com.feliva.bpm.avaliacao.dao;
 
 import br.com.feliva.bpm.avaliacao.model.InstrumentoAvaliativo;
 //import br.com.feliva.bpm.avaliacao.model.StatusInstrumento;
+import br.com.feliva.bpm.avaliacao.model.TipoStatus;
 import br.com.feliva.sharedClass.db.InjectEntityManagerDAO;
 import br.edu.iffar.box.component.datatable.DatatablePage;
 import br.edu.iffar.box.component.datatable.DatatableQuery;
@@ -11,9 +12,23 @@ import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RequestScoped
 public class InstrumentoAvaliacaoDAO extends InjectEntityManagerDAO<InstrumentoAvaliativo> {
+
+    public InstrumentoAvaliativo buscarPorId(UUID id) {
+        return em.find(InstrumentoAvaliativo.class, id);
+    }
+
+    public List<TipoStatus> getTiposStatus() {
+        return em.createQuery("select ts from TipoStatus ts order by ts.tipoStatusId", TipoStatus.class)
+                .getResultList();
+    }
+
+    public TipoStatus buscarTipoStatusPorId(String id) {
+        return em.find(TipoStatus.class, id);
+    }
 
     public List<InstrumentoAvaliativo> getLista() {
         return em.createQuery(
