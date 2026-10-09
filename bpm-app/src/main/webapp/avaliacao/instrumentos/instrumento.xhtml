@@ -18,10 +18,58 @@
                         <h:inputText id="nome" value="#{instrumentoAvaliacaoBean.nome}" />
                     </div>
                 </div>
-                <h:commandButton value="Buscar" actionListener="#{instrumentoAvaliacaoBean.buscar}">
-                    <f:ajax render=":frmPrincipal"/>
-                </h:commandButton>
+                <div class="actions">
+                    <b:commandButton action="#{instrumentoAvaliacaoBean.buscar}"
+                                     icon="bi bi-search"
+                                     value="Buscar"
+                                     render="pnlResultado" />
+                    <b:commandButton icon="bi bi-plus" value="Novo" />
+                </div>
             </b:panel>
+
+            <h:panelGroup id="pnlResultado" layout="block" style="margin-top: 1.5rem;">
+                <b:panel header="Instrumentos Cadastrados" rendered="#{instrumentoAvaliacaoBean.buscaRealizada}">
+                    <b:datatable id="tabela" value="#{instrumentoAvaliacaoBean}" var="inst" defaultSortBy="titulo">
+                        <b:column field="titulo" header="Título" sortable="true" filterable="true"/>
+                        <b:column field="cicloReferencia" header="Ciclo" sortable="true" filterable="true"/>
+                        <b:column field="status" header="Status" sortable="true" filterable="true"/>
+                        <b:column field="inicioAplicacao" header="Início" sortable="true">
+                            <h:outputText value="#{inst.dataInicio}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
+                            </h:outputText>
+                        </b:column>
+                        <b:column field="fimAplicacao" header="Término" sortable="true">
+                            <h:outputText value="#{inst.dataFim}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
+                            </h:outputText>
+                        </b:column>
+                        <b:column header="Ações">
+                            <h:link outcome="/avaliacao/instrumentos/editar" p:aria-label="Editar questões: #{inst.titulo}" title="Editar questões">
+                                <i class="bi bi-pencil-square"/>
+                                <f:param name="instrumentoId" value="#{inst.id}"/>
+                            </h:link>
+                            &#160;|&#160;
+                            <h:commandLink action="#{instrumentoAvaliacaoBean.excluir(inst)}" styleClass="link-danger"
+                                           p:aria-label="Excluir #{inst.titulo}" title="Excluir">
+                                <i class="bi bi-trash"/>
+                                <box-confirm message="Excluir o instrumento #{inst.titulo}? As respostas recebidas também serão apagadas."/>
+                                <f:ajax render=":frmPrincipal:pnlResultado"/>
+                            </h:commandLink>
+                            &#160;|&#160;
+                            <h:outputLink value="/responder/index.html">
+                                <f:param name="instrumentoId" value="#{inst.id}"/>
+                                Responder
+                            </h:outputLink>
+                            &#160;|&#160;
+                            <h:link outcome="/avaliacao/instrumentos/relatorio" value="Relatório">
+                                <f:param name="instrumentoId" value="#{inst.id}"/>
+                            </h:link>
+                        </b:column>
+
+                        <f:facet name="empty">Nenhum instrumento avaliativo encontrado.</f:facet>
+                    </b:datatable>
+                </b:panel>
+            </h:panelGroup>
         </h:form>
     </ui:define>
 </ui:composition>

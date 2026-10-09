@@ -24,7 +24,7 @@
                   httpsPort="${default.https.port}"/>
 
     <webApplication location="bpm.war" contextRoot="/">
-        <classloader delegation="parentLast" />
+<!--        <classloader delegation="parentLast" />-->
     </webApplication>
 
     <!-- Driver JDBC copiado para cá pelo liberty-maven-plugin (dependency com scope adequado) -->

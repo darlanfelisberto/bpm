@@ -10,16 +10,16 @@
     <ui:define name="content">
 
         <h2>b:panel</h2>
-        <p>Box with an optional title (equivalent to a card). Native
-            component (<code>UIComponentBase</code>), with no separate
-            <code>Renderer</code> nor <code>*.taglib.xml</code> — the tag is
-            generated automatically by <code>createTag</code>/<code>namespace</code>/
-            <code>tagName</code> on the Java class itself.</p>
+        <p>Box with an optional title (equivalent to a card). Self-rendering
+            component (<code>UIComponentBase</code>) registered via <code>@FacesComponent</code>
+            and declared in <code>box.taglib.xml</code>.</p>
 
         <h4>Attributes</h4>
         <table class="attributes-table">
             <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
             <tr><td><code>header</code></td><td>No</td><td>Title shown at the top of the box. Omitted, the box has no title.</td></tr>
+            <tr><td><code>style</code></td><td>No</td><td>Inline CSS style.</td></tr>
+            <tr><td><code>styleClass</code></td><td>No</td><td>Custom CSS class added to the card container.</td></tr>
         </table>
 
         <h4>Example — with a title</h4>

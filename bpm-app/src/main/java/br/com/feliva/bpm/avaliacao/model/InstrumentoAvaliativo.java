@@ -136,6 +136,14 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
         this.titulo = titulo;
     }
 
+    public String getNome() {
+        return getTitulo();
+    }
+
+    public void setNome(String nome) {
+        setTitulo(nome);
+    }
+
     public String getDescricao() {
         return descricao;
     }

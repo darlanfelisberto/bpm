@@ -8,7 +8,7 @@
     <!-- Bootstrap Icons auto-hospedada (webapp/vendor/bootstrap-icons/), servida
          como arquivo estatico comum (fora do resource handler do JSF) para as
          referencias relativas a fonts/ dentro do CSS funcionarem sem ajuste. -->
-    <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <h:outputStylesheet library="css" name="app.css"/>
     <!-- confirm.js/css (lib box): <box-confirm> é um custom element puro,
          não um componente Faces, então ninguém pede o recurso pra JSF
@@ -16,7 +16,6 @@
          vez, pra toda a aplicacao. confirm.js funciona standalone, sem
          depender de box-core.js (só usa ele de forma oportunista pra
          tradução, quando outro componente do box já carregou). -->
-    <h:outputStylesheet library="box" name="confirm/confirm.css"/>
     <h:outputScript library="box" name="confirm/confirm.js"/>
     <ui:insert name="head-extra"/>
 </h:head>
