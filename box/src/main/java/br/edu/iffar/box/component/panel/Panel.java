@@ -9,9 +9,7 @@ import java.io.IOException;
 
 /**
  * Panel with an optional title, equivalent to p:panel (only with the
- * "header" attribute). Native component (self-rendering UIComponent), not
- * a composite: no separate Renderer, no *.taglib.xml — the tag is
- * generated at runtime by createTag/namespace/tagName below.
+ * "header" attribute).
  *
  * Usage: xmlns:b="http://iffar.edu.br/box"
  *        <b:panel header="New instrument">...</b:panel>
@@ -39,6 +37,22 @@ public class Panel extends UIComponentBase {
         getStateHelper().put("header", header);
     }
 
+    public String getStyle() {
+        return (String) getStateHelper().eval("style");
+    }
+
+    public void setStyle(String style) {
+        getStateHelper().put("style", style);
+    }
+
+    public String getStyleClass() {
+        return (String) getStateHelper().eval("styleClass");
+    }
+
+    public void setStyleClass(String styleClass) {
+        getStateHelper().put("styleClass", styleClass);
+    }
+
     @Override
     public void encodeBegin(FacesContext context) throws IOException {
         if (!isRendered()) {
@@ -47,7 +61,15 @@ public class Panel extends UIComponentBase {
         ResponseWriter writer = context.getResponseWriter();
         writer.startElement("div", this);
         writer.writeAttribute("id", getClientId(context), "id");
-        writer.writeAttribute("class", "card", null);
+
+        String styleClass = getStyleClass();
+        String clazz = styleClass != null && !styleClass.isBlank() ? "card " + styleClass.trim() : "card";
+        writer.writeAttribute("class", clazz, null);
+
+        String style = getStyle();
+        if (style != null && !style.isBlank()) {
+            writer.writeAttribute("style", style, null);
+        }
 
         String header = getHeader();
         if (header != null && !header.isBlank()) {

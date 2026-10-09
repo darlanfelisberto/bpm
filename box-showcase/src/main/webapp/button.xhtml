@@ -27,6 +27,10 @@
             <tr><td><code>variant</code></td><td>No</td><td>Visual style variant: <code>primary</code> (default), <code>secondary</code>, <code>success</code>, <code>danger</code>, <code>warning</code>, <code>outlined</code>, <code>text</code>.</td></tr>
             <tr><td><code>size</code></td><td>No</td><td>Button size: <code>sm</code>, <code>normal</code> (default), or <code>lg</code>.</td></tr>
             <tr><td><code>type</code></td><td>No</td><td>HTML button type: <code>submit</code> (default), <code>button</code>, or <code>reset</code>.</td></tr>
+            <tr><td><code>ajax</code></td><td>No</td><td>Whether the button executes via AJAX asynchronously without reloading the page. Defaults to <code>true</code>. Set <code>false</code> for full-page synchronous POST submits (e.g. file downloads).</td></tr>
+            <tr><td><code>render</code> / <code>update</code></td><td>No</td><td>Components to re-render in partial response (e.g. <code>@form</code>, <code>@this</code>, <code>:targetId</code>, or component IDs). Defaults to <code>@form</code>.</td></tr>
+            <tr><td><code>execute</code> / <code>process</code></td><td>No</td><td>Components to process on form submission. Defaults to <code>@form</code>.</td></tr>
+            <tr><td><code>resetValues</code></td><td>No</td><td>Whether to reset component values on execution. Defaults to <code>false</code>.</td></tr>
             <tr><td><code>disabled</code></td><td>No</td><td>Disables button interaction. Defaults to <code>false</code>.</td></tr>
             <tr><td><code>action</code></td><td>No</td><td>MethodExpression invoked when clicking the button.</td></tr>
             <tr><td><code>actionListener</code></td><td>No</td><td>MethodExpression for the action listener.</td></tr>
@@ -112,38 +116,49 @@
         </div>
 
         <div class="card">
-            <h3>4. AJAX Submissions with f:ajax</h3>
-            <p>Seamlessly integrates with <code>&lt;f:ajax&gt;</code> to update portions of the page asynchronously.</p>
+            <h3>4. Seamless AJAX by Default</h3>
+            <p>
+                Buttons submit via AJAX by default (<code>ajax="true"</code>). You do not need to nest <code>&lt;f:ajax&gt;</code>;
+                simply use <code>render</code> (or <code>update</code>) to specify what to update. By default, <code>render</code> updates the enclosing <code>@form</code>.
+            </p>
 
-            <pre class="code-example">&lt;h:form id="ajaxForm"&gt;
-    &lt;b:commandButton value="Increment Counter"
-                     icon="bi bi-plus-circle"
-                     action="\#{buttonDemoBean.increment}"&gt;
-        &lt;f:ajax render="counterDisplay statusMessage" /&gt;
-    &lt;/b:commandButton&gt;
+            <pre class="code-example">&lt;!-- Native AJAX without &lt;f:ajax&gt; --&gt;
+&lt;b:commandButton value="Increment Counter"
+                 icon="bi bi-plus-circle"
+                 action="\#{buttonDemoBean.increment}"
+                 render="counterDisplay statusMessage" /&gt;
 
-    &lt;b:commandButton value="Reset"
-                     icon="bi bi-arrow-counterclockwise"
-                     variant="secondary"
-                     action="\#{buttonDemoBean.reset}"&gt;
-        &lt;f:ajax render="counterDisplay statusMessage" /&gt;
-    &lt;/b:commandButton&gt;
-&lt;/h:form&gt;</pre>
+&lt;b:commandButton value="Reset"
+                 icon="bi bi-arrow-counterclockwise"
+                 variant="secondary"
+                 action="\#{buttonDemoBean.reset}"
+                 render="counterDisplay statusMessage" /&gt;
+
+&lt;!-- Synchronous full-page submit when needed (e.g. file export) --&gt;
+&lt;b:commandButton value="Full Page Reload"
+                 icon="bi bi-arrow-repeat"
+                 ajax="false"
+                 variant="outlined"
+                 action="\#{buttonDemoBean.execute('Full Page Submit')}" /&gt;</pre>
 
             <h:form id="ajaxForm">
                 <div class="actions" style="margin-top: 1rem; align-items: center;">
                     <b:commandButton value="Increment Counter"
                                      icon="bi bi-plus-circle"
-                                     action="#{buttonDemoBean.increment}">
-                        <f:ajax render="counterDisplay statusMessage" />
-                    </b:commandButton>
+                                     action="#{buttonDemoBean.increment}"
+                                     render="counterDisplay statusMessage" />
 
                     <b:commandButton value="Reset"
                                      icon="bi bi-arrow-counterclockwise"
                                      variant="secondary"
-                                     action="#{buttonDemoBean.reset}">
-                        <f:ajax render="counterDisplay statusMessage" />
-                    </b:commandButton>
+                                     action="#{buttonDemoBean.reset}"
+                                     render="counterDisplay statusMessage" />
+
+                    <b:commandButton value="Full Page Reload"
+                                     icon="bi bi-arrow-repeat"
+                                     ajax="false"
+                                     variant="outlined"
+                                     action="#{buttonDemoBean.execute('Full Page Submit')}" />
 
                     <span style="margin-left: 1rem; font-weight: 500;">
                         Clicks:
@@ -161,18 +176,18 @@
             <h3>5. Nested &lt;box-confirm&gt;</h3>
             <p>
                 Because <code>b:commandButton</code> renders a native <code>&lt;button&gt;</code> container element,
-                <code>&lt;box-confirm&gt;</code> can be nested directly inside it (unlike standard <code>h:commandButton</code>
-                which renders a void <code>&lt;input&gt;</code>).
+                <code>&lt;box-confirm&gt;</code> can be nested directly inside it. The confirmation runs purely on the client side,
+                and when confirmed, executes the AJAX action.
             </p>
 
             <pre class="code-example">&lt;b:commandButton value="Delete Item"
                  icon="bi bi-trash"
                  variant="danger"
-                 action="\#{buttonDemoBean.execute('Item Deleted')}"&gt;
+                 action="\#{buttonDemoBean.execute('Item Deleted')}"
+                 render=":confirmForm:confirmResult"&gt;
     &lt;box-confirm message="Are you sure you want to permanently delete this item?"
                  yes-label="Yes, delete"
                  yes-class="box-button-danger"/&gt;
-    &lt;f:ajax render=":confirmResult" /&gt;
 &lt;/b:commandButton&gt;</pre>
 
             <h:form id="confirmForm" style="margin-top: 1rem;">
@@ -180,27 +195,26 @@
                     <b:commandButton value="Delete Item"
                                      icon="bi bi-trash"
                                      variant="danger"
-                                     action="#{buttonDemoBean.execute('Item Deleted')}">
+                                     action="#{buttonDemoBean.execute('Item Deleted')}"
+                                     render="confirmResult">
                         <box-confirm message="Are you sure you want to permanently delete this item?"
                                      yes-label="Yes, delete"
                                      yes-class="box-button-danger"/>
-                        <f:ajax render=":confirmResult" />
                     </b:commandButton>
 
                     <b:commandButton value="Archive Item"
                                      icon="bi bi-archive"
                                      variant="secondary"
-                                     action="#{buttonDemoBean.execute('Item Archived')}">
+                                     action="#{buttonDemoBean.execute('Item Archived')}"
+                                     render="confirmResult">
                         <box-confirm message="Archive this record?"
                                      yes-label="Archive"/>
-                        <f:ajax render=":confirmResult" />
                     </b:commandButton>
                 </div>
+                <div style="margin-top: 0.75rem;">
+                    <small>Last result: <h:outputText id="confirmResult" value="#{buttonDemoBean.lastAction}" /></small>
+                </div>
             </h:form>
-
-            <div style="margin-top: 0.75rem;">
-                <small>Last result: <h:outputText id="confirmResult" value="#{buttonDemoBean.lastAction}" /></small>
-            </div>
         </div>
 
         <div class="card">

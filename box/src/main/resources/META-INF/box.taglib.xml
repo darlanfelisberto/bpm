@@ -6,10 +6,36 @@
 
     <namespace>http://iffar.edu.br/box</namespace>
 
-    <!-- panel is registered via @FacesComponent(createTag=true). Confirmation
-         (formerly a "confirm" behavior here) is now the <box-confirm> custom
-         element (see box/confirm/confirm.js) - a plain HTML tag, not a
-         Faces component, so it needs no taglib entry. -->
+    <!-- Confirmation (formerly a "confirm" behavior here) is now the
+         <box-confirm> custom element (see box/confirm/confirm.js) - a plain
+         HTML tag, not a Faces component, so it needs no taglib entry. -->
+
+    <tag>
+        <tag-name>panel</tag-name>
+        <component>
+            <component-type>br.edu.iffar.box.Panel</component-type>
+        </component>
+        <attribute>
+            <name>header</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>style</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>styleClass</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>rendered</name>
+            <required>false</required>
+            <type>boolean</type>
+        </attribute>
+    </tag>
 
     <tag>
         <tag-name>autocomplete</tag-name>
@@ -632,6 +658,46 @@
             <required>false</required>
             <type>boolean</type>
         </attribute>
+        <attribute>
+            <name>ajax</name>
+            <required>false</required>
+            <type>boolean</type>
+        </attribute>
+        <attribute>
+            <name>render</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>update</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>execute</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>process</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>resetValues</name>
+            <required>false</required>
+            <type>boolean</type>
+        </attribute>
+        <attribute>
+            <name>onevent</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>onerror</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
     </tag>
 
     <tag>
@@ -743,6 +809,46 @@
             <name>rendered</name>
             <required>false</required>
             <type>boolean</type>
+        </attribute>
+        <attribute>
+            <name>ajax</name>
+            <required>false</required>
+            <type>boolean</type>
+        </attribute>
+        <attribute>
+            <name>render</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>update</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>execute</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>process</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>resetValues</name>
+            <required>false</required>
+            <type>boolean</type>
+        </attribute>
+        <attribute>
+            <name>onevent</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>onerror</name>
+            <required>false</required>
+            <type>java.lang.String</type>
         </attribute>
     </tag>
 

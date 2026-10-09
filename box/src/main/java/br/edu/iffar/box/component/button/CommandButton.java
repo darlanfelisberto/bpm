@@ -4,6 +4,7 @@ import jakarta.faces.application.ResourceDependencies;
 import jakarta.faces.application.ResourceDependency;
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UICommand;
+import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.behavior.ClientBehavior;
 import jakarta.faces.component.behavior.ClientBehaviorContext;
 import jakarta.faces.component.behavior.ClientBehaviorHolder;
@@ -20,9 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Enhanced button component supporting standard UICommand actions, f:ajax client
- * behaviors, and integrated icon rendering with customizable positioning.
- * Renders a native &lt;button&gt; tag so children like &lt;box-confirm&gt; can be nested.
+ * Enhanced button component supporting standard UICommand actions, AJAX submissions
+ * by default (like PrimeFaces p:commandButton), nested child tags like &lt;box-confirm&gt;,
+ * and integrated icon rendering with customizable positioning.
  */
 @FacesComponent(
         value = CommandButton.COMPONENT_TYPE,
@@ -30,6 +31,7 @@ import java.util.Map;
         tagName = "commandButton",
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
+        @ResourceDependency(library = "jakarta.faces", name = "faces.js", target = "head"),
         @ResourceDependency(library = "box", name = "box.css", target = "head")
 })
 public class CommandButton extends UICommand implements ClientBehaviorHolder {
@@ -70,6 +72,80 @@ public class CommandButton extends UICommand implements ClientBehaviorHolder {
     @Override
     public String getDefaultEventName() {
         return "action";
+    }
+
+    public boolean isAjax() {
+        Boolean ajax = (Boolean) getStateHelper().eval("ajax");
+        return ajax == null || ajax;
+    }
+
+    public void setAjax(boolean ajax) {
+        getStateHelper().put("ajax", ajax);
+    }
+
+    public String getRender() {
+        String render = (String) getStateHelper().eval("render");
+        if (render != null && !render.isBlank()) {
+            return render;
+        }
+        return (String) getStateHelper().eval("update");
+    }
+
+    public void setRender(String render) {
+        getStateHelper().put("render", render);
+    }
+
+    public String getUpdate() {
+        return getRender();
+    }
+
+    public void setUpdate(String update) {
+        setRender(update);
+    }
+
+    public String getExecute() {
+        String execute = (String) getStateHelper().eval("execute");
+        if (execute != null && !execute.isBlank()) {
+            return execute;
+        }
+        return (String) getStateHelper().eval("process");
+    }
+
+    public void setExecute(String execute) {
+        getStateHelper().put("execute", execute);
+    }
+
+    public String getProcess() {
+        return getExecute();
+    }
+
+    public void setProcess(String process) {
+        setExecute(process);
+    }
+
+    public boolean isResetValues() {
+        Boolean reset = (Boolean) getStateHelper().eval("resetValues");
+        return reset != null && reset;
+    }
+
+    public void setResetValues(boolean resetValues) {
+        getStateHelper().put("resetValues", resetValues);
+    }
+
+    public String getOnevent() {
+        return (String) getStateHelper().eval("onevent");
+    }
+
+    public void setOnevent(String onevent) {
+        getStateHelper().put("onevent", onevent);
+    }
+
+    public String getOnerror() {
+        return (String) getStateHelper().eval("onerror");
+    }
+
+    public void setOnerror(String onerror) {
+        getStateHelper().put("onerror", onerror);
     }
 
     public String getLabel() {
@@ -353,29 +429,93 @@ public class CommandButton extends UICommand implements ClientBehaviorHolder {
     }
 
     private String buildOnClickScript(FacesContext context, String clientId, String userOnClick) {
-        List<ClientBehavior> actionBehaviors = getClientBehaviors().get("action");
-        if (actionBehaviors == null || actionBehaviors.isEmpty()) {
-            actionBehaviors = getClientBehaviors().get("click");
+        if ("reset".equalsIgnoreCase(getType())) {
+            return userOnClick;
         }
-        String behaviorScript = null;
-        if (actionBehaviors != null && !actionBehaviors.isEmpty()) {
-            ClientBehaviorContext behaviorContext = ClientBehaviorContext.createClientBehaviorContext(
-                    context, this, "action", clientId, null);
-            behaviorScript = actionBehaviors.get(0).getScript(behaviorContext);
+
+        boolean ajax = isAjax();
+        String ajaxScript = null;
+
+        if (ajax) {
+            List<ClientBehavior> actionBehaviors = getClientBehaviors().get("action");
+            if (actionBehaviors == null || actionBehaviors.isEmpty()) {
+                actionBehaviors = getClientBehaviors().get("click");
+            }
+
+            if (actionBehaviors != null && !actionBehaviors.isEmpty()) {
+                ClientBehaviorContext behaviorContext = ClientBehaviorContext.createClientBehaviorContext(
+                        context, this, "action", clientId, null);
+                ajaxScript = actionBehaviors.get(0).getScript(behaviorContext);
+            } else {
+                ajaxScript = buildDefaultAjaxScript(context);
+            }
         }
 
         boolean hasUserClick = userOnClick != null && !userOnClick.isBlank();
-        boolean hasBehavior = behaviorScript != null && !behaviorScript.isBlank();
+        boolean hasAjax = ajaxScript != null && !ajaxScript.isBlank();
 
-        if (!hasUserClick && !hasBehavior) {
+        if (!hasUserClick && !hasAjax) {
             return null;
         }
-        if (hasUserClick && !hasBehavior) {
+        if (hasUserClick && !hasAjax) {
             return userOnClick;
         }
-        if (!hasUserClick && hasBehavior) {
-            return behaviorScript;
+        if (!hasUserClick && hasAjax) {
+            return ajaxScript;
         }
-        return "var b=(function(){" + userOnClick + "})();if(b!==false){" + behaviorScript + "}return false;";
+        return "var b=(function(){" + userOnClick + "})();if(b!==false){" + ajaxScript + "}return false;";
+    }
+
+    private String buildDefaultAjaxScript(FacesContext context) {
+        String execute = resolveClientIds(context, getExecute(), "@form");
+        String render = resolveClientIds(context, getRender(), "@form");
+
+        StringBuilder sb = new StringBuilder("faces.ajax.request(this,event,{");
+        sb.append("'jakarta.faces.behavior.event':'action'");
+        sb.append(",execute:'").append(execute).append("'");
+        sb.append(",render:'").append(render).append("'");
+
+        if (isResetValues()) {
+            sb.append(",resetValues:true");
+        }
+        String onevent = getOnevent();
+        if (onevent != null && !onevent.isBlank()) {
+            sb.append(",onevent:").append(onevent.trim());
+        }
+        String onerror = getOnerror();
+        if (onerror != null && !onerror.isBlank()) {
+            sb.append(",onerror:").append(onerror.trim());
+        }
+        sb.append("});return false;");
+        return sb.toString();
+    }
+
+    private String resolveClientIds(FacesContext context, String expressions, String defaultKeyword) {
+        if (expressions == null || expressions.isBlank()) {
+            return defaultKeyword;
+        }
+        String[] tokens = expressions.trim().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String token : tokens) {
+            if (token.isBlank()) {
+                continue;
+            }
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            if (token.startsWith("@")) {
+                sb.append(token);
+            } else {
+                UIComponent target = findComponent(token);
+                if (target != null) {
+                    sb.append(target.getClientId(context));
+                } else if (token.startsWith(":")) {
+                    sb.append(token.substring(1));
+                } else {
+                    sb.append(token);
+                }
+            }
+        }
+        return sb.toString();
     }
 }
