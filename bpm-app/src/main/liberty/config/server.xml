@@ -12,14 +12,20 @@
         <feature>jsonp-2.1</feature>
         <feature>validation-3.1</feature>
         <feature>jdbc-4.3</feature>
-        <feature>persistenceContainer-3.2</feature>
+        <feature>persistence-3.2</feature>
+
+        <!-- Para usar o Hibernate 7 -->
+        <feature>xmlBinding-4.0</feature>
+<!--        <feature>persistenceContainer-3.2</feature>-->
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint"
                   httpPort="${default.http.port}"
                   httpsPort="${default.https.port}"/>
 
-    <webApplication location="bpm.war" contextRoot="/"/>
+    <webApplication location="bpm.war" contextRoot="/">
+        <classloader delegation="parentLast" />
+    </webApplication>
 
     <!-- Driver JDBC copiado para cá pelo liberty-maven-plugin (dependency com scope adequado) -->
     <library id="postgresqlLib">

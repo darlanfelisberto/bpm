@@ -8,33 +8,31 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>jdbc/bpmDS</jta-data-source>
 
-        <class>br.edu.iffar.bpm.model.Macroprocesso</class>
-        <class>br.edu.iffar.bpm.model.Processo</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.InstrumentoAvaliativo</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.PublicoAlvo</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.InstrumentoSessao</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.ConjuntoOpcao</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.OpcaoQuestao</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.Questao</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.SessaoQuestao</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.Participacao</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.RespostaInstrumento</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.RespostaQuestao</class>
-        <class>br.edu.iffar.bpm.avaliacao.model.Encaminhamento</class>
-        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <class>br.com.feliva.bpm.model.Macroprocesso</class>
+        <class>br.com.feliva.bpm.model.Processo</class>
+        <class>br.com.feliva.bpm.avaliacao.model.InstrumentoAvaliativo</class>
+        <class>br.com.feliva.bpm.avaliacao.model.PublicoAlvo</class>
+        <class>br.com.feliva.bpm.avaliacao.model.InstrumentoSessao</class>
+        <class>br.com.feliva.bpm.avaliacao.model.ConjuntoOpcao</class>
+        <class>br.com.feliva.bpm.avaliacao.model.OpcaoQuestao</class>
+        <class>br.com.feliva.bpm.avaliacao.model.Questao</class>
+        <class>br.com.feliva.bpm.avaliacao.model.SessaoQuestao</class>
+        <class>br.com.feliva.bpm.avaliacao.model.Participacao</class>
+        <class>br.com.feliva.bpm.avaliacao.model.RespostaInstrumento</class>
+        <class>br.com.feliva.bpm.avaliacao.model.RespostaQuestao</class>
+        <class>br.com.feliva.bpm.avaliacao.model.Encaminhamento</class>
 
-        <shared-cache-mode>NONE</shared-cache-mode>
         <properties>
             <!-- O schema é responsabilidade do Flyway (src/main/resources/db/migration) -->
             <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
             <!-- O transformador de enhancement do Hibernate, plugado no classloader do Liberty,
                  recarrega classes recursivamente e estoura a pilha. Entidades não usam lazy de atributo. -->
-            <property name="hibernate.enhancer.enableDirtyTracking" value="false"/>
-            <property name="hibernate.enhancer.enableLazyInitialization" value="false"/>
-            <property name="hibernate.enhancer.enableAssociationManagement" value="false"/>
-            <!-- Sem isso o Hibernate não enxerga o TransactionManager do Liberty e o @Transactional não faz efeito -->
-            <property name="hibernate.transaction.jta.platform"
-                      value="org.hibernate.engine.transaction.jta.platform.internal.WebSphereLibertyJtaPlatform"/>
+<!--            <property name="hibernate.enhancer.enableDirtyTracking" value="false"/>-->
+<!--            <property name="hibernate.enhancer.enableLazyInitialization" value="false"/>-->
+<!--            <property name="hibernate.enhancer.enableAssociationManagement" value="false"/>-->
+<!--            &lt;!&ndash; Sem isso o Hibernate não enxerga o TransactionManager do Liberty e o @Transactional não faz efeito &ndash;&gt;-->
+<!--            <property name="hibernate.transaction.jta.platform"-->
+<!--                      value="org.hibernate.engine.transaction.jta.platform.internal.WebSphereLibertyJtaPlatform"/>-->
         </properties>
     </persistence-unit>
 

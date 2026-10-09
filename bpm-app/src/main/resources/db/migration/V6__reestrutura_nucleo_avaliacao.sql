@@ -11,12 +11,15 @@ CREATE SCHEMA avaliacao;
 -- ---------------------------------------------------------------------
 -- 1. Instrumento (uma aplicacao/ciclo: autoavaliacao 2025, ADPD 2026/1...)
 -- ---------------------------------------------------------------------
+create table avaliacao.tipo_status(
+    tipo_status_id   VARCHAR(12) PRIMARY KEY NOT NULL CHECK (tipo_status_id IN ('RASCUNHO', 'PUBLICADO', 'ENCERRADO', 'CONSOLIDADO')),
+    descricao        VARCHAR(100) NOT NULL
+)
+
 CREATE TABLE avaliacao.instrumento_avaliativo
 (
     instrumento_avaliativo_id        UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     instrumento_avaliativo_origem_id UUID REFERENCES avaliacao.instrumento_avaliativo (instrumento_avaliativo_id),
-    modulo                           VARCHAR(20)  NOT NULL
-        CHECK (modulo IN ('AUTOAVALIACAO', 'ADPD', 'APRENDIZAGEM')),
     titulo                           VARCHAR(200) NOT NULL,
     descricao                        TEXT,
     ciclo_referencia                 VARCHAR(20)  NOT NULL,               -- '2025', '2026/1'
@@ -24,14 +27,14 @@ CREATE TABLE avaliacao.instrumento_avaliativo
     fim_aplicacao                    TIMESTAMPTZ  NOT NULL,
     anonimo                          BOOLEAN      NOT NULL DEFAULT FALSE, -- RF08 / RNF03
     permite_edicao                   BOOLEAN      NOT NULL DEFAULT TRUE,  -- RF07
-    status                           VARCHAR(12)  NOT NULL DEFAULT 'RASCUNHO' CHECK (status IN ('RASCUNHO', 'PUBLICADO', 'ENCERRADO', 'CONSOLIDADO')),
+    status                           VARCHAR(12)  NOT NULL references avaliacao.tipo_status (tipo_status_id),
     consolidado_em                   TIMESTAMPTZ,
     criado_por                       VARCHAR(60)  NOT NULL,
     criado_em                        TIMESTAMPTZ  NOT NULL DEFAULT now(),
     atualizado_em                    TIMESTAMPTZ  NOT NULL DEFAULT now(),
     CHECK (fim_aplicacao > inicio_aplicacao),
     CHECK ((status = 'CONSOLIDADO') = (consolidado_em IS NOT NULL)),
-    UNIQUE (modulo, ciclo_referencia, titulo)
+    UNIQUE (ciclo_referencia, titulo)
 );
 
 -- ---------------------------------------------------------------------
