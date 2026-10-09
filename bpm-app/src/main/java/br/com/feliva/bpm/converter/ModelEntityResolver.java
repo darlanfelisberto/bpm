@@ -6,7 +6,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import jakarta.inject.Named;
+import jakarta.transaction.Transactional;
+
+@Named("modelEntityResolver")
 @ApplicationScoped
+@Transactional
 public class ModelEntityResolver implements EntityResolver {
 
     @Inject

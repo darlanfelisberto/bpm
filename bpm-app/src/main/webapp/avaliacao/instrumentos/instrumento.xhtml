@@ -48,25 +48,31 @@
                                 </h:outputText>
                             </b:column>
                             <b:column header="Ações">
-                                <h:commandLink action="#{instrumentoAvaliacaoBean.editar}"
-                                               p:aria-label="Editar #{inst.titulo}" title="Editar">
-                                    <i class="bi bi-pencil-square"/>
-                                    <f:param name="instrumentoId" value="#{inst.id}"/>
-                                    <f:ajax render=":frmPrincipal"/>
-                                </h:commandLink>
+                                <b:commandButton action="#{instrumentoAvaliacaoBean.editar(inst)}"
+                                                 rowValue="#{inst}"
+                                                 converter="modelConverter"
+                                                 icon="bi bi-pencil-square"
+                                                 variant="link"
+                                                 title="Editar"
+                                                 ariaLabel="Editar #{inst.titulo}"
+                                                 render=":frmPrincipal"/>
                                 &#160;|&#160;
                                 <h:link outcome="/avaliacao/instrumentos/editar" p:aria-label="Editar questões: #{inst.titulo}" title="Editar questões">
                                     <i class="bi bi-card-checklist"/>
                                     <f:param name="instrumentoId" value="#{inst.id}"/>
                                 </h:link>
                                 &#160;|&#160;
-                                <h:commandLink action="#{instrumentoAvaliacaoBean.excluir}" styleClass="link-danger"
-                                               p:aria-label="Excluir #{inst.titulo}" title="Excluir">
-                                    <i class="bi bi-trash"/>
-                                    <f:param name="instrumentoId" value="#{inst.id}"/>
+                                <b:commandButton action="#{instrumentoAvaliacaoBean.excluir(inst)}"
+                                                 rowValue="#{inst}"
+                                                 converter="modelConverter"
+                                                 icon="bi bi-trash"
+                                                 variant="link"
+                                                 styleClass="link-danger"
+                                                 title="Excluir"
+                                                 ariaLabel="Excluir #{inst.titulo}"
+                                                 render=":frmPrincipal:pnlResultado">
                                     <box-confirm message="Excluir o instrumento #{inst.titulo}? As respostas recebidas também serão apagadas."/>
-                                    <f:ajax render=":frmPrincipal:pnlResultado"/>
-                                </h:commandLink>
+                                </b:commandButton>
                                 &#160;|&#160;
                                 <h:outputLink value="/responder/index.html">
                                     <f:param name="instrumentoId" value="#{inst.id}"/>

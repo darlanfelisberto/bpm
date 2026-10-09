@@ -1,5 +1,12 @@
 package br.edu.iffar.box.component.button;
 
+import br.edu.iffar.box.component.datatable.Datatable;
+import br.edu.iffar.box.converter.EntityConverter;
+import jakarta.el.MethodExpression;
+import jakarta.el.MethodNotFoundException;
+import jakarta.el.ValueExpression;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.faces.application.ResourceDependencies;
 import jakarta.faces.application.ResourceDependency;
 import jakarta.faces.component.FacesComponent;
@@ -10,7 +17,10 @@ import jakarta.faces.component.behavior.ClientBehaviorContext;
 import jakarta.faces.component.behavior.ClientBehaviorHolder;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.ResponseWriter;
+import jakarta.faces.convert.Converter;
+import jakarta.faces.event.AbortProcessingException;
 import jakarta.faces.event.ActionEvent;
+import jakarta.faces.event.FacesEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +29,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Enhanced button component supporting standard UICommand actions, AJAX submissions
@@ -35,6 +47,8 @@ import java.util.Map;
         @ResourceDependency(library = "box", name = "box.css", target = "head")
 })
 public class CommandButton extends UICommand implements ClientBehaviorHolder {
+
+    private static final Logger LOGGER = Logger.getLogger(CommandButton.class.getName());
 
     public static final String COMPONENT_TYPE = "br.edu.iffar.box.CommandButton";
     public static final String COMPONENT_FAMILY = "br.edu.iffar.box.CommandButton";
@@ -285,6 +299,165 @@ public class CommandButton extends UICommand implements ClientBehaviorHolder {
         getStateHelper().put("onblur", onblur);
     }
 
+    private transient String submittedRowId;
+
+    public Object getRowValue() {
+        return getStateHelper().eval("rowValue");
+    }
+
+    public void setRowValue(Object rowValue) {
+        getStateHelper().put("rowValue", rowValue);
+    }
+
+    public String getVar() {
+        return (String) getStateHelper().eval("var");
+    }
+
+    public void setVar(String var) {
+        getStateHelper().put("var", var);
+    }
+
+    public Object getConverter() {
+        return getStateHelper().eval("converter");
+    }
+
+    public void setConverter(Object converter) {
+        getStateHelper().put("converter", converter);
+    }
+
+    public Object getTarget() {
+        return getStateHelper().eval("target");
+    }
+
+    public void setTarget(Object target) {
+        getStateHelper().put("target", target);
+    }
+
+    private Datatable findParentDatatable() {
+        UIComponent current = getParent();
+        while (current != null) {
+            if (current instanceof Datatable datatable) {
+                return datatable;
+            }
+            current = current.getParent();
+        }
+        return null;
+    }
+
+    public String resolveVar() {
+        String var = getVar();
+        if (var != null && !var.isBlank()) {
+            return var;
+        }
+        Datatable dt = findParentDatatable();
+        if (dt != null) {
+            return dt.getVar();
+        }
+        return null;
+    }
+
+    public Object resolveRowValue(FacesContext context) {
+        Object val = getRowValue();
+        if (val != null) {
+            return val;
+        }
+        String var = resolveVar();
+        if (var != null) {
+            return context.getExternalContext().getRequestMap().get(var);
+        }
+        return null;
+    }
+
+    public Converter resolveConverter(FacesContext context, Object value) {
+        Object conv = getConverter();
+        if (conv instanceof Converter c) {
+            return c;
+        }
+        if (conv instanceof String convId && !convId.isBlank()) {
+            Converter c = findConverterById(context, convId);
+            if (c != null) {
+                return c;
+            }
+        }
+        Datatable dt = findParentDatatable();
+        if (dt != null && dt.getConverter() != null) {
+            return dt.getConverter();
+        }
+        if (value != null) {
+            Converter c = context.getApplication().createConverter(value.getClass());
+            if (c != null) {
+                return c;
+            }
+        }
+        try {
+            Instance<EntityConverter> cdiInstance = CDI.current().select(EntityConverter.class);
+            if (cdiInstance.isResolvable()) {
+                return cdiInstance.get();
+            }
+            if (!cdiInstance.isUnsatisfied()) {
+                return cdiInstance.iterator().next();
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "CDI resolution of EntityConverter failed: " + e.getMessage(), e);
+        }
+        for (String elExpr : new String[]{"#{modelConverter}", "#{entityConverter}"}) {
+            try {
+                Object bean = context.getApplication().evaluateExpressionGet(context, elExpr, Object.class);
+                if (bean instanceof Converter c) {
+                    return c;
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.FINE, "EL evaluation of converter expression (" + elExpr + ") failed: " + e.getMessage(), e);
+            }
+        }
+        for (String convId : new String[]{"modelConverter", "box.entityConverter"}) {
+            Converter c = findConverterById(context, convId);
+            if (c != null) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    private Converter findConverterById(FacesContext context, String converterId) {
+        try {
+            Converter c = context.getApplication().createConverter(converterId);
+            if (c != null) {
+                return c;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Faces createConverter failed for ID '" + converterId + "': " + e.getMessage(), e);
+        }
+        try {
+            Object bean = context.getApplication().evaluateExpressionGet(context, "#{" + converterId + "}", Object.class);
+            if (bean instanceof Converter c) {
+                return c;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "EL evaluation of converter bean '#{" + converterId + "}' failed: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private String getConvertedRowValue(FacesContext context) {
+        Object val = resolveRowValue(context);
+        if (val == null) {
+            return null;
+        }
+        Converter converter = resolveConverter(context, val);
+        if (converter == null) {
+            return val.toString();
+        }
+        return converter.getAsString(context, this, val);
+    }
+
+    private static String escapeJs(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replace("\\", "\\\\").replace("'", "\\'");
+    }
+
     @Override
     public void decode(FacesContext context) {
         if (!isRendered() || isDisabled()) {
@@ -297,6 +470,26 @@ public class CommandButton extends UICommand implements ClientBehaviorHolder {
         boolean nameMatch = params.containsKey(clientId);
 
         if (nameMatch || sourceMatch) {
+            String rowId = params.get(clientId + "_row");
+            if (rowId == null || rowId.isBlank()) {
+                rowId = params.get("box_row");
+            }
+            if (rowId == null || rowId.isBlank()) {
+                for (Map.Entry<String, String> entry : params.entrySet()) {
+                    if (entry.getKey().endsWith(clientId + "_row") || entry.getKey().endsWith("box_row")) {
+                        rowId = entry.getValue();
+                        break;
+                    }
+                }
+            }
+            if (rowId == null || rowId.isBlank()) {
+                rowId = params.get(clientId);
+            }
+            if (rowId != null && !rowId.isBlank() && !rowId.equals(clientId)) {
+                this.submittedRowId = rowId;
+            } else {
+                this.submittedRowId = null;
+            }
             queueEvent(new ActionEvent(this));
         }
 
@@ -315,6 +508,58 @@ public class CommandButton extends UICommand implements ClientBehaviorHolder {
     }
 
     @Override
+    public void broadcast(FacesEvent event) throws AbortProcessingException {
+        if (event instanceof ActionEvent) {
+            FacesContext context = getFacesContext();
+            String var = resolveVar();
+            Object rowObject = null;
+
+            if (submittedRowId != null) {
+                Converter converter = resolveConverter(context, null);
+                if (converter != null) {
+                    rowObject = converter.getAsObject(context, this, submittedRowId);
+                }
+            }
+
+            ValueExpression target = getValueExpression("target");
+            if (target != null && rowObject != null) {
+                target.setValue(context.getELContext(), rowObject);
+            }
+
+            Map<String, Object> requestMap = context.getExternalContext().getRequestMap();
+            boolean restoreVar = false;
+            Object previousVarValue = null;
+
+            if (var != null && rowObject != null) {
+                restoreVar = requestMap.containsKey(var);
+                previousVarValue = requestMap.get(var);
+                requestMap.put(var, rowObject);
+            }
+
+            try {
+                super.broadcast(event);
+            } catch (MethodNotFoundException e) {
+                MethodExpression actionExpression = getActionExpression();
+                if (actionExpression != null && rowObject != null) {
+                    actionExpression.invoke(context.getELContext(), new Object[]{rowObject});
+                } else {
+                    throw e;
+                }
+            } finally {
+                if (var != null && rowObject != null) {
+                    if (restoreVar) {
+                        requestMap.put(var, previousVarValue);
+                    } else {
+                        requestMap.remove(var);
+                    }
+                }
+            }
+        } else {
+            super.broadcast(event);
+        }
+    }
+
+    @Override
     public void encodeBegin(FacesContext context) throws IOException {
         if (!isRendered()) {
             return;
@@ -328,7 +573,14 @@ public class CommandButton extends UICommand implements ClientBehaviorHolder {
         writer.writeAttribute("id", clientId, "id");
         writer.writeAttribute("name", clientId, "name");
         writer.writeAttribute("type", type, "type");
-        writer.writeAttribute("value", clientId, null);
+
+        String convertedRow = getConvertedRowValue(context);
+        if (convertedRow != null) {
+            writer.writeAttribute("value", convertedRow, null);
+            writer.writeAttribute("data-row-value", convertedRow, null);
+        } else {
+            writer.writeAttribute("value", clientId, null);
+        }
 
         if (disabled) {
             writer.writeAttribute("disabled", "disabled", null);
@@ -469,11 +721,20 @@ public class CommandButton extends UICommand implements ClientBehaviorHolder {
     private String buildDefaultAjaxScript(FacesContext context) {
         String execute = resolveClientIds(context, getExecute(), "@form");
         String render = resolveClientIds(context, getRender(), "@form");
+        String clientId = getClientId(context);
 
         StringBuilder sb = new StringBuilder("faces.ajax.request(this,event,{");
         sb.append("'jakarta.faces.behavior.event':'action'");
         sb.append(",execute:'").append(execute).append("'");
         sb.append(",render:'").append(render).append("'");
+
+        String convertedRow = getConvertedRowValue(context);
+        if (convertedRow != null) {
+            String escaped = escapeJs(convertedRow);
+            sb.append(",params:{'").append(clientId).append("_row':'").append(escaped).append("','box_row':'").append(escaped).append("'}");
+            sb.append(",'").append(clientId).append("_row':'").append(escaped).append("'");
+            sb.append(",box_row:'").append(escaped).append("'");
+        }
 
         if (isResetValues()) {
             sb.append(",resetValues:true");

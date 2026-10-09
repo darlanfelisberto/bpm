@@ -29,9 +29,16 @@ public interface EntityResolver {
         for (String methodName : new String[]{"getMMId", "getId"}) {
             try {
                 return entity.getClass().getMethod(methodName).invoke(entity);
-            } catch (Exception ignored) {
+            } catch (NoSuchMethodException e) {
+                java.util.logging.Logger.getLogger(EntityResolver.class.getName())
+                        .log(java.util.logging.Level.FINEST, "Method " + methodName + " not present on " + entity.getClass().getName(), e);
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger(EntityResolver.class.getName())
+                        .log(java.util.logging.Level.WARNING, "Failed invoking " + methodName + " on entity " + entity, e);
             }
         }
+        java.util.logging.Logger.getLogger(EntityResolver.class.getName())
+                .log(java.util.logging.Level.FINE, "No identifier method (getMMId or getId) found on " + entity.getClass().getName());
         return null;
     }
 }

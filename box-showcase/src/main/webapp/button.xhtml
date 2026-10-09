@@ -40,6 +40,10 @@
             <tr><td><code>ariaLabel</code></td><td>No</td><td>Accessible label for screen readers.</td></tr>
             <tr><td><code>style</code></td><td>No</td><td>Inline CSS styles.</td></tr>
             <tr><td><code>styleClass</code></td><td>No</td><td>Extra CSS class names.</td></tr>
+            <tr><td><code>rowValue</code></td><td>No</td><td>Entity or row object associated with this button. Inferred automatically when inside <code>&lt;b:datatable&gt;</code>.</td></tr>
+            <tr><td><code>var</code></td><td>No</td><td>Request-scope variable name under which the converted row object is exposed during action execution. Inferred automatically from parent <code>&lt;b:datatable&gt;</code>.</td></tr>
+            <tr><td><code>converter</code></td><td>No</td><td>Converter instance or ID (e.g. <code>box.entityConverter</code>) used to serialize the row object to an ID on render and restore it on postback.</td></tr>
+            <tr><td><code>target</code></td><td>No</td><td>ValueExpression (e.g. <code>#{bean.selected}</code>) populated with the converted row object before action invocation.</td></tr>
         </table>
 
         <h4>Client Behaviors</h4>
@@ -226,6 +230,34 @@
                 <b:commandButton value="Disabled Secondary" icon="bi bi-slash-circle" variant="secondary" disabled="true" />
                 <b:commandButton icon="bi bi-trash" title="Disabled delete" variant="danger" disabled="true" />
             </div>
+        </div>
+
+        <div class="card">
+            <h3>7. Row and Entity Binding in Datatables</h3>
+            <p>
+                When placed inside a <code>&lt;b:datatable&gt;</code> (or any loop), <code>&lt;b:commandButton&gt;</code>
+                seamlessly binds the current row entity. It converts the entity to a compact ID on render using
+                <code>converter</code> (defaults to <code>box.entityConverter</code>), and on postback reconstructs
+                the entity via <code>EntityResolver</code>, making it available under <code>var</code> in the request scope.
+            </p>
+
+            <pre class="code-example">&lt;!-- Inside a b:datatable, var and rowValue are inferred automatically --&gt;
+&lt;b:datatable value="#{personBean.model}" var="person"&gt;
+    &lt;b:column field="name" header="Name" /&gt;
+    &lt;b:column header="Actions"&gt;
+        &lt;b:commandButton action="#{personBean.edit(person)}"
+                         icon="bi bi-pencil"
+                         variant="text"
+                         title="Edit"
+                         render=":editForm" /&gt;
+    &lt;/b:column&gt;
+&lt;/b:datatable&gt;
+
+&lt;!-- Alternatively, populate a target property before executing the action --&gt;
+&lt;b:commandButton action="#{personBean.edit}"
+                 rowValue="#{person}"
+                 target="#{personBean.selectedPerson}"
+                 render=":editForm" /&gt;</pre>
         </div>
 
     </ui:define>

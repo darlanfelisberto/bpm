@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Presença deste arquivo (mesmo vazio) é o gatilho que faz o container
-  registrar o FacesServlet com o mapeamento padrão *.xhtml automaticamente.
--->
 <faces-config xmlns="https://jakarta.ee/xml/ns/jakartaee"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_1.xsd"
@@ -11,11 +7,6 @@
     <converter>
         <converter-id>box.entityConverter</converter-id>
         <converter-class>br.edu.iffar.box.converter.EntityConverter</converter-class>
-    </converter>
-
-    <converter>
-        <converter-id>modelConverter</converter-id>
-        <converter-class>br.com.feliva.bpm.converter.ModelConverter</converter-class>
     </converter>
 
 </faces-config>

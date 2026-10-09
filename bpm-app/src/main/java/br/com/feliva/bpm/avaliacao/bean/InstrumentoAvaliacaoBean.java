@@ -60,19 +60,14 @@ public class InstrumentoAvaliacaoBean implements Serializable, DatatableLazyMode
         FacesContext context = FacesContext.getCurrentInstance();
         String idParam = context.getExternalContext().getRequestParameterMap().get("instrumentoId");
         if (idParam != null && !idParam.isBlank()) {
-            editar(UUID.fromString(idParam));
+            InstrumentoAvaliativo carregado = instrumentoAvaliacaoDAO.buscarPorId(UUID.fromString(idParam));
+            if (carregado != null) {
+                editar(carregado);
+                return;
+            }
         }
-    }
-
-    public void editar(UUID id) {
-        if (id != null) {
-            this.instrumento = instrumentoAvaliacaoDAO.buscarPorId(id);
-        } else {
-            this.instrumento = new InstrumentoAvaliativo();
-        }
-        this.tipoStatusId = this.instrumento != null && this.instrumento.getTipoStatus() != null
-                ? this.instrumento.getTipoStatus().getTipoStatusId()
-                : "RASCUNHO";
+        this.instrumento = new InstrumentoAvaliativo();
+        this.tipoStatusId = "RASCUNHO";
         this.editando = true;
     }
 
@@ -82,12 +77,15 @@ public class InstrumentoAvaliacaoBean implements Serializable, DatatableLazyMode
             return;
         }
         if (inst.getId() != null) {
-            editar(inst.getId());
+            InstrumentoAvaliativo carregado = instrumentoAvaliacaoDAO.buscarPorId(inst.getId());
+            this.instrumento = carregado != null ? carregado : inst;
         } else {
             this.instrumento = inst;
-            this.tipoStatusId = "RASCUNHO";
-            this.editando = true;
         }
+        this.tipoStatusId = this.instrumento != null && this.instrumento.getTipoStatus() != null
+                ? this.instrumento.getTipoStatus().getTipoStatusId()
+                : "RASCUNHO";
+        this.editando = true;
     }
 
     public void cancelar() {
@@ -132,6 +130,7 @@ public class InstrumentoAvaliacaoBean implements Serializable, DatatableLazyMode
             this.instrumento = new InstrumentoAvaliativo();
             this.tipoStatusId = null;
         } catch (Exception e) {
+            e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao salvar instrumento: " + e.getMessage(), null));
         }
@@ -166,6 +165,7 @@ public class InstrumentoAvaliacaoBean implements Serializable, DatatableLazyMode
         try {
             instrumentoAvaliacaoDAO.remove(instrumento);
         } catch (Exception e) {
+            e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao excluir instrumento: " + e.getMessage(), null));
         }

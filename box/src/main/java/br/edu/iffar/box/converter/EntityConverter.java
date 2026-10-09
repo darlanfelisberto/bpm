@@ -14,6 +14,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Universal entity converter that serializes entities to a compact
@@ -22,8 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Named("entityConverter")
 @ApplicationScoped
-@FacesConverter(value = "box.entityConverter", managed = true)
+@FacesConverter(value = "box.entityConverter")
 public class EntityConverter implements Converter<Object> {
+
+    private static final Logger LOGGER = Logger.getLogger(EntityConverter.class.getName());
 
     public static final String CONVERTER_ID = "box.entityConverter";
     public static final String SEPARATOR = "@";
@@ -70,6 +74,7 @@ public class EntityConverter implements Converter<Object> {
             Object id = parseId(entityClass, idStr);
             return id != null ? resolver.find(entityClass, id) : null;
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to resolve entity for classKey@id: " + value, e);
             return null;
         }
     }
@@ -87,6 +92,12 @@ public class EntityConverter implements Converter<Object> {
         }
 
         Class<?> entityClass = value.getClass();
+        if (entityClass.getName().contains("$$") || entityClass.getName().contains("HibernateProxy")) {
+            Class<?> superclass = entityClass.getSuperclass();
+            if (superclass != null && !Object.class.equals(superclass)) {
+                entityClass = superclass;
+            }
+        }
         int classKey = entityClass.getName().hashCode();
         CLASS_REGISTRY.putIfAbsent(classKey, entityClass);
 
@@ -115,12 +126,43 @@ public class EntityConverter implements Converter<Object> {
             if (cdiInstance.isResolvable()) {
                 return cdiInstance.get();
             }
-        } catch (Exception ignored) {
+            if (!cdiInstance.isUnsatisfied()) {
+                return cdiInstance.iterator().next();
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "CDI resolution of EntityResolver failed: " + e.getMessage(), e);
+        }
+        try {
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            if (facesContext != null) {
+                for (String expr : new String[]{"#{modelEntityResolver}", "#{entityResolver}"}) {
+                    try {
+                        Object bean = facesContext.getApplication().evaluateExpressionGet(facesContext, expr, Object.class);
+                        if (bean instanceof EntityResolver er) {
+                            return er;
+                        }
+                    } catch (Exception e) {
+                        LOGGER.log(Level.FINE, "EL evaluation of EntityResolver (" + expr + ") failed: " + e.getMessage(), e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "FacesContext lookup of EntityResolver failed: " + e.getMessage(), e);
         }
         return null;
     }
 
     private Object parseId(Class<?> entityClass, String idStr) {
+        if (idStr == null || idStr.isBlank()) {
+            return null;
+        }
+        if (idStr.length() == 36 && idStr.charAt(8) == '-' && idStr.charAt(13) == '-') {
+            try {
+                return UUID.fromString(idStr);
+            } catch (IllegalArgumentException e) {
+                LOGGER.log(Level.FINE, "UUID parse failed for candidate string: " + idStr, e);
+            }
+        }
         Class<?> idType = resolveIdType(entityClass);
         if (UUID.class.equals(idType)) {
             return UUID.fromString(idStr);
@@ -133,11 +175,14 @@ public class EntityConverter implements Converter<Object> {
     }
 
     private Class<?> resolveIdType(Class<?> entityClass) {
-        for (String methodName : new String[]{"getMMId", "getId"}) {
-            try {
-                Method method = entityClass.getMethod(methodName);
-                return method.getReturnType();
-            } catch (NoSuchMethodException ignored) {
+        for (String methodName : new String[]{"getId", "getMMId"}) {
+            for (Method method : entityClass.getMethods()) {
+                if (methodName.equals(method.getName()) && !method.isBridge() && method.getParameterCount() == 0) {
+                    Class<?> ret = method.getReturnType();
+                    if (!Object.class.equals(ret)) {
+                        return ret;
+                    }
+                }
             }
         }
         return String.class;

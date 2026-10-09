@@ -8,6 +8,6 @@ import jakarta.inject.Named;
 
 @Named("modelConverter")
 @ApplicationScoped
-@FacesConverter(value = "modelConverter", forClass = Model.class, managed = true)
+@FacesConverter(value = "modelConverter")
 public class ModelConverter extends EntityConverter {
 }

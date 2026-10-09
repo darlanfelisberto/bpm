@@ -36,6 +36,10 @@ automaticamente dentro do reactor.
 - **Sem comentários óbvios**: só comente o "porquê" quando não for óbvio
   (uma decisão contra-intuitiva, um workaround, uma armadilha conhecida).
   Não descreva o que o código já deixa claro pelo nome.
+- **Tratamento de exceções (try/catch)**: nunca deixe de mostrar ou logar
+  os erros em blocos `try/catch`. Jamais silencie exceções com blocos vazios
+  ou `catch (Exception ignored)` sem log — sempre exiba/registre o erro
+  (via logger ou mensagens de erro) para facilitar o diagnóstico de falhas.
 - Componentes JSF customizados (`box`) seguem o padrão
   `UIComponentBase implements ClientBehaviorHolder`: `decode()` lê
   `jakarta.faces.source`/`jakarta.faces.behavior.event` e delega a cada

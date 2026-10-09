@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Autocomplete input with dynamic suggestions, equivalent to PrimeFaces'
@@ -57,6 +59,8 @@ import java.util.Map;
         @ResourceDependency(library = "box", name = "autocomplete/autocomplete.js", target = "head")
 })
 public class Autocomplete extends UIInput implements ClientBehaviorHolder {
+
+    private static final Logger LOGGER = Logger.getLogger(Autocomplete.class.getName());
 
     public static final String COMPONENT_TYPE = "br.edu.iffar.box.Autocomplete";
     public static final String COMPONENT_FAMILY = "br.edu.iffar.box.Autocomplete";
@@ -397,12 +401,15 @@ public class Autocomplete extends UIInput implements ClientBehaviorHolder {
         } catch (MethodNotFoundException e) {
             try {
                 result = methodExpression.invoke(elContext, new Object[]{});
-            } catch (Exception ignored) {
+            } catch (Exception noArgEx) {
+                LOGGER.log(Level.WARNING, "Failed to invoke no-arg completeMethod fallback: " + noArgEx.getMessage(), noArgEx);
             }
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Exception invoking completeMethod with query parameter: " + e.getMessage(), e);
             try {
                 result = methodExpression.invoke(elContext, new Object[]{});
-            } catch (Exception ignored) {
+            } catch (Exception noArgEx) {
+                LOGGER.log(Level.FINE, "Fallback no-arg completeMethod also failed: " + noArgEx.getMessage(), noArgEx);
             }
         }
         if (result instanceof List<?> list) {
