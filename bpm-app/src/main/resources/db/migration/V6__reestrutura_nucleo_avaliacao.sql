@@ -71,14 +71,12 @@ CREATE TABLE avaliacao.instrumento_sessao
 (
     instrumento_sessao_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     instrumento_avaliativo_id UUID         NOT NULL REFERENCES avaliacao.instrumento_avaliativo (instrumento_avaliativo_id),
-    instrumento_sessao_pai_id UUID,
     tipo                      VARCHAR(6)   NOT NULL CHECK (tipo IN ('PAGINA', 'SESSAO')),
     titulo                    VARCHAR(200) NOT NULL,
     descricao                 TEXT,
     ordem                     SMALLINT     NOT NULL,
     UNIQUE (instrumento_avaliativo_id, instrumento_sessao_id),
-    FOREIGN KEY (instrumento_avaliativo_id, instrumento_sessao_pai_id) REFERENCES avaliacao.instrumento_sessao (instrumento_avaliativo_id, instrumento_sessao_id),
-    CHECK ((tipo = 'PAGINA') = (instrumento_sessao_pai_id IS NULL))
+    FOREIGN KEY (instrumento_avaliativo_id) REFERENCES avaliacao.instrumento_avaliativo (instrumento_avaliativo_id)
 );
 
 -- ---------------------------------------------------------------------

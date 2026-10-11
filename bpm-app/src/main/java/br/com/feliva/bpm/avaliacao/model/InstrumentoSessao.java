@@ -1,5 +1,6 @@
 package br.com.feliva.bpm.avaliacao.model;
 
+import br.com.feliva.sharedClass.db.Model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,24 +23,16 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "instrumento_sessao", schema = "avaliacao")
-public class InstrumentoSessao implements Serializable {
+public class InstrumentoSessao  extends Model<UUID> implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "instrumento_sessao_id", updatable = false, nullable = false)
-    private UUID id;
+    private UUID instumentoSessaoId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "instrumento_avaliativo_id", nullable = false)
     private InstrumentoAvaliativo instrumentoAvaliativo;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instrumento_sessao_pai_id")
-    private InstrumentoSessao instrumentoSessaoPai;
-
-    @OneToMany(mappedBy = "instrumentoSessaoPai", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("ordem ASC")
-    private List<InstrumentoSessao> sessoesFilhas = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 6)
@@ -53,17 +46,29 @@ public class InstrumentoSessao implements Serializable {
 
     @Column(nullable = false)
     private short ordem;
-
     @OneToMany(mappedBy = "instrumentoSessao", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("ordem ASC")
     private List<SessaoQuestao> questoes = new ArrayList<>();
 
+    @Override
+    public UUID getMMId() {
+        return this.instumentoSessaoId;
+    }
+
     public UUID getId() {
-        return id;
+        return instumentoSessaoId;
     }
 
     public void setId(UUID id) {
-        this.id = id;
+        this.instumentoSessaoId = id;
+    }
+
+    public UUID getInstumentoSessaoId() {
+        return instumentoSessaoId;
+    }
+
+    public void setInstumentoSessaoId(UUID instumentoSessaoId) {
+        this.instumentoSessaoId = instumentoSessaoId;
     }
 
     public InstrumentoAvaliativo getInstrumentoAvaliativo() {
@@ -72,22 +77,6 @@ public class InstrumentoSessao implements Serializable {
 
     public void setInstrumentoAvaliativo(InstrumentoAvaliativo instrumentoAvaliativo) {
         this.instrumentoAvaliativo = instrumentoAvaliativo;
-    }
-
-    public InstrumentoSessao getInstrumentoSessaoPai() {
-        return instrumentoSessaoPai;
-    }
-
-    public void setInstrumentoSessaoPai(InstrumentoSessao instrumentoSessaoPai) {
-        this.instrumentoSessaoPai = instrumentoSessaoPai;
-    }
-
-    public List<InstrumentoSessao> getSessoesFilhas() {
-        return sessoesFilhas;
-    }
-
-    public void setSessoesFilhas(List<InstrumentoSessao> sessoesFilhas) {
-        this.sessoesFilhas = sessoesFilhas;
     }
 
     public TipoSessao getTipo() {

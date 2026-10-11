@@ -1,3 +1,6 @@
+agy --conversation=4b1e8362-12d8-40a9-8669-ec020ea10ac5
+
+
 # Build e configuração
 
 Guia para compilar e rodar o BPM IFFar localmente.

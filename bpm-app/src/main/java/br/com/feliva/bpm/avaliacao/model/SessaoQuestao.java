@@ -1,5 +1,6 @@
 package br.com.feliva.bpm.avaliacao.model;
 
+import br.com.feliva.sharedClass.db.Model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,12 +20,17 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "sessao_questao", schema = "avaliacao")
-public class SessaoQuestao implements Serializable {
+public class SessaoQuestao extends Model<UUID> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "sessao_questao_id", updatable = false, nullable = false)
     private UUID id;
+
+    @Override
+    public UUID getMMId() {
+        return this.id;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "instrumento_sessao_id", nullable = false)

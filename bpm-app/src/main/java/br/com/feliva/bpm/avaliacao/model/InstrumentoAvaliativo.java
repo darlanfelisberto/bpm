@@ -78,9 +78,9 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
 //    @OneToMany(mappedBy = "instrumentoAvaliativo", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<PublicoAlvo> publicosAlvo = new ArrayList<>();
 //
-//    @OneToMany(mappedBy = "instrumentoAvaliativo", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @OrderBy("ordem ASC")
-//    private List<InstrumentoSessao> sessoes = new ArrayList<>();
+    @OneToMany(mappedBy = "instrumentoAvaliativo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("ordem ASC")
+    private List<InstrumentoSessao> sessoes = new ArrayList<>();
 //
 //    @OneToMany(mappedBy = "instrumentoAvaliativo")
 //    private List<Participacao> participacoes = new ArrayList<>();
@@ -254,6 +254,14 @@ public class InstrumentoAvaliativo extends Model<UUID> implements Serializable {
 
     public void setAtualizadoEm(LocalDateTime atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
+    }
+
+    public List<InstrumentoSessao> getSessoes() {
+        return sessoes;
+    }
+
+    public void setSessoes(List<InstrumentoSessao> sessoes) {
+        this.sessoes = sessoes;
     }
 
     @Override

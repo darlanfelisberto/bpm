@@ -7,151 +7,642 @@
       xmlns:p="jakarta.faces.passthrough">
 <f:metadata>
     <f:viewParam name="instrumentoId" value="#{instrumentoDetalheBean.instrumentoId}" required="true"/>
+    <f:viewAction action="#{instrumentoDetalheBean.carregar}"/>
 </f:metadata>
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
-    <ui:define name="titulo">Editar questões</ui:define>
+    <ui:define name="titulo">Estrutura do Instrumento - #{instrumentoDetalheBean.instrumento.titulo}</ui:define>
     <ui:define name="conteudo">
 
-        <h2>#{instrumentoDetalheBean.instrumento.titulo}</h2>
+        <h:form id="frmBuilder">
+            <h:messages id="msgs" errorClass="msg-error" infoClass="msg-info" style="margin-bottom: 1.25rem; list-style: none; padding: 0;"/>
 
-        <b:panel>
-            <h:form id="formGrupos">
-                <h:dataTable value="#{instrumentoDetalheBean.instrumento.grupos}" var="g" styleClass="grid">
-                    <h:column>
-                        <f:facet name="header">Grupo</f:facet>
-                        <strong>#{g.titulo}</strong> — #{g.descricao}
-
-                        <h:dataTable value="#{g.questoes}" var="q" styleClass="grid">
-                            <h:column>
-                                <f:facet name="header">Questão</f:facet>
-                                #{q.enunciado}
-                            </h:column>
-                            <h:column>
-                                <f:facet name="header">Tipo</f:facet>
-                                #{q.tipo}
-                            </h:column>
-                            <h:column>
-                                <f:facet name="header">Obrigatória</f:facet>
-                                #{q.obrigatoria ? 'Sim' : 'Não'}
-                            </h:column>
-                            <h:column>
-                                <f:facet name="header">Opções</f:facet>
-                                <ui:repeat value="#{q.opcoes}" var="o">
-                                    #{o.texto} (#{o.valor})&#160;
-                                    <h:commandLink action="#{instrumentoDetalheBean.excluirOpcao(o)}" styleClass="link-danger"
-                                                   p:aria-label="Remover opção #{o.texto}" title="Remover opção">
-                                        <i class="bi bi-trash"/>
-                                        <box-confirm message="Remover a opção #{o.texto}?"/>
-                                        <f:ajax render=":formGrupos"/>
-                                    </h:commandLink>
-                                    <br/>
-                                </ui:repeat>
-                            </h:column>
-                            <h:column>
-                                <f:facet name="header">Ações</f:facet>
-                                <h:commandLink action="#{instrumentoDetalheBean.excluirQuestao(q)}" styleClass="link-danger"
-                                               p:aria-label="Excluir questão #{q.enunciado}" title="Excluir questão">
-                                    <i class="bi bi-trash"/>
-                                    <box-confirm message="Excluir a questão #{q.enunciado}? As opções e respostas dela também serão apagadas."/>
-                                    <f:ajax render=":formGrupos"/>
-                                </h:commandLink>
-                            </h:column>
-                        </h:dataTable>
-                    </h:column>
-                    <h:column>
-                        <f:facet name="header">Ações</f:facet>
-                        <h:commandLink action="#{instrumentoDetalheBean.excluirGrupo(g)}" styleClass="link-danger"
-                                       p:aria-label="Excluir grupo #{g.titulo}" title="Excluir grupo">
-                            <i class="bi bi-trash"/>
-                            <box-confirm message="Excluir o grupo #{g.titulo}? Todas as questões dele também serão apagadas."/>
-                            <f:ajax render=":formGrupos"/>
-                        </h:commandLink>
-                    </h:column>
-                </h:dataTable>
-            </h:form>
-        </b:panel>
-
-        <b:panel header="Novo grupo de questões">
-            <h:form id="formNovoGrupo">
-                <div class="grid-12">
-                    <div class="campo col-6">
-                        <h:outputLabel for="titulo" value="Título"/>
-                        <h:inputText id="titulo" value="#{instrumentoDetalheBean.novoGrupo.titulo}" required="true"/>
+            <!-- =================================================================
+                 Cabeçalho do Construtor de Instrumento
+                 ================================================================= -->
+            <div class="builder-header">
+                <div class="builder-header-top">
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <h:link outcome="/avaliacao/instrumentos/instrumento" value="Instrumentos Avaliativos" style="color: inherit; text-decoration: none;"/>
+                            <i class="bi bi-chevron-right" style="font-size: 0.75rem;"/>
+                            <span>Estrutura e Questões</span>
+                        </div>
+                        <h2 class="builder-title">#{instrumentoDetalheBean.instrumento.titulo}</h2>
+                        <div class="builder-meta">
+                            <span class="badge" style="background: #e2e8f0; color: #334155;">Ciclo: #{instrumentoDetalheBean.instrumento.cicloReferencia}</span>
+                            <span class="badge" style="background: #e0f2fe; color: #0284c7;">Status: #{instrumentoDetalheBean.instrumento.tipoStatus.descricao}</span>
+                            <h:panelGroup rendered="#{instrumentoDetalheBean.instrumento.anonimo}">
+                                <span class="badge" style="background: #fef3c7; color: #b45309;"><i class="bi bi-incognito"/> Anônimo</span>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{not empty instrumentoDetalheBean.instrumento.descricao}">
+                                <span style="font-size: 0.88rem; color: var(--color-text-muted); margin-left: 0.5rem;">#{instrumentoDetalheBean.instrumento.descricao}</span>
+                            </h:panelGroup>
+                        </div>
                     </div>
 
-                    <div class="campo col-12">
-                        <h:outputLabel for="descricao" value="Descrição"/>
-                        <h:inputTextarea id="descricao" value="#{instrumentoDetalheBean.novoGrupo.descricao}"/>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                        <b:commandButton action="#{instrumentoDetalheBean.novaSessao}"
+                                         value="Nova Sessão"
+                                         icon="bi bi-folder-plus"
+                                         render=":frmBuilder"
+                                         title="Adicionar uma nova página ou agrupador de questões"/>
+
+                        <b:commandButton action="#{instrumentoDetalheBean.alternarPreview}"
+                                         value="#{instrumentoDetalheBean.previsualizar ? 'Voltar ao Editor' : 'Visualizar Formulário'}"
+                                         icon="#{instrumentoDetalheBean.previsualizar ? 'bi bi-pencil-square' : 'bi bi-eye'}"
+                                         variant="secondary"
+                                         render=":frmBuilder"
+                                         title="Alternar entre o modo editor e a visão do respondente"/>
+
+                        <h:link outcome="/avaliacao/instrumentos/instrumento"
+                                styleClass="btn-secondary"
+                                style="display: inline-flex; align-items: center; gap: 0.35rem; text-decoration: none; padding: 0.5rem 0.85rem; border-radius: 6px; border: 1px solid var(--color-border); font-size: 0.88rem; font-weight: 600;">
+                            <i class="bi bi-arrow-left"/> Voltar
+                        </h:link>
                     </div>
                 </div>
-                <h:commandButton value="Adicionar grupo" action="#{instrumentoDetalheBean.salvarGrupo}">
-                    <f:ajax execute="@form" render=":formGrupos :formNovoGrupo :formNovaQuestao"/>
-                </h:commandButton>
-            </h:form>
-        </b:panel>
 
-        <b:panel header="Nova questão">
-            <h:form id="formNovaQuestao">
-                <div class="grid-12">
-                    <div class="campo col-6">
-                        <h:outputLabel for="grupo" value="Grupo"/>
-                        <h:selectOneMenu id="grupo" value="#{instrumentoDetalheBean.grupoSelecionadoId}" required="true">
-                            <f:selectItems value="#{instrumentoDetalheBean.instrumento.grupos}" var="g"
-                                           itemLabel="#{g.titulo}" itemValue="#{g.id}"/>
-                        </h:selectOneMenu>
+                <!-- Estatísticas Rápidas -->
+                <div class="builder-stats">
+                    <div class="builder-stat-card">
+                        <div class="builder-stat-number">#{instrumentoDetalheBean.totalSessoes}</div>
+                        <div class="builder-stat-label">Sessões / Páginas</div>
                     </div>
-
-                    <div class="campo col-6">
-                        <h:outputLabel for="tipo" value="Tipo"/>
-                        <h:selectOneMenu id="tipo" value="#{instrumentoDetalheBean.novaQuestao.tipo}" required="true">
-                            <f:selectItems value="#{instrumentoDetalheBean.tiposQuestao}"/>
-                        </h:selectOneMenu>
+                    <div class="builder-stat-card">
+                        <div class="builder-stat-number">#{instrumentoDetalheBean.totalQuestoes}</div>
+                        <div class="builder-stat-label">Total de Questões</div>
                     </div>
-
-                    <div class="campo col-12">
-                        <h:outputLabel for="enunciado" value="Enunciado"/>
-                        <h:inputTextarea id="enunciado" value="#{instrumentoDetalheBean.novaQuestao.enunciado}" required="true"/>
+                    <div class="builder-stat-card">
+                        <div class="builder-stat-number" style="color: #b91c1c;">#{instrumentoDetalheBean.totalObrigatorias}</div>
+                        <div class="builder-stat-label">Obrigatórias</div>
                     </div>
-
-                    <div class="campo col-6">
-                        <h:outputLabel for="obrigatoria" value="Obrigatória"/>
-                        <h:selectBooleanCheckbox id="obrigatoria" value="#{instrumentoDetalheBean.novaQuestao.obrigatoria}"/>
+                    <div class="builder-stat-card">
+                        <div class="builder-stat-number" style="color: #0369a1;">#{instrumentoDetalheBean.totalQuestoes - instrumentoDetalheBean.totalObrigatorias}</div>
+                        <div class="builder-stat-label">Opcionais</div>
                     </div>
                 </div>
-                <h:commandButton value="Adicionar questão" action="#{instrumentoDetalheBean.salvarQuestao}">
-                    <f:ajax execute="@form" render=":formGrupos :formNovaQuestao :formNovaOpcao"/>
-                </h:commandButton>
-                <h:messages errorClass="msg-error" infoClass="msg-info"/>
-            </h:form>
-        </b:panel>
+            </div>
 
-        <b:panel header="Nova opção (para questões de escala/múltipla escolha)">
-            <h:form id="formNovaOpcao">
-                <div class="grid-12">
-                    <div class="campo col-12">
-                        <h:outputLabel for="questao" value="Questão"/>
-                        <h:selectOneMenu id="questao" value="#{instrumentoDetalheBean.questaoSelecionadaId}" required="true">
-                            <ui:repeat value="#{instrumentoDetalheBean.instrumento.grupos}" var="g">
-                                <f:selectItems value="#{g.questoes}" var="q" itemLabel="#{q.enunciado}" itemValue="#{q.id}"/>
+            <!-- =================================================================
+                 Modo Pré-visualização do Formulário (Visão do Respondente)
+                 ================================================================= -->
+            <h:panelGroup id="pnlPreview" layout="block" rendered="#{instrumentoDetalheBean.previsualizar}">
+                <div class="card" style="border: 2px dashed #0284c7; background: #f0f9ff; margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; color: #0369a1; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="bi bi-eye-fill"/> Modo Pré-visualização: esta é uma demonstração de como o formulário será apresentado ao respondente.
+                        </span>
+                        <b:commandButton action="#{instrumentoDetalheBean.alternarPreview}"
+                                         value="Fechar Pré-visualização"
+                                         size="sm"
+                                         render=":frmBuilder"/>
+                    </div>
+                </div>
+
+                <ui:repeat value="#{instrumentoDetalheBean.instrumento.sessoes}" var="s">
+                    <div class="card" style="margin-bottom: 2rem;">
+                        <div style="border-bottom: 2px solid var(--color-primary); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+                            <span class="badge badge-sessao-pagina" style="margin-bottom: 0.35rem;">#{s.tipo == 'PAGINA' ? 'Página ' : 'Sessão '} ##{s.ordem}</span>
+                            <h3 style="margin: 0; font-size: 1.3rem;">#{s.titulo}</h3>
+                            <h:panelGroup rendered="#{not empty s.descricao}">
+                                <p style="margin: 0.35rem 0 0 0; font-size: 0.95rem;">#{s.descricao}</p>
+                            </h:panelGroup>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+                            <ui:repeat value="#{s.questoes}" var="sq">
+                                <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+                                    <div style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.85rem; color: #1e293b;">
+                                        #{sq.ordem}. #{sq.enunciado}
+                                        <h:panelGroup rendered="#{sq.obrigatoria}">
+                                            <span style="color: #b91c1c; margin-left: 0.25rem;">*</span>
+                                        </h:panelGroup>
+                                    </div>
+
+                                    <!-- Renderização interativa simulada para cada tipo -->
+                                    <h:panelGroup rendered="#{sq.tipo == 'ESCOLHA_UNICA'}">
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <ui:repeat value="#{sq.opcoes}" var="op">
+                                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; background: #f8fafc;">
+                                                    <input type="radio" name="preview_#{sq.id}" value="#{op.id}"/>
+                                                    <span>#{op.texto}</span>
+                                                </label>
+                                            </ui:repeat>
+                                        </div>
+                                    </h:panelGroup>
+
+                                    <h:panelGroup rendered="#{sq.tipo == 'MULTIPLA_ESCOLHA'}">
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <ui:repeat value="#{sq.opcoes}" var="op">
+                                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; background: #f8fafc;">
+                                                    <input type="checkbox" name="preview_#{sq.id}" value="#{op.id}"/>
+                                                    <span>#{op.texto}</span>
+                                                </label>
+                                            </ui:repeat>
+                                        </div>
+                                    </h:panelGroup>
+
+                                    <h:panelGroup rendered="#{sq.tipo == 'ESCALA'}">
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <ui:repeat value="#{sq.opcoes}" var="op">
+                                                <label style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; padding: 0.5rem 0.85rem; border-radius: 6px; border: 1px solid #0d9488; background: #f0fdfa; text-align: center; min-width: 90px;">
+                                                    <input type="radio" name="preview_#{sq.id}" value="#{op.id}"/>
+                                                    <span style="font-weight: 600; font-size: 0.95rem; color: #0f766e;">#{op.texto}</span>
+                                                    <span style="font-size: 0.75rem; color: #64748b;">(#{op.valor != null ? op.valor : '-'})</span>
+                                                </label>
+                                            </ui:repeat>
+                                        </div>
+                                    </h:panelGroup>
+
+                                    <h:panelGroup rendered="#{sq.tipo == 'DESCRITIVA'}">
+                                        <textarea class="campo" rows="3" placeholder="Digite sua resposta aqui..." style="width: 100%; border: 1px solid var(--color-border); border-radius: 6px; padding: 0.5rem;"></textarea>
+                                    </h:panelGroup>
+                                </div>
                             </ui:repeat>
-                        </h:selectOneMenu>
+                        </div>
                     </div>
+                </ui:repeat>
+            </h:panelGroup>
 
-                    <div class="campo col-8">
-                        <h:outputLabel for="texto" value="Texto da opção"/>
-                        <h:inputText id="texto" value="#{instrumentoDetalheBean.novaOpcao.texto}" required="true"/>
+            <!-- =================================================================
+                 Modo Construtor Visual (Form Builder)
+                 ================================================================= -->
+            <h:panelGroup id="pnlBuilder" layout="block" rendered="#{not instrumentoDetalheBean.previsualizar}">
+
+                <!-- Estado Vazio: nenhuma sessão -->
+                <h:panelGroup rendered="#{empty instrumentoDetalheBean.instrumento.sessoes}">
+                    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+                        <i class="bi bi-folder2-open" style="font-size: 3rem; color: var(--color-text-muted); display: block; margin-bottom: 1rem;"/>
+                        <h3 style="font-size: 1.25rem;">Nenhuma sessão cadastrada ainda</h3>
+                        <p style="max-width: 500px; margin: 0 auto 1.5rem auto;">
+                            Um instrumento avaliativo é composto por páginas ou sessões que agrupam as perguntas.
+                            Crie a primeira sessão para começar a adicionar questões.
+                        </p>
+                        <b:commandButton action="#{instrumentoDetalheBean.novaSessao}"
+                                         value="Criar Primeira Sessão"
+                                         icon="bi bi-plus-lg"
+                                         render=":frmBuilder"/>
                     </div>
+                </h:panelGroup>
 
-                    <div class="campo col-4">
-                        <h:outputLabel for="valor" value="Valor (para cálculo de médias)"/>
-                        <h:inputText id="valor" value="#{instrumentoDetalheBean.novaOpcao.valor}"/>
+                <!-- Lista de Sessões e Questões -->
+                <ui:repeat value="#{instrumentoDetalheBean.instrumento.sessoes}" var="sessao">
+                    <div class="session-card">
+                        <!-- Cabeçalho da Sessão -->
+                        <div class="session-header">
+                            <div class="session-header-info">
+                                <h:panelGroup rendered="#{sessao.tipo == 'PAGINA'}">
+                                    <span class="badge badge-sessao-pagina"><i class="bi bi-file-earmark-text"/> Página ##{sessao.ordem}</span>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{sessao.tipo == 'SESSAO'}">
+                                    <span class="badge badge-sessao-bloco"><i class="bi bi-folder"/> Sessão ##{sessao.ordem}</span>
+                                </h:panelGroup>
+
+                                <div>
+                                    <h3 class="session-title">#{sessao.titulo}</h3>
+                                    <h:panelGroup rendered="#{not empty sessao.descricao}">
+                                        <p class="session-desc">#{sessao.descricao}</p>
+                                    </h:panelGroup>
+                                </div>
+                            </div>
+
+                            <div class="session-actions">
+                                <b:commandButton action="#{instrumentoDetalheBean.novaQuestao(sessao)}"
+                                                 value="Adicionar Questão"
+                                                 icon="bi bi-plus-circle"
+                                                 size="sm"
+                                                 render=":frmBuilder"
+                                                 title="Adicionar nova questão a esta sessão"/>
+
+                                <b:commandButton action="#{instrumentoDetalheBean.editarSessao(sessao)}"
+                                                 icon="bi bi-pencil"
+                                                 variant="secondary"
+                                                 size="sm"
+                                                 render=":frmBuilder"
+                                                 title="Editar informações da sessão"/>
+
+                                <b:commandButton action="#{instrumentoDetalheBean.moverSessaoCima(sessao)}"
+                                                 icon="bi bi-arrow-up"
+                                                 variant="secondary"
+                                                 size="sm"
+                                                 render=":frmBuilder"
+                                                 title="Mover sessão para cima"/>
+
+                                <b:commandButton action="#{instrumentoDetalheBean.moverSessaoBaixo(sessao)}"
+                                                 icon="bi bi-arrow-down"
+                                                 variant="secondary"
+                                                 size="sm"
+                                                 render=":frmBuilder"
+                                                 title="Mover sessão para baixo"/>
+
+                                <b:commandButton action="#{instrumentoDetalheBean.excluirSessao(sessao)}"
+                                                 icon="bi bi-trash"
+                                                 variant="danger"
+                                                 size="sm"
+                                                 render=":frmBuilder"
+                                                 title="Excluir sessão e questões">
+                                    <box-confirm message="Excluir a sessão '#{sessao.titulo}' e todas as suas questões?"/>
+                                </b:commandButton>
+                            </div>
+                        </div>
+
+                        <!-- Corpo da Sessão: Lista de Questões -->
+                        <div class="session-body">
+                            <h:panelGroup rendered="#{empty sessao.questoes}">
+                                <div style="text-align: center; padding: 1.5rem; color: var(--color-text-muted); background: #f8fafc; border: 1px dashed var(--color-border); border-radius: 6px;">
+                                    <i class="bi bi-question-circle" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"/>
+                                    Nenhuma questão nesta sessão.
+                                    <div style="margin-top: 0.5rem;">
+                                        <b:commandButton action="#{instrumentoDetalheBean.novaQuestao(sessao)}"
+                                                         value="Criar Primeira Questão"
+                                                         icon="bi bi-plus-lg"
+                                                         size="sm"
+                                                         variant="secondary"
+                                                         render=":frmBuilder"/>
+                                    </div>
+                                </div>
+                            </h:panelGroup>
+
+                            <ui:repeat value="#{sessao.questoes}" var="sq">
+                                <div class="question-card">
+                                    <!-- Cabeçalho do Card da Questão -->
+                                    <div class="question-card-header">
+                                        <div class="question-meta">
+                                            <span style="font-weight: 700; color: #475569; font-size: 0.85rem;">Q#{sq.ordem}</span>
+
+                                            <h:panelGroup rendered="#{sq.tipo == 'ESCOLHA_UNICA'}">
+                                                <span class="badge badge-tipo-unica"><i class="bi bi-ui-radios"/> Escolha Única</span>
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{sq.tipo == 'MULTIPLA_ESCOLHA'}">
+                                                <span class="badge badge-tipo-multipla"><i class="bi bi-check2-square"/> Múltipla Escolha</span>
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{sq.tipo == 'ESCALA'}">
+                                                <span class="badge badge-tipo-escala"><i class="bi bi-sliders"/> Escala / Likert</span>
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{sq.tipo == 'DESCRITIVA'}">
+                                                <span class="badge badge-tipo-descritiva"><i class="bi bi-textarea-t"/> Descritiva</span>
+                                            </h:panelGroup>
+
+                                            <h:panelGroup rendered="#{sq.obrigatoria}">
+                                                <span class="badge badge-required">Obrigatória</span>
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{not sq.obrigatoria}">
+                                                <span class="badge badge-optional">Opcional</span>
+                                            </h:panelGroup>
+
+                                            <h:panelGroup rendered="#{sq.peso != null}">
+                                                <span class="badge" style="background: #f1f5f9; color: #334155;">Peso: #{sq.peso}</span>
+                                            </h:panelGroup>
+                                        </div>
+
+                                        <div class="question-actions">
+                                            <h:panelGroup rendered="#{sq.tipo != 'DESCRITIVA'}">
+                                                <b:commandButton action="#{instrumentoDetalheBean.abrirGerenciadorOpcoes(sq)}"
+                                                                 value="Opções (#{sq.opcoes.size()})"
+                                                                 icon="bi bi-list-check"
+                                                                 size="sm"
+                                                                 variant="secondary"
+                                                                 render=":frmBuilder"
+                                                                 title="Gerenciar opções de resposta"/>
+                                            </h:panelGroup>
+
+                                            <b:commandButton action="#{instrumentoDetalheBean.editarQuestao(sq)}"
+                                                             icon="bi bi-pencil"
+                                                             variant="secondary"
+                                                             size="sm"
+                                                             render=":frmBuilder"
+                                                             title="Editar questão"/>
+
+                                            <b:commandButton action="#{instrumentoDetalheBean.moverQuestaoCima(sq)}"
+                                                             icon="bi bi-arrow-up"
+                                                             variant="secondary"
+                                                             size="sm"
+                                                             render=":frmBuilder"
+                                                             title="Mover questão para cima"/>
+
+                                            <b:commandButton action="#{instrumentoDetalheBean.moverQuestaoBaixo(sq)}"
+                                                             icon="bi bi-arrow-down"
+                                                             variant="secondary"
+                                                             size="sm"
+                                                             render=":frmBuilder"
+                                                             title="Mover questão para baixo"/>
+
+                                            <b:commandButton action="#{instrumentoDetalheBean.excluirQuestao(sq)}"
+                                                             icon="bi bi-trash"
+                                                             variant="danger"
+                                                             size="sm"
+                                                             render=":frmBuilder"
+                                                             title="Excluir questão">
+                                                <box-confirm message="Excluir esta questão?"/>
+                                            </b:commandButton>
+                                        </div>
+                                    </div>
+
+                                    <!-- Enunciado e Assunto -->
+                                    <div class="question-prompt">#{sq.enunciado}</div>
+                                    <h:panelGroup rendered="#{not empty sq.questao.assunto}">
+                                        <span class="question-subject"><i class="bi bi-tag"/> #{sq.questao.assunto}</span>
+                                    </h:panelGroup>
+
+                                    <!-- Pré-visualização realista no card -->
+                                    <div class="question-preview-box">
+                                        <div class="preview-label">
+                                            <i class="bi bi-eye"/> Prévia da Resposta:
+                                        </div>
+
+                                        <h:panelGroup rendered="#{sq.tipo == 'ESCOLHA_UNICA'}">
+                                            <h:panelGroup rendered="#{empty sq.opcoes}">
+                                                <div style="font-size: 0.85rem; color: #b45309;">
+                                                    <i class="bi bi-exclamation-triangle"/> Nenhuma opção cadastrada.
+                                                    <b:commandButton action="#{instrumentoDetalheBean.abrirGerenciadorOpcoes(sq)}"
+                                                                     value="Adicionar Opções"
+                                                                     variant="link"
+                                                                     render=":frmBuilder"/>
+                                                </div>
+                                            </h:panelGroup>
+                                            <div class="preview-options-list">
+                                                <ui:repeat value="#{sq.opcoes}" var="op">
+                                                    <div class="preview-option-item">
+                                                        <i class="bi bi-circle"/>
+                                                        <span>#{op.texto}</span>
+                                                        <h:panelGroup rendered="#{op.valor != null}">
+                                                            <span style="margin-left: auto; font-size: 0.75rem; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">peso: #{op.valor}</span>
+                                                        </h:panelGroup>
+                                                    </div>
+                                                </ui:repeat>
+                                            </div>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{sq.tipo == 'MULTIPLA_ESCOLHA'}">
+                                            <h:panelGroup rendered="#{empty sq.opcoes}">
+                                                <div style="font-size: 0.85rem; color: #b45309;">
+                                                    <i class="bi bi-exclamation-triangle"/> Nenhuma opção cadastrada.
+                                                    <b:commandButton action="#{instrumentoDetalheBean.abrirGerenciadorOpcoes(sq)}"
+                                                                     value="Adicionar Opções"
+                                                                     variant="link"
+                                                                     render=":frmBuilder"/>
+                                                </div>
+                                            </h:panelGroup>
+                                            <div class="preview-options-list">
+                                                <ui:repeat value="#{sq.opcoes}" var="op">
+                                                    <div class="preview-option-item">
+                                                        <i class="bi bi-square"/>
+                                                        <span>#{op.texto}</span>
+                                                        <h:panelGroup rendered="#{op.valor != null}">
+                                                            <span style="margin-left: auto; font-size: 0.75rem; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">peso: #{op.valor}</span>
+                                                        </h:panelGroup>
+                                                    </div>
+                                                </ui:repeat>
+                                            </div>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{sq.tipo == 'ESCALA'}">
+                                            <h:panelGroup rendered="#{empty sq.opcoes}">
+                                                <div style="font-size: 0.85rem; color: #b45309;">
+                                                    <i class="bi bi-exclamation-triangle"/> Nenhuma opção de escala cadastrada.
+                                                    <b:commandButton action="#{instrumentoDetalheBean.abrirGerenciadorOpcoes(sq)}"
+                                                                     value="Adicionar Opções de Escala"
+                                                                     variant="link"
+                                                                     render=":frmBuilder"/>
+                                                </div>
+                                            </h:panelGroup>
+                                            <div class="preview-scale-row">
+                                                <ui:repeat value="#{sq.opcoes}" var="op">
+                                                    <span class="preview-scale-pill">
+                                                        <i class="bi bi-circle-fill" style="font-size: 0.45rem;"/> #{op.texto} (#{op.valor != null ? op.valor : '-'})
+                                                    </span>
+                                                </ui:repeat>
+                                            </div>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{sq.tipo == 'DESCRITIVA'}">
+                                            <div class="preview-textarea-simulated">
+                                                O respondente redigirá um texto livre nesta área...
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </div>
+                            </ui:repeat>
+                        </div>
+                    </div>
+                </ui:repeat>
+
+            </h:panelGroup>
+
+            <!-- =================================================================
+                 MODAL 1: Cadastro / Edição de Sessão
+                 ================================================================= -->
+            <h:panelGroup id="modalSessao" layout="block" rendered="#{instrumentoDetalheBean.editandoSessao}">
+                <div class="builder-modal-backdrop">
+                    <div class="builder-modal-window">
+                        <div class="builder-modal-header">
+                            <h3><i class="bi bi-folder-fill" style="color: var(--color-primary);"/> #{instrumentoDetalheBean.sessaoEmEdicao.id != null ? 'Editar Sessão' : 'Nova Sessão / Página'}</h3>
+                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" icon="bi bi-x-lg" variant="link" render=":frmBuilder" immediate="true"/>
+                        </div>
+                        <div class="builder-modal-body">
+                            <div class="grid-12">
+                                <div class="campo col-12">
+                                    <h:outputLabel for="sessaoTitulo" value="Título da Sessão / Página *"/>
+                                    <h:inputText id="sessaoTitulo" value="#{instrumentoDetalheBean.sessaoEmEdicao.titulo}" required="true" placeholder="Ex.: Dimensão 1: Autoavaliação do Discente"/>
+                                </div>
+
+                                <div class="campo col-6">
+                                    <h:outputLabel for="sessaoTipo" value="Tipo de Sessão *"/>
+                                    <h:selectOneMenu id="sessaoTipo" value="#{instrumentoDetalheBean.sessaoEmEdicao.tipo}" required="true">
+                                        <f:selectItems value="#{instrumentoDetalheBean.tiposSessao}" var="t" itemValue="#{t}"
+                                                       itemLabel="#{t == 'PAGINA' ? 'Página (Gera quebra de página no formulário)' : 'Sessão (Agrupador visual na mesma página)'}"/>
+                                    </h:selectOneMenu>
+                                </div>
+
+                                <div class="campo col-6">
+                                    <h:outputLabel for="sessaoOrdem" value="Posição / Ordem"/>
+                                    <h:inputText id="sessaoOrdem" value="#{instrumentoDetalheBean.sessaoEmEdicao.ordem}" p:type="number"/>
+                                </div>
+
+                                <div class="campo col-12">
+                                    <h:outputLabel for="sessaoDesc" value="Descrição / Instruções (opcional)"/>
+                                    <h:inputTextarea id="sessaoDesc" value="#{instrumentoDetalheBean.sessaoEmEdicao.descricao}" rows="3" placeholder="Orientações e contexto exibidos para o respondente nesta seção..."/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="builder-modal-footer">
+                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" value="Cancelar" variant="secondary" render=":frmBuilder" immediate="true"/>
+                            <b:commandButton action="#{instrumentoDetalheBean.salvarSessao}" value="Salvar Sessão" icon="bi bi-check-lg" render=":frmBuilder"/>
+                        </div>
                     </div>
                 </div>
-                <h:commandButton value="Adicionar opção" action="#{instrumentoDetalheBean.salvarOpcao}">
-                    <f:ajax execute="@form" render=":formGrupos :formNovaOpcao"/>
-                </h:commandButton>
-            </h:form>
-        </b:panel>
+            </h:panelGroup>
+
+            <!-- =================================================================
+                 MODAL 2: Cadastro / Edição de Questão
+                 ================================================================= -->
+            <h:panelGroup id="modalQuestao" layout="block" rendered="#{instrumentoDetalheBean.editandoQuestao}">
+                <div class="builder-modal-backdrop">
+                    <div class="builder-modal-window">
+                        <div class="builder-modal-header">
+                            <h3><i class="bi bi-question-circle-fill" style="color: var(--color-primary);"/> #{instrumentoDetalheBean.questaoEmEdicao.id != null ? 'Editar Questão' : 'Nova Questão'}</h3>
+                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" icon="bi bi-x-lg" variant="link" render=":frmBuilder" immediate="true"/>
+                        </div>
+                        <div class="builder-modal-body">
+                            <div class="grid-12">
+                                <div class="campo col-12">
+                                    <label style="font-weight: 600;">Sessão Pertencente:</label>
+                                    <div style="background: #f8fafc; padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.95rem;">
+                                        <i class="bi bi-folder2-open"/> #{instrumentoDetalheBean.sessaoSelecionada.titulo}
+                                    </div>
+                                </div>
+
+                                <div class="campo col-12">
+                                    <h:outputLabel for="questaoEnunciado" value="Enunciado da Questão *"/>
+                                    <h:inputTextarea id="questaoEnunciado" value="#{instrumentoDetalheBean.questaoEmEdicao.enunciado}" required="true" rows="3" placeholder="Digite o enunciado claro da pergunta..."/>
+                                </div>
+
+                                <div class="campo col-8">
+                                    <h:outputLabel for="questaoTipo" value="Tipo de Pergunta *"/>
+                                    <h:selectOneMenu id="questaoTipo" value="#{instrumentoDetalheBean.questaoEmEdicao.tipo}" required="true">
+                                        <f:selectItems value="#{instrumentoDetalheBean.tiposQuestao}" var="t" itemValue="#{t}"
+                                                       itemLabel="#{t.descricao}"/>
+                                    </h:selectOneMenu>
+                                </div>
+
+                                <div class="campo col-4">
+                                    <h:outputLabel for="questaoPeso" value="Peso / Pontuação"/>
+                                    <h:inputText id="questaoPeso" value="#{instrumentoDetalheBean.sessaoQuestaoEmEdicao.peso}" placeholder="1.00"/>
+                                </div>
+
+                                <div class="campo col-8">
+                                    <h:outputLabel for="questaoAssunto" value="Assunto / Categoria (opcional)"/>
+                                    <h:inputText id="questaoAssunto" value="#{instrumentoDetalheBean.questaoEmEdicao.assunto}" placeholder="Ex.: Infraestrutura, Metodologia..."/>
+                                </div>
+
+                                <div class="campo col-4" style="margin-top: 1.5rem;">
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <h:selectBooleanCheckbox id="questaoObrigatoria" value="#{instrumentoDetalheBean.sessaoQuestaoEmEdicao.obrigatoria}"/>
+                                        Obrigatória
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="builder-modal-footer">
+                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" value="Cancelar" variant="secondary" render=":frmBuilder" immediate="true"/>
+                            <b:commandButton action="#{instrumentoDetalheBean.salvarQuestao}" value="Salvar Questão" icon="bi bi-check-lg" render=":frmBuilder"/>
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+
+            <!-- =================================================================
+                 MODAL 3: Gerenciamento de Opções de Resposta
+                 ================================================================= -->
+            <h:panelGroup id="modalOpcoes" layout="block" rendered="#{instrumentoDetalheBean.gerenciandoOpcoes}">
+                <div class="builder-modal-backdrop">
+                    <div class="builder-modal-window" style="max-width: 720px;">
+                        <div class="builder-modal-header">
+                            <div>
+                                <h3 style="margin: 0;"><i class="bi bi-list-check" style="color: var(--color-primary);"/> Opções de Resposta</h3>
+                                <div style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 0.25rem;">
+                                    #{instrumentoDetalheBean.sessaoQuestaoOpcoes.enunciado}
+                                </div>
+                            </div>
+                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" icon="bi bi-x-lg" variant="link" render=":frmBuilder" immediate="true"/>
+                        </div>
+                        <div class="builder-modal-body">
+                            <!-- Barra de Templates Rápidos -->
+                            <div class="templates-bar">
+                                <span><i class="bi bi-magic"/> Preenchimento Rápido com Templates:</span>
+                                <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateLikert5}"
+                                                 value="Escala Likert (5 níveis)"
+                                                 size="sm"
+                                                 variant="secondary"
+                                                 render=":frmBuilder"
+                                                 title="Adiciona: Discordo totalmente a Concordo totalmente"/>
+
+                                <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateQualidade}"
+                                                 value="Qualidade (4 níveis)"
+                                                 size="sm"
+                                                 variant="secondary"
+                                                 render=":frmBuilder"
+                                                 title="Adiciona: Insuficiente, Regular, Bom e Excelente"/>
+
+                                <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateSimNao}"
+                                                 value="Sim / Não"
+                                                 size="sm"
+                                                 variant="secondary"
+                                                 render=":frmBuilder"
+                                                 title="Adiciona: Sim e Não"/>
+                            </div>
+
+                            <!-- Tabela de Opções Existentes -->
+                            <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">Opções Cadastradas:</h4>
+                            <h:panelGroup rendered="#{empty instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}">
+                                <div style="text-align: center; padding: 1rem; color: var(--color-text-muted); background: #f8fafc; border-radius: 6px; margin-bottom: 1rem;">
+                                    Nenhuma opção cadastrada ainda. Utilize um template acima ou adicione manualmente abaixo.
+                                </div>
+                            </h:panelGroup>
+
+                            <h:panelGroup rendered="#{not empty instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}">
+                                <table class="grid" style="margin-bottom: 1.25rem;">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th>Texto da Opção</th>
+                                        <th style="width: 120px;">Valor / Peso</th>
+                                        <th style="width: 60px; text-align: center;">Ação</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <ui:repeat value="#{instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}" var="op">
+                                        <tr>
+                                            <td>#{op.ordem}</td>
+                                            <td><strong>#{op.texto}</strong></td>
+                                            <td>#{op.valor != null ? op.valor : '-'}</td>
+                                            <td style="text-align: center;">
+                                                <b:commandButton action="#{instrumentoDetalheBean.excluirOpcao(op)}"
+                                                                 icon="bi bi-trash"
+                                                                 variant="danger"
+                                                                 size="sm"
+                                                                 render=":frmBuilder"
+                                                                 title="Remover esta opção"/>
+                                            </td>
+                                        </tr>
+                                    </ui:repeat>
+                                    </tbody>
+                                </table>
+                            </h:panelGroup>
+
+                            <!-- Adicionar Nova Opção Manualmente -->
+                            <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem;">
+                                <h4 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 0.75rem;"><i class="bi bi-plus-circle"/> Adicionar Nova Opção</h4>
+                                <div class="grid-12" style="margin-bottom: 0.5rem;">
+                                    <div class="campo col-8">
+                                        <h:outputLabel for="novaOpcaoTexto" value="Texto da Opção *"/>
+                                        <h:inputText id="novaOpcaoTexto" value="#{instrumentoDetalheBean.novaOpcaoTexto}" placeholder="Ex.: Parcialmente satisfeito"/>
+                                    </div>
+                                    <div class="campo col-4">
+                                        <h:outputLabel for="novaOpcaoValor" value="Valor / Peso (numérico)"/>
+                                        <h:inputText id="novaOpcaoValor" value="#{instrumentoDetalheBean.novaOpcaoValor}" placeholder="Ex.: 3.00"/>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    <b:commandButton action="#{instrumentoDetalheBean.adicionarOpcao}"
+                                                     value="Adicionar Opção"
+                                                     icon="bi bi-plus-lg"
+                                                     size="sm"
+                                                     render=":frmBuilder"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="builder-modal-footer">
+                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}"
+                                             value="Concluir"
+                                             icon="bi bi-check-lg"
+                                             render=":frmBuilder"/>
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+
+        </h:form>
 
     </ui:define>
 </ui:composition>

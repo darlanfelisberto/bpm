@@ -10,18 +10,25 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import br.com.feliva.sharedClass.db.Model;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
 @Table(name = "opcao_questao", schema = "avaliacao")
-public class OpcaoQuestao implements Serializable {
+public class OpcaoQuestao extends Model<UUID> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "opcao_questao_id", updatable = false, nullable = false)
     private UUID id;
+
+    @Override
+    public UUID getMMId() {
+        return this.id;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "conjunto_opcao_id", nullable = false)

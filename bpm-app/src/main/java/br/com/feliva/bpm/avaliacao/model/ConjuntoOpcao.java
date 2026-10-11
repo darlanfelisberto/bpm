@@ -10,6 +10,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 
+import br.com.feliva.sharedClass.db.Model;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +19,17 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "conjunto_opcao", schema = "avaliacao")
-public class ConjuntoOpcao implements Serializable {
+public class ConjuntoOpcao extends Model<UUID> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "conjunto_opcao_id", updatable = false, nullable = false)
     private UUID id;
+
+    @Override
+    public UUID getMMId() {
+        return this.id;
+    }
 
     @Column(nullable = false, unique = true, length = 100)
     private String nome;

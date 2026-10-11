@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import br.com.feliva.sharedClass.db.Model;
 import jakarta.persistence.Table;
 
 import java.io.Serializable;
@@ -22,12 +23,17 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "questao", schema = "avaliacao")
-public class Questao implements Serializable {
+public class Questao extends Model<UUID> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "questao_id", updatable = false, nullable = false)
     private UUID id;
+
+    @Override
+    public UUID getMMId() {
+        return this.id;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conjunto_opcao_id")
