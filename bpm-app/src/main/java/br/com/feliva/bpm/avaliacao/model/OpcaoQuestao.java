@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import br.edu.iffar.box.component.question.QuestionOption;
 import br.com.feliva.sharedClass.db.Model;
 
 import java.io.Serializable;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "opcao_questao", schema = "avaliacao")
-public class OpcaoQuestao extends Model<UUID> implements Serializable {
+public class OpcaoQuestao extends Model<UUID> implements Serializable, QuestionOption {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -28,6 +29,21 @@ public class OpcaoQuestao extends Model<UUID> implements Serializable {
     @Override
     public UUID getMMId() {
         return this.id;
+    }
+
+    @Override
+    public Object getValue() {
+        return this.id != null ? this.id.toString() : this.texto;
+    }
+
+    @Override
+    public String getLabel() {
+        return this.texto;
+    }
+
+    @Override
+    public String getDescription() {
+        return this.valor != null ? ("peso: " + this.valor) : null;
     }
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

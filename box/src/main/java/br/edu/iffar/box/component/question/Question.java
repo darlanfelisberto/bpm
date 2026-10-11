@@ -279,6 +279,7 @@ public class Question extends UIInput implements ClientBehaviorHolder {
 
         String clientId = getClientId(context);
         Map<String, String> requestParams = context.getExternalContext().getRequestParameterMap();
+        Map<String, String[]> requestValuesMap = context.getExternalContext().getRequestParameterValuesMap();
 
         if (isMultipleQuestions()) {
             List<QuestionModel> questions = resolveQuestionList();
@@ -289,7 +290,14 @@ public class Question extends UIInput implements ClientBehaviorHolder {
                 QuestionModel q = questions.get(i);
                 Object key = q.getId() != null ? q.getId() : i;
                 String inputName = clientId + "_" + key;
-                if (requestParams.containsKey(inputName)) {
+                QuestionType qType = q.getType() != null ? q.getType() : QuestionType.DESCRIPTIVE;
+                if (qType == QuestionType.MULTIPLE_CHOICE) {
+                    if (requestValuesMap.containsKey(inputName)) {
+                        String[] vals = requestValuesMap.get(inputName);
+                        submittedMap.put(key, vals != null ? Arrays.asList(vals) : List.of());
+                        hasSubmission = true;
+                    }
+                } else if (requestParams.containsKey(inputName)) {
                     submittedMap.put(key, requestParams.get(inputName));
                     hasSubmission = true;
                 }
@@ -299,7 +307,13 @@ public class Question extends UIInput implements ClientBehaviorHolder {
                 setSubmittedValue(submittedMap);
             }
         } else {
-            if (requestParams.containsKey(clientId)) {
+            QuestionType singleType = resolveSingleModel() != null ? resolveSingleModel().getType() : getType();
+            if (singleType == QuestionType.MULTIPLE_CHOICE) {
+                if (requestValuesMap.containsKey(clientId)) {
+                    String[] vals = requestValuesMap.get(clientId);
+                    setSubmittedValue(vals != null ? Arrays.asList(vals) : List.of());
+                }
+            } else if (requestParams.containsKey(clientId)) {
                 String submitted = requestParams.get(clientId);
                 setSubmittedValue(submitted);
             }
@@ -492,6 +506,10 @@ public class Question extends UIInput implements ClientBehaviorHolder {
 
         if (type == QuestionType.DESCRIPTIVE) {
             encodeDescriptive(context, writer, mainClientId, inputName, elementId + "_input", currentValue, disabled, readonly, required);
+        } else if (type == QuestionType.MULTIPLE_CHOICE) {
+            encodeMultipleChoice(context, writer, mainClientId, inputName, elementId, optionsList, currentValue, disabled, readonly, required);
+        } else if (type == QuestionType.SCALE) {
+            encodeScale(context, writer, mainClientId, inputName, elementId, optionsList, currentValue, disabled, readonly, required);
         } else {
             encodeChoice(context, writer, mainClientId, inputName, elementId, optionsList, currentValue, disabled, readonly, required);
         }
@@ -671,6 +689,198 @@ public class Question extends UIInput implements ClientBehaviorHolder {
         }
 
         writer.endElement("div"); // .box-question-options
+    }
+
+    private boolean isOptionSelected(Object currentValue, String optValue) {
+        if (currentValue == null || optValue == null) {
+            return false;
+        }
+        if (currentValue instanceof Collection<?> col) {
+            for (Object item : col) {
+                if (item != null && optValue.equals(String.valueOf(item))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (currentValue instanceof Object[] arr) {
+            for (Object item : arr) {
+                if (item != null && optValue.equals(String.valueOf(item))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return optValue.equals(String.valueOf(currentValue));
+    }
+
+    private void encodeMultipleChoice(FacesContext context, ResponseWriter writer,
+                                      String mainClientId, String inputName, String elementId,
+                                      List<?> optionsList, Object currentValue,
+                                      boolean disabled, boolean readonly, boolean required) throws IOException {
+        writer.startElement("div", this);
+        writer.writeAttribute("class", "box-question-options box-question-options-multiple", null);
+
+        String behaviorScript = buildBehaviorScript(context, mainClientId, "valueChange", "change", "click");
+
+        int index = 0;
+        for (Object item : optionsList) {
+            String optValue;
+            String optLabel;
+            String optDesc = null;
+            boolean optDisabled = disabled;
+
+            if (item instanceof QuestionOption opt) {
+                optValue = opt.getValue() != null ? String.valueOf(opt.getValue()) : "";
+                optLabel = opt.getLabel();
+                optDesc = opt.getDescription();
+                optDisabled = disabled || opt.isDisabled();
+            } else {
+                optValue = item != null ? String.valueOf(item) : "";
+                optLabel = optValue;
+            }
+
+            boolean checked = isOptionSelected(currentValue, optValue);
+            String optionId = elementId + "_chk" + index;
+
+            writer.startElement("label", this);
+            StringBuilder optionClass = new StringBuilder("box-question-option");
+            if (checked) {
+                optionClass.append(" is-selected");
+            }
+            if (optDisabled) {
+                optionClass.append(" is-disabled");
+            }
+            writer.writeAttribute("class", optionClass.toString(), null);
+            writer.writeAttribute("for", optionId, null);
+
+            writer.startElement("input", this);
+            writer.writeAttribute("type", "checkbox", null);
+            writer.writeAttribute("id", optionId, "id");
+            writer.writeAttribute("name", inputName, null);
+            writer.writeAttribute("value", optValue, null);
+            if (checked) {
+                writer.writeAttribute("checked", "checked", null);
+            }
+            if (optDisabled) {
+                writer.writeAttribute("disabled", "disabled", null);
+            }
+            if (readonly) {
+                writer.writeAttribute("readonly", "readonly", null);
+            }
+            if (required) {
+                writer.writeAttribute("aria-required", "true", null);
+            }
+            if (behaviorScript != null && !optDisabled && !readonly) {
+                writer.writeAttribute("onchange", behaviorScript, null);
+            }
+            writer.endElement("input");
+
+            writer.startElement("span", this);
+            writer.writeAttribute("class", "box-question-option-content", null);
+
+            writer.startElement("span", this);
+            writer.writeAttribute("class", "box-question-option-label", null);
+            writer.writeText(optLabel != null ? optLabel : optValue, null);
+            writer.endElement("span");
+
+            if (optDesc != null && !optDesc.isBlank()) {
+                writer.startElement("span", this);
+                writer.writeAttribute("class", "box-question-option-desc", null);
+                writer.writeText(optDesc, null);
+                writer.endElement("span");
+            }
+
+            writer.endElement("span"); // .box-question-option-content
+            writer.endElement("label"); // .box-question-option
+
+            index++;
+        }
+
+        writer.endElement("div"); // .box-question-options
+    }
+
+    private void encodeScale(FacesContext context, ResponseWriter writer,
+                             String mainClientId, String inputName, String elementId,
+                             List<?> optionsList, Object currentValue,
+                             boolean disabled, boolean readonly, boolean required) throws IOException {
+        writer.startElement("div", this);
+        writer.writeAttribute("class", "box-question-options box-question-options-scale", null);
+
+        String currentStr = currentValue != null ? String.valueOf(currentValue) : null;
+        String behaviorScript = buildBehaviorScript(context, mainClientId, "valueChange", "change", "click");
+
+        int index = 0;
+        for (Object item : optionsList) {
+            String optValue;
+            String optLabel;
+            String optDesc = null;
+            boolean optDisabled = disabled;
+
+            if (item instanceof QuestionOption opt) {
+                optValue = opt.getValue() != null ? String.valueOf(opt.getValue()) : "";
+                optLabel = opt.getLabel();
+                optDesc = opt.getDescription();
+                optDisabled = disabled || opt.isDisabled();
+            } else {
+                optValue = item != null ? String.valueOf(item) : "";
+                optLabel = optValue;
+            }
+
+            boolean checked = currentStr != null && currentStr.equals(optValue);
+            String optionId = elementId + "_scl" + index;
+
+            writer.startElement("label", this);
+            StringBuilder optionClass = new StringBuilder("box-question-option box-question-option-scale");
+            if (checked) {
+                optionClass.append(" is-selected");
+            }
+            if (optDisabled) {
+                optionClass.append(" is-disabled");
+            }
+            writer.writeAttribute("class", optionClass.toString(), null);
+            writer.writeAttribute("for", optionId, null);
+
+            writer.startElement("input", this);
+            writer.writeAttribute("type", "radio", null);
+            writer.writeAttribute("id", optionId, "id");
+            writer.writeAttribute("name", inputName, null);
+            writer.writeAttribute("value", optValue, null);
+            if (checked) {
+                writer.writeAttribute("checked", "checked", null);
+            }
+            if (optDisabled) {
+                writer.writeAttribute("disabled", "disabled", null);
+            }
+            if (readonly) {
+                writer.writeAttribute("readonly", "readonly", null);
+            }
+            if (required) {
+                writer.writeAttribute("aria-required", "true", null);
+            }
+            if (behaviorScript != null && !optDisabled && !readonly) {
+                writer.writeAttribute("onchange", behaviorScript, null);
+            }
+            writer.endElement("input");
+
+            writer.startElement("span", this);
+            writer.writeAttribute("class", "box-question-option-label", null);
+            writer.writeText(optLabel != null ? optLabel : optValue, null);
+            writer.endElement("span");
+
+            if (optDesc != null && !optDesc.isBlank()) {
+                writer.startElement("span", this);
+                writer.writeAttribute("class", "box-question-option-desc", null);
+                writer.writeText(optDesc, null);
+                writer.endElement("span");
+            }
+
+            writer.endElement("label"); // .box-question-option-scale
+
+            index++;
+        }
+
+        writer.endElement("div"); // .box-question-options-scale
     }
 
     private String buildBehaviorScript(FacesContext context, String clientId, String... eventNames) {

@@ -109,57 +109,15 @@
                             </h:panelGroup>
                         </div>
 
-                        <div style="display: flex; flex-direction: column; gap: 1.75rem;">
-                            <ui:repeat value="#{s.questoes}" var="sq">
-                                <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
-                                    <div style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.85rem; color: #1e293b;">
-                                        #{sq.ordem}. #{sq.enunciado}
-                                        <h:panelGroup rendered="#{sq.obrigatoria}">
-                                            <span style="color: #b91c1c; margin-left: 0.25rem;">*</span>
-                                        </h:panelGroup>
-                                    </div>
-
-                                    <!-- Renderização interativa simulada para cada tipo -->
-                                    <h:panelGroup rendered="#{sq.tipo == 'ESCOLHA_UNICA'}">
-                                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                            <ui:repeat value="#{sq.opcoes}" var="op">
-                                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; background: #f8fafc;">
-                                                    <input type="radio" name="preview_#{sq.id}" value="#{op.id}"/>
-                                                    <span>#{op.texto}</span>
-                                                </label>
-                                            </ui:repeat>
-                                        </div>
-                                    </h:panelGroup>
-
-                                    <h:panelGroup rendered="#{sq.tipo == 'MULTIPLA_ESCOLHA'}">
-                                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                            <ui:repeat value="#{sq.opcoes}" var="op">
-                                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; background: #f8fafc;">
-                                                    <input type="checkbox" name="preview_#{sq.id}" value="#{op.id}"/>
-                                                    <span>#{op.texto}</span>
-                                                </label>
-                                            </ui:repeat>
-                                        </div>
-                                    </h:panelGroup>
-
-                                    <h:panelGroup rendered="#{sq.tipo == 'ESCALA'}">
-                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                            <ui:repeat value="#{sq.opcoes}" var="op">
-                                                <label style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; padding: 0.5rem 0.85rem; border-radius: 6px; border: 1px solid #0d9488; background: #f0fdfa; text-align: center; min-width: 90px;">
-                                                    <input type="radio" name="preview_#{sq.id}" value="#{op.id}"/>
-                                                    <span style="font-weight: 600; font-size: 0.95rem; color: #0f766e;">#{op.texto}</span>
-                                                    <span style="font-size: 0.75rem; color: #64748b;">(#{op.valor != null ? op.valor : '-'})</span>
-                                                </label>
-                                            </ui:repeat>
-                                        </div>
-                                    </h:panelGroup>
-
-                                    <h:panelGroup rendered="#{sq.tipo == 'DESCRITIVA'}">
-                                        <textarea class="campo" rows="3" placeholder="Digite sua resposta aqui..." style="width: 100%; border: 1px solid var(--color-border); border-radius: 6px; padding: 0.5rem;"></textarea>
-                                    </h:panelGroup>
-                                </div>
-                            </ui:repeat>
-                        </div>
+                        <h:panelGroup rendered="#{empty s.questoes}">
+                            <div style="text-align: center; padding: 1.5rem; color: var(--color-text-muted); background: #f8fafc; border: 1px dashed var(--color-border); border-radius: 6px;">
+                                <i class="bi bi-question-circle" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"/>
+                                Nenhuma questão nesta sessão.
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{not empty s.questoes}">
+                            <b:question model="#{s.questoes}"/>
+                        </h:panelGroup>
                     </div>
                 </ui:repeat>
             </h:panelGroup>

@@ -10,9 +10,11 @@
     <ui:define name="content">
 
         <h2>b:question</h2>
-        <p>A native assessment and survey question component. Renders questions in either
-            <strong>Descriptive</strong> format (multi-line <code>&lt;textarea&gt;</code>) or
-            <strong>Choice</strong> format (single-choice <code>&lt;input type="radio"&gt;</code> list).
+        <p>A native assessment and survey question component. Renders questions in
+            <strong>Descriptive</strong> (multi-line <code>&lt;textarea&gt;</code>),
+            <strong>Choice</strong> (single-choice <code>&lt;input type="radio"&gt;</code> list),
+            <strong>Multiple Choice</strong> (multi-selection <code>&lt;input type="checkbox"&gt;</code> list), or
+            <strong>Scale</strong> (horizontal rating / Likert scale pill row) formats.
             Designed for seamless integration with database entities via generic Java interfaces
             (<code>QuestionModel</code>, <code>QuestionOption</code>, <code>QuestionType</code>), as well
             as direct declarative attribute usage.</p>
@@ -20,10 +22,10 @@
         <h4>Attributes — b:question</h4>
         <table class="attributes-table">
             <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
-            <tr><td><code>value</code></td><td>No</td><td>The current answer value bound to a bean property (String for descriptive, Option ID/value for choice).</td></tr>
+            <tr><td><code>value</code></td><td>No</td><td>The current answer value bound to a bean property (String for descriptive, Option ID/value for choice/scale, Collection/Array for multiple choice).</td></tr>
             <tr><td><code>model</code></td><td>No</td><td>Instance of <code>QuestionModel</code> supplying prompt, type, options, required flag, etc.</td></tr>
             <tr><td><code>prompt</code></td><td>No</td><td>Question statement or prompt text. Overrides <code>model.prompt</code> if specified.</td></tr>
-            <tr><td><code>type</code></td><td>No</td><td>Format of the question: <code>DESCRIPTIVE</code> or <code>CHOICE</code>.</td></tr>
+            <tr><td><code>type</code></td><td>No</td><td>Format of the question: <code>DESCRIPTIVE</code>, <code>CHOICE</code>, <code>MULTIPLE_CHOICE</code>, or <code>SCALE</code>.</td></tr>
             <tr><td><code>options</code></td><td>No</td><td>Collection of options (items implementing <code>QuestionOption</code>, <code>SelectItem</code>, or plain Objects).</td></tr>
             <tr><td><code>number</code></td><td>No</td><td>Display index or label (e.g. <code>1</code>, <code>"Questão 1"</code>).</td></tr>
             <tr><td><code>description</code></td><td>No</td><td>Supplementary instructions or help text displayed below the prompt.</td></tr>
@@ -117,6 +119,14 @@
                         placeholder="Type your feedback here..."
                         rows="4"
                         value="#{questionDemoBean.feedbackText}"/>
+
+            <b:question prompt="Select all applicable categories (Multiple Choice):"
+                        type="MULTIPLE_CHOICE"
+                        options="#{questionDemoBean.priorityOptions}"/>
+
+            <b:question prompt="Rate the service responsiveness (Scale / Likert):"
+                        type="SCALE"
+                        options="#{questionDemoBean.priorityOptions}"/>
         </div>
 
         <h4>Example 3 — Disabled and Readonly States</h4>

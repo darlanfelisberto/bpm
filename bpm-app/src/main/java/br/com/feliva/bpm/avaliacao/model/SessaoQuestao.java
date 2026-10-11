@@ -1,5 +1,8 @@
 package br.com.feliva.bpm.avaliacao.model;
 
+import br.edu.iffar.box.component.question.QuestionModel;
+import br.edu.iffar.box.component.question.QuestionOption;
+import br.edu.iffar.box.component.question.QuestionType;
 import br.com.feliva.sharedClass.db.Model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,7 +23,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "sessao_questao", schema = "avaliacao")
-public class SessaoQuestao extends Model<UUID> implements Serializable {
+public class SessaoQuestao extends Model<UUID> implements Serializable, QuestionModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -120,5 +123,45 @@ public class SessaoQuestao extends Model<UUID> implements Serializable {
         return questao != null && questao.getConjuntoOpcao() != null
                 ? questao.getConjuntoOpcao().getOpcoes()
                 : java.util.Collections.emptyList();
+    }
+
+    /* -------------------------------------------------------------------------
+     * Implementação de QuestionModel (lib box)
+     * ------------------------------------------------------------------------- */
+
+    @Override
+    public String getPrompt() {
+        return getEnunciado();
+    }
+
+    @Override
+    public QuestionType getType() {
+        if (questao == null || questao.getTipo() == null) {
+            return QuestionType.DESCRIPTIVE;
+        }
+        return switch (questao.getTipo()) {
+            case ESCOLHA_UNICA -> QuestionType.CHOICE;
+            case MULTIPLA_ESCOLHA -> QuestionType.MULTIPLE_CHOICE;
+            case ESCALA -> QuestionType.SCALE;
+            case DESCRITIVA -> QuestionType.DESCRIPTIVE;
+        };
+    }
+
+    @Override
+    public boolean isRequired() {
+        return isObrigatoria();
+    }
+
+    @Override
+    public String getDescription() {
+        return (questao != null && questao.getAssunto() != null && !questao.getAssunto().isBlank())
+                ? ("Assunto: " + questao.getAssunto())
+                : null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<QuestionOption> getOptions() {
+        return (List<QuestionOption>) (List<?>) getOpcoes();
     }
 }
