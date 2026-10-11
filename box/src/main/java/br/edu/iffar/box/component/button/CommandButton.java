@@ -44,6 +44,7 @@ import java.util.logging.Logger;
         namespace = "http://iffar.edu.br/box")
 @ResourceDependencies({
         @ResourceDependency(library = "jakarta.faces", name = "faces.js", target = "head"),
+        @ResourceDependency(library = "box", name = "core/box-core.js", target = "head"),
         @ResourceDependency(library = "box", name = "box.css", target = "head")
 })
 public class CommandButton extends UICommand implements ClientBehaviorHolder {

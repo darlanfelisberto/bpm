@@ -9,6 +9,27 @@
         <param-value>Development</param-value>
     </context-param>
 
+    <!-- Mantém até 50 views por sessão e 15 views sequenciais por janela/aba -->
+    <context-param>
+        <param-name>org.apache.myfaces.NUMBER_OF_VIEWS_IN_SESSION</param-name>
+        <param-value>5</param-value>
+    </context-param>
+    <context-param>
+        <param-name>org.apache.myfaces.NUMBER_OF_SEQUENTIAL_VIEWS_IN_SESSION</param-name>
+        <param-value>3</param-value>
+    </context-param>
+
+    <!-- Sessão ativa por 60 minutos -->
+    <session-config>
+        <session-timeout>15</session-timeout>
+    </session-config>
+
+    <!-- Redireciona de forma limpa requisições normais que expirarem -->
+    <error-page>
+        <exception-type>jakarta.faces.application.ViewExpiredException</exception-type>
+        <location>/index.xhtml</location>
+    </error-page>
+
     <welcome-file-list>
         <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>

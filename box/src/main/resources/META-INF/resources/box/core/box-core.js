@@ -25,6 +25,22 @@
         });
     }
 
+    // Automatically reload on ViewExpiredException during Faces AJAX requests
+    // to prevent the UI from freezing when sessions expire or the server restarts.
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.faces && window.faces.ajax && window.faces.ajax.addOnError) {
+            window.faces.ajax.addOnError(function (data) {
+                var name = (data && ((data.errorName || '') + ' ' + (data.serverErrorName || ''))) || '';
+                var msg = (data && ((data.errorMessage || '') + ' ' + (data.serverErrorMessage || '') + ' ' + (data.responseText || ''))) || '';
+                if (name.indexOf('ViewExpiredException') !== -1 ||
+                    msg.indexOf('ViewExpiredException') !== -1 ||
+                    msg.indexOf('could not be restored') !== -1) {
+                    window.location.reload();
+                }
+            });
+        }
+    });
+
     // Triggers a client behavior (select/move/resize/click) through the
     // same API f:ajax itself uses under the hood - "jakarta.faces.behavior.event"
     // is the event name Schedule.decode()/Schedule2.decode() check to know
