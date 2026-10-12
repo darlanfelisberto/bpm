@@ -967,6 +967,38 @@
     </tag>
 
     <tag>
+        <tag-name>popup</tag-name>
+        <component>
+            <component-type>br.edu.iffar.box.Popup</component-type>
+        </component>
+        <attribute>
+            <name>header</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>closable</name>
+            <required>false</required>
+            <type>boolean</type>
+        </attribute>
+        <attribute>
+            <name>style</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>styleClass</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>rendered</name>
+            <required>false</required>
+            <type>boolean</type>
+        </attribute>
+    </tag>
+
+    <tag>
         <tag-name>entityConverter</tag-name>
         <converter>
             <converter-id>box.entityConverter</converter-id>

@@ -61,17 +61,29 @@ public class InstrumentoDetalheBean implements Serializable {
 
     // Estados dos modais / formulários inline
     private boolean editandoSessao = false;
-    private InstrumentoSessao sessaoEmEdicao;
+    private InstrumentoSessao sessaoEmEdicao = criarSessaoPadrao();
 
     private boolean editandoQuestao = false;
-    private InstrumentoSessao sessaoSelecionada;
-    private SessaoQuestao sessaoQuestaoEmEdicao;
-    private Questao questaoEmEdicao;
+    private InstrumentoSessao sessaoSelecionada = new InstrumentoSessao();
+    private SessaoQuestao sessaoQuestaoEmEdicao = new SessaoQuestao();
+    private Questao questaoEmEdicao = criarQuestaoPadrao();
 
     private boolean gerenciandoOpcoes = false;
-    private SessaoQuestao sessaoQuestaoOpcoes;
+    private SessaoQuestao sessaoQuestaoOpcoes = new SessaoQuestao();
     private String novaOpcaoTexto;
     private BigDecimal novaOpcaoValor;
+
+    private static InstrumentoSessao criarSessaoPadrao() {
+        InstrumentoSessao s = new InstrumentoSessao();
+        s.setTipo(TipoSessao.PAGINA);
+        return s;
+    }
+
+    private static Questao criarQuestaoPadrao() {
+        Questao q = new Questao();
+        q.setTipo(TipoQuestao.ESCOLHA_UNICA);
+        return q;
+    }
 
     // Modo pré-visualização ao vivo
     private boolean previsualizar = false;
@@ -82,6 +94,21 @@ public class InstrumentoDetalheBean implements Serializable {
         }
         try {
             instrumento = instrumentoDAO.buscarComEstruturaCompleta(instrumentoId);
+            if (sessaoEmEdicao == null) {
+                sessaoEmEdicao = new InstrumentoSessao();
+            }
+            if (questaoEmEdicao == null) {
+                questaoEmEdicao = new Questao();
+            }
+            if (sessaoQuestaoEmEdicao == null) {
+                sessaoQuestaoEmEdicao = new SessaoQuestao();
+            }
+            if (sessaoSelecionada == null) {
+                sessaoSelecionada = new InstrumentoSessao();
+            }
+            if (sessaoQuestaoOpcoes == null) {
+                sessaoQuestaoOpcoes = new SessaoQuestao();
+            }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro ao carregar instrumento " + instrumentoId, e);
             FacesContext.getCurrentInstance().addMessage(null,
@@ -140,6 +167,8 @@ public class InstrumentoDetalheBean implements Serializable {
         editandoSessao = true;
         editandoQuestao = false;
         gerenciandoOpcoes = false;
+        FacesContext.getCurrentInstance().getPartialViewContext()
+                .getEvalScripts().add("Box.popup.open('popupSessao')");
     }
 
     public void editarSessao(InstrumentoSessao s) {
@@ -147,6 +176,8 @@ public class InstrumentoDetalheBean implements Serializable {
         this.editandoSessao = true;
         this.editandoQuestao = false;
         this.gerenciandoOpcoes = false;
+        FacesContext.getCurrentInstance().getPartialViewContext()
+                .getEvalScripts().add("Box.popup.open('popupSessao')");
     }
 
     public void salvarSessao() {
@@ -162,6 +193,8 @@ public class InstrumentoDetalheBean implements Serializable {
             carregar();
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Sessão salva com sucesso!", null));
+            FacesContext.getCurrentInstance().getPartialViewContext()
+                    .getEvalScripts().add("Box.popup.close('popupSessao')");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro ao salvar sessao", e);
             FacesContext.getCurrentInstance().addMessage(null,
@@ -219,6 +252,8 @@ public class InstrumentoDetalheBean implements Serializable {
         this.editandoQuestao = true;
         this.editandoSessao = false;
         this.gerenciandoOpcoes = false;
+        FacesContext.getCurrentInstance().getPartialViewContext()
+                .getEvalScripts().add("Box.popup.open('popupQuestao')");
     }
 
     public void editarQuestao(SessaoQuestao sq) {
@@ -228,6 +263,8 @@ public class InstrumentoDetalheBean implements Serializable {
         this.editandoQuestao = true;
         this.editandoSessao = false;
         this.gerenciandoOpcoes = false;
+        FacesContext.getCurrentInstance().getPartialViewContext()
+                .getEvalScripts().add("Box.popup.open('popupQuestao')");
     }
 
     public void salvarQuestao() {
@@ -243,6 +280,8 @@ public class InstrumentoDetalheBean implements Serializable {
             carregar();
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Questão salva com sucesso!", null));
+            FacesContext.getCurrentInstance().getPartialViewContext()
+                    .getEvalScripts().add("Box.popup.close('popupQuestao')");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro ao salvar questao", e);
             FacesContext.getCurrentInstance().addMessage(null,
@@ -299,6 +338,8 @@ public class InstrumentoDetalheBean implements Serializable {
         this.gerenciandoOpcoes = true;
         this.editandoSessao = false;
         this.editandoQuestao = false;
+        FacesContext.getCurrentInstance().getPartialViewContext()
+                .getEvalScripts().add("Box.popup.open('popupOpcoes')");
     }
 
     public void adicionarOpcao() {

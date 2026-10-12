@@ -75,6 +75,22 @@ public class Popup extends UIComponentBase {
         getStateHelper().put("header", header);
     }
 
+    public String getStyle() {
+        return (String) getStateHelper().eval("style");
+    }
+
+    public void setStyle(String style) {
+        getStateHelper().put("style", style);
+    }
+
+    public String getStyleClass() {
+        return (String) getStateHelper().eval("styleClass");
+    }
+
+    public void setStyleClass(String styleClass) {
+        getStateHelper().put("styleClass", styleClass);
+    }
+
     /** If false, removes the close button and disables closing by clicking outside/Esc. Default true. */
     public boolean isClosable() {
         Boolean closable = (Boolean) getStateHelper().eval("closable");
@@ -93,7 +109,16 @@ public class Popup extends UIComponentBase {
         ResponseWriter writer = context.getResponseWriter();
         writer.startElement("dialog", this);
         writer.writeAttribute("id", getClientId(context), "id");
-        writer.writeAttribute("class", "box-popup", null);
+
+        String styleClass = getStyleClass();
+        String clazz = styleClass != null && !styleClass.isBlank() ? "box-popup " + styleClass.trim() : "box-popup";
+        writer.writeAttribute("class", clazz, null);
+
+        String style = getStyle();
+        if (style != null && !style.isBlank()) {
+            writer.writeAttribute("style", style, null);
+        }
+
         writer.writeAttribute("data-box-popup-closable", String.valueOf(isClosable()), null);
 
         UIComponent header = getFacet("header");

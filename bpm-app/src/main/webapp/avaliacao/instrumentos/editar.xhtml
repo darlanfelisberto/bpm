@@ -44,7 +44,7 @@
                         <b:commandButton action="#{instrumentoDetalheBean.novaSessao}"
                                          value="Nova Sessão"
                                          icon="bi bi-folder-plus"
-                                         render=":frmBuilder"
+                                         render=":frmPopupSessao"
                                          title="Adicionar uma nova página ou agrupador de questões"/>
 
                         <b:commandButton action="#{instrumentoDetalheBean.alternarPreview}"
@@ -139,7 +139,7 @@
                         <b:commandButton action="#{instrumentoDetalheBean.novaSessao}"
                                          value="Criar Primeira Sessão"
                                          icon="bi bi-plus-lg"
-                                         render=":frmBuilder"/>
+                                         render=":frmPopupSessao"/>
                     </div>
                 </h:panelGroup>
 
@@ -166,17 +166,17 @@
 
                             <div class="session-actions">
                                 <b:commandButton action="#{instrumentoDetalheBean.novaQuestao(sessao)}"
-                                                 value="Adicionar Questão"
-                                                 icon="bi bi-plus-circle"
-                                                 size="sm"
-                                                 render=":frmBuilder"
-                                                 title="Adicionar nova questão a esta sessão"/>
+                                                  value="Adicionar Questão"
+                                                  icon="bi bi-plus-circle"
+                                                  size="sm"
+                                                  render=":frmPopupQuestao"
+                                                  title="Adicionar nova questão a esta sessão"/>
 
                                 <b:commandButton action="#{instrumentoDetalheBean.editarSessao(sessao)}"
                                                  icon="bi bi-pencil"
                                                  variant="secondary"
                                                  size="sm"
-                                                 render=":frmBuilder"
+                                                 render=":frmPopupSessao"
                                                  title="Editar informações da sessão"/>
 
                                 <b:commandButton action="#{instrumentoDetalheBean.moverSessaoCima(sessao)}"
@@ -216,7 +216,7 @@
                                                          icon="bi bi-plus-lg"
                                                          size="sm"
                                                          variant="secondary"
-                                                         render=":frmBuilder"/>
+                                                         render=":frmPopupQuestao"/>
                                     </div>
                                 </div>
                             </h:panelGroup>
@@ -260,7 +260,7 @@
                                                                  icon="bi bi-list-check"
                                                                  size="sm"
                                                                  variant="secondary"
-                                                                 render=":frmBuilder"
+                                                                 render=":frmPopupOpcoes"
                                                                  title="Gerenciar opções de resposta"/>
                                             </h:panelGroup>
 
@@ -268,7 +268,7 @@
                                                              icon="bi bi-pencil"
                                                              variant="secondary"
                                                              size="sm"
-                                                             render=":frmBuilder"
+                                                             render=":frmPopupQuestao"
                                                              title="Editar questão"/>
 
                                             <b:commandButton action="#{instrumentoDetalheBean.moverQuestaoCima(sq)}"
@@ -409,261 +409,254 @@
 
             </h:panelGroup>
 
-            <!-- =================================================================
-                 MODAL 1: Cadastro / Edição de Sessão
-                 ================================================================= -->
-            <h:panelGroup id="modalSessao" layout="block" rendered="#{instrumentoDetalheBean.editandoSessao}">
-                <div class="builder-modal-backdrop">
-                    <div class="builder-modal-window">
-                        <div class="builder-modal-header">
-                            <h3><i class="bi bi-folder-fill" style="color: var(--color-primary);"/> #{instrumentoDetalheBean.sessaoEmEdicao.id != null ? 'Editar Sessão' : 'Nova Sessão / Página'}</h3>
-                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" icon="bi bi-x-lg" variant="link" render=":frmBuilder" immediate="true"/>
-                        </div>
-                        <div class="builder-modal-body">
-                            <div class="grid-12">
-                                <div class="campo col-12">
-                                    <h:outputLabel for="sessaoTitulo" value="Título da Sessão / Página *"/>
-                                    <h:inputText id="sessaoTitulo" value="#{instrumentoDetalheBean.sessaoEmEdicao.titulo}" required="true" placeholder="Ex.: Dimensão 1: Autoavaliação do Discente"/>
-                                </div>
-
-                                <div class="campo col-6">
-                                    <h:outputLabel for="sessaoTipo" value="Tipo de Sessão *"/>
-                                    <h:selectOneMenu id="sessaoTipo" value="#{instrumentoDetalheBean.sessaoEmEdicao.tipo}" required="true">
-                                        <f:selectItems value="#{instrumentoDetalheBean.tiposSessao}" var="t" itemValue="#{t}"
-                                                       itemLabel="#{t == 'PAGINA' ? 'Página (Gera quebra de página no formulário)' : 'Sessão (Agrupador visual na mesma página)'}"/>
-                                    </h:selectOneMenu>
-                                </div>
-
-                                <div class="campo col-6">
-                                    <h:outputLabel for="sessaoOrdem" value="Posição / Ordem"/>
-                                    <h:inputText id="sessaoOrdem" value="#{instrumentoDetalheBean.sessaoEmEdicao.ordem}" p:type="number"/>
-                                </div>
-
-                                <div class="campo col-12">
-                                    <h:outputLabel for="sessaoDesc" value="Descrição / Instruções (opcional)"/>
-                                    <h:inputTextarea id="sessaoDesc" value="#{instrumentoDetalheBean.sessaoEmEdicao.descricao}" rows="3" placeholder="Orientações e contexto exibidos para o respondente nesta seção..."/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="builder-modal-footer">
-                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" value="Cancelar" variant="secondary" render=":frmBuilder" immediate="true"/>
-                            <b:commandButton action="#{instrumentoDetalheBean.salvarSessao}" value="Salvar Sessão" icon="bi bi-check-lg" render=":frmBuilder"/>
-                        </div>
-                    </div>
-                </div>
-            </h:panelGroup>
-
-            <!-- =================================================================
-                 MODAL 2: Cadastro / Edição de Questão
-                 ================================================================= -->
-            <h:panelGroup id="modalQuestao" layout="block" rendered="#{instrumentoDetalheBean.editandoQuestao}">
-                <div class="builder-modal-backdrop">
-                    <div class="builder-modal-window">
-                        <div class="builder-modal-header">
-                            <h3><i class="bi bi-question-circle-fill" style="color: var(--color-primary);"/> #{instrumentoDetalheBean.questaoEmEdicao.id != null ? 'Editar Questão' : 'Nova Questão'}</h3>
-                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" icon="bi bi-x-lg" variant="link" render=":frmBuilder" immediate="true"/>
-                        </div>
-                        <div class="builder-modal-body">
-                            <div class="grid-12">
-                                <div class="campo col-12">
-                                    <label style="font-weight: 600;">Sessão Pertencente:</label>
-                                    <div style="background: #f8fafc; padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.95rem;">
-                                        <i class="bi bi-folder2-open"/> #{instrumentoDetalheBean.sessaoSelecionada.titulo}
-                                    </div>
-                                </div>
-
-                                <div class="campo col-12">
-                                    <h:outputLabel for="questaoEnunciado" value="Enunciado da Questão *"/>
-                                    <h:inputTextarea id="questaoEnunciado" value="#{instrumentoDetalheBean.questaoEmEdicao.enunciado}" required="true" rows="3" placeholder="Digite o enunciado claro da pergunta..."/>
-                                </div>
-
-                                <div class="campo col-8">
-                                    <h:outputLabel for="questaoTipo" value="Tipo de Pergunta *"/>
-                                    <h:selectOneMenu id="questaoTipo" value="#{instrumentoDetalheBean.questaoEmEdicao.tipo}" required="true">
-                                        <f:selectItems value="#{instrumentoDetalheBean.tiposQuestao}" var="t" itemValue="#{t}"
-                                                       itemLabel="#{t.descricao}"/>
-                                    </h:selectOneMenu>
-                                </div>
-
-                                <div class="campo col-4">
-                                    <h:outputLabel for="questaoPeso" value="Peso / Pontuação"/>
-                                    <h:inputText id="questaoPeso" value="#{instrumentoDetalheBean.sessaoQuestaoEmEdicao.peso}" placeholder="1.00"/>
-                                </div>
-
-                                <div class="campo col-6">
-                                    <h:outputLabel for="questaoAssunto" value="Assunto / Categoria (opcional)"/>
-                                    <h:inputText id="questaoAssunto" value="#{instrumentoDetalheBean.questaoEmEdicao.assunto}" placeholder="Ex.: Infraestrutura, Metodologia..."/>
-                                </div>
-
-                                <div class="campo col-6">
-                                    <h:outputLabel for="questaoAreaConhecimento_input" value="Área do Conhecimento (opcional)"/>
-                                    <b:autocomplete id="questaoAreaConhecimento"
-                                                    value="#{instrumentoDetalheBean.questaoEmEdicao.areaConhecimento}"
-                                                    completeMethod="#{instrumentoDetalheBean.completeAreaConhecimento}"
-                                                    var="area"
-                                                    itemLabel="#{area.rotuloExibicao}"
-                                                    itemValue="#{area}"
-                                                    converter="box.entityConverter"
-                                                    dropdown="true"
-                                                    placeholder="Digite o código ou nome da área...">
-                                        <div style="display: flex; gap: 0.5rem; align-items: baseline;">
-                                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-primary);">#{area.cod}</span>
-                                            <span>#{area.descricao}</span>
-                                        </div>
-                                    </b:autocomplete>
-                                </div>
-
-                                <div class="campo col-4">
-                                    <h:outputLabel for="questaoAno" value="Ano"/>
-                                    <h:inputText id="questaoAno" value="#{instrumentoDetalheBean.questaoEmEdicao.ano}" p:type="number" placeholder="Ex.: 2026"/>
-                                </div>
-
-                                <div class="campo col-4">
-                                    <h:outputLabel for="questaoNivel" value="Nível Escolar/Acadêmico"/>
-                                    <h:selectOneMenu id="questaoNivel" value="#{instrumentoDetalheBean.questaoEmEdicao.nivel}">
-                                        <f:selectItem itemValue="#{null}" itemLabel="-- Não informado --"/>
-                                        <f:selectItems value="#{instrumentoDetalheBean.niveisQuestao}" var="nv" itemValue="#{nv}"
-                                                       itemLabel="#{nv.descricao}"/>
-                                    </h:selectOneMenu>
-                                </div>
-
-                                <div class="campo col-4">
-                                    <h:outputLabel for="questaoDificuldade" value="Dificuldade"/>
-                                    <h:selectOneMenu id="questaoDificuldade" value="#{instrumentoDetalheBean.questaoEmEdicao.dificuldade}">
-                                        <f:selectItem itemValue="#{null}" itemLabel="-- Não informada --"/>
-                                        <f:selectItems value="#{instrumentoDetalheBean.dificuldadesQuestao}" var="df" itemValue="#{df}"
-                                                       itemLabel="#{df.descricao}"/>
-                                    </h:selectOneMenu>
-                                </div>
-
-                                <div class="campo col-12" style="margin-top: 0.5rem;">
-                                    <label style="display: flex; align-items: center; cursor: pointer; gap: 0.4rem;">
-                                        <h:selectBooleanCheckbox id="questaoObrigatoria" value="#{instrumentoDetalheBean.sessaoQuestaoEmEdicao.obrigatoria}"/>
-                                        Obrigatória
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="builder-modal-footer">
-                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" value="Cancelar" variant="secondary" render=":frmBuilder" immediate="true"/>
-                            <b:commandButton action="#{instrumentoDetalheBean.salvarQuestao}" value="Salvar Questão" icon="bi bi-check-lg" render=":frmBuilder"/>
-                        </div>
-                    </div>
-                </div>
-            </h:panelGroup>
-
-            <!-- =================================================================
-                 MODAL 3: Gerenciamento de Opções de Resposta
-                 ================================================================= -->
-            <h:panelGroup id="modalOpcoes" layout="block" rendered="#{instrumentoDetalheBean.gerenciandoOpcoes}">
-                <div class="builder-modal-backdrop">
-                    <div class="builder-modal-window" style="max-width: 720px;">
-                        <div class="builder-modal-header">
-                            <div>
-                                <h3 style="margin: 0;"><i class="bi bi-list-check" style="color: var(--color-primary);"/> Opções de Resposta</h3>
-                                <div style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 0.25rem;">
-                                    #{instrumentoDetalheBean.sessaoQuestaoOpcoes.enunciado}
-                                </div>
-                            </div>
-                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}" icon="bi bi-x-lg" variant="link" render=":frmBuilder" immediate="true"/>
-                        </div>
-                        <div class="builder-modal-body">
-                            <!-- Barra de Templates Rápidos -->
-                            <div class="templates-bar">
-                                <span><i class="bi bi-magic"/> Preenchimento Rápido com Templates:</span>
-                                <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateLikert5}"
-                                                 value="Escala Likert (5 níveis)"
-                                                 size="sm"
-                                                 variant="secondary"
-                                                 render=":frmBuilder"
-                                                 title="Adiciona: Discordo totalmente a Concordo totalmente"/>
-
-                                <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateQualidade}"
-                                                 value="Qualidade (4 níveis)"
-                                                 size="sm"
-                                                 variant="secondary"
-                                                 render=":frmBuilder"
-                                                 title="Adiciona: Insuficiente, Regular, Bom e Excelente"/>
-
-                                <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateSimNao}"
-                                                 value="Sim / Não"
-                                                 size="sm"
-                                                 variant="secondary"
-                                                 render=":frmBuilder"
-                                                 title="Adiciona: Sim e Não"/>
-                            </div>
-
-                            <!-- Tabela de Opções Existentes -->
-                            <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">Opções Cadastradas:</h4>
-                            <h:panelGroup rendered="#{empty instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}">
-                                <div style="text-align: center; padding: 1rem; color: var(--color-text-muted); background: #f8fafc; border-radius: 6px; margin-bottom: 1rem;">
-                                    Nenhuma opção cadastrada ainda. Utilize um template acima ou adicione manualmente abaixo.
-                                </div>
-                            </h:panelGroup>
-
-                            <h:panelGroup rendered="#{not empty instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}">
-                                <table class="grid" style="margin-bottom: 1.25rem;">
-                                    <thead>
-                                    <tr>
-                                        <th style="width: 50px;">#</th>
-                                        <th>Texto da Opção</th>
-                                        <th style="width: 120px;">Valor / Peso</th>
-                                        <th style="width: 60px; text-align: center;">Ação</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <ui:repeat value="#{instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}" var="op">
-                                        <tr>
-                                            <td>#{op.ordem}</td>
-                                            <td><strong>#{op.texto}</strong></td>
-                                            <td>#{op.valor != null ? op.valor : '-'}</td>
-                                            <td style="text-align: center;">
-                                                <b:commandButton action="#{instrumentoDetalheBean.excluirOpcao(op)}"
-                                                                 icon="bi bi-trash"
-                                                                 variant="danger"
-                                                                 size="sm"
-                                                                 render=":frmBuilder"
-                                                                 title="Remover esta opção"/>
-                                            </td>
-                                        </tr>
-                                    </ui:repeat>
-                                    </tbody>
-                                </table>
-                            </h:panelGroup>
-
-                            <!-- Adicionar Nova Opção Manualmente -->
-                            <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem;">
-                                <h4 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 0.75rem;"><i class="bi bi-plus-circle"/> Adicionar Nova Opção</h4>
-                                <div class="grid-12" style="margin-bottom: 0.5rem;">
-                                    <div class="campo col-8">
-                                        <h:outputLabel for="novaOpcaoTexto" value="Texto da Opção *"/>
-                                        <h:inputText id="novaOpcaoTexto" value="#{instrumentoDetalheBean.novaOpcaoTexto}" placeholder="Ex.: Parcialmente satisfeito"/>
-                                    </div>
-                                    <div class="campo col-4">
-                                        <h:outputLabel for="novaOpcaoValor" value="Valor / Peso (numérico)"/>
-                                        <h:inputText id="novaOpcaoValor" value="#{instrumentoDetalheBean.novaOpcaoValor}" placeholder="Ex.: 3.00"/>
-                                    </div>
-                                </div>
-                                <div style="display: flex; justify-content: flex-end;">
-                                    <b:commandButton action="#{instrumentoDetalheBean.adicionarOpcao}"
-                                                     value="Adicionar Opção"
-                                                     icon="bi bi-plus-lg"
-                                                     size="sm"
-                                                     render=":frmBuilder"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="builder-modal-footer">
-                            <b:commandButton action="#{instrumentoDetalheBean.fecharModal}"
-                                             value="Concluir"
-                                             icon="bi bi-check-lg"
-                                             render=":frmBuilder"/>
-                        </div>
-                    </div>
-                </div>
-            </h:panelGroup>
-
         </h:form>
+
+        <!-- =================================================================
+             POPUP 1: Cadastro / Edição de Sessão
+             ================================================================= -->
+        <b:popup id="popupSessao"
+                 header="#{not empty instrumentoDetalheBean.sessaoEmEdicao and instrumentoDetalheBean.sessaoEmEdicao.id != null ? 'Editar Sessão' : 'Nova Sessão / Página'}"
+                 style="max-width: 640px;">
+            <h:form id="frmPopupSessao">
+                <div class="grid-12">
+                    <div class="campo col-12">
+                        <h:outputLabel for="sessaoTitulo" value="Título da Sessão / Página *"/>
+                        <h:inputText id="sessaoTitulo" value="#{instrumentoDetalheBean.sessaoEmEdicao.titulo}" required="true" placeholder="Ex.: Dimensão 1: Autoavaliação do Discente"/>
+                    </div>
+
+                    <div class="campo col-6">
+                        <h:outputLabel for="sessaoTipo" value="Tipo de Sessão *"/>
+                        <h:selectOneMenu id="sessaoTipo" value="#{instrumentoDetalheBean.sessaoEmEdicao.tipo}" required="true">
+                            <f:selectItems value="#{instrumentoDetalheBean.tiposSessao}" var="t" itemValue="#{t}"
+                                           itemLabel="#{t == 'PAGINA' ? 'Página (Gera quebra de página no formulário)' : 'Sessão (Agrupador visual na mesma página)'}"/>
+                        </h:selectOneMenu>
+                    </div>
+
+                    <div class="campo col-6">
+                        <h:outputLabel for="sessaoOrdem" value="Posição / Ordem"/>
+                        <h:inputText id="sessaoOrdem" value="#{instrumentoDetalheBean.sessaoEmEdicao.ordem}" p:type="number"/>
+                    </div>
+
+                    <div class="campo col-12">
+                        <h:outputLabel for="sessaoDesc" value="Descrição / Instruções (opcional)"/>
+                        <h:inputTextarea id="sessaoDesc" value="#{instrumentoDetalheBean.sessaoEmEdicao.descricao}" rows="3" placeholder="Orientações e contexto exibidos para o respondente nesta seção..."/>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem;">
+                    <b:commandButton value="Cancelar"
+                                     variant="secondary"
+                                     onclick="Box.popup.close('popupSessao'); return false;"/>
+                    <b:commandButton action="#{instrumentoDetalheBean.salvarSessao}"
+                                     value="Salvar Sessão"
+                                     icon="bi bi-check-lg"
+                                     render=":frmBuilder :growlGlobal"/>
+                </div>
+            </h:form>
+        </b:popup>
+
+        <!-- =================================================================
+             POPUP 2: Cadastro / Edição de Questão
+             ================================================================= -->
+        <b:popup id="popupQuestao"
+                 header="#{not empty instrumentoDetalheBean.questaoEmEdicao and instrumentoDetalheBean.questaoEmEdicao.id != null ? 'Editar Questão' : 'Nova Questão'}"
+                 style="max-width: 680px;">
+            <h:form id="frmPopupQuestao">
+                <div class="grid-12">
+                    <div class="campo col-12">
+                        <label style="font-weight: 600;">Sessão Pertencente:</label>
+                        <div style="background: #f8fafc; padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.95rem;">
+                            <i class="bi bi-folder2-open"/> #{instrumentoDetalheBean.sessaoSelecionada.titulo}
+                        </div>
+                    </div>
+
+                    <div class="campo col-12">
+                        <h:outputLabel for="questaoEnunciado" value="Enunciado da Questão *"/>
+                        <h:inputTextarea id="questaoEnunciado" value="#{instrumentoDetalheBean.questaoEmEdicao.enunciado}" required="true" rows="3" placeholder="Digite o enunciado claro da pergunta..."/>
+                    </div>
+
+                    <div class="campo col-8">
+                        <h:outputLabel for="questaoTipo" value="Tipo de Pergunta *"/>
+                        <h:selectOneMenu id="questaoTipo" value="#{instrumentoDetalheBean.questaoEmEdicao.tipo}" required="true">
+                            <f:selectItems value="#{instrumentoDetalheBean.tiposQuestao}" var="t" itemValue="#{t}"
+                                           itemLabel="#{t.descricao}"/>
+                        </h:selectOneMenu>
+                    </div>
+
+                    <div class="campo col-4">
+                        <h:outputLabel for="questaoPeso" value="Peso / Pontuação"/>
+                        <h:inputText id="questaoPeso" value="#{instrumentoDetalheBean.sessaoQuestaoEmEdicao.peso}" placeholder="1.00"/>
+                    </div>
+
+                    <div class="campo col-6">
+                        <h:outputLabel for="questaoAssunto" value="Assunto / Categoria (opcional)"/>
+                        <h:inputText id="questaoAssunto" value="#{instrumentoDetalheBean.questaoEmEdicao.assunto}" placeholder="Ex.: Infraestrutura, Metodologia..."/>
+                    </div>
+
+                    <div class="campo col-6">
+                        <h:outputLabel for="questaoAreaConhecimento_input" value="Área do Conhecimento (opcional)"/>
+                        <b:autocomplete id="questaoAreaConhecimento"
+                                        value="#{instrumentoDetalheBean.questaoEmEdicao.areaConhecimento}"
+                                        completeMethod="#{instrumentoDetalheBean.completeAreaConhecimento}"
+                                        var="area"
+                                        itemLabel="#{area.rotuloExibicao}"
+                                        itemValue="#{area}"
+                                        converter="box.entityConverter"
+                                        dropdown="true"
+                                        placeholder="Digite o código ou nome da área...">
+                            <div style="display: flex; gap: 0.5rem; align-items: baseline;">
+                                <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-primary);">#{area.cod}</span>
+                                <span>#{area.descricao}</span>
+                            </div>
+                        </b:autocomplete>
+                    </div>
+
+                    <div class="campo col-4">
+                        <h:outputLabel for="questaoAno" value="Ano"/>
+                        <h:inputText id="questaoAno" value="#{instrumentoDetalheBean.questaoEmEdicao.ano}" p:type="number" placeholder="Ex.: 2026"/>
+                    </div>
+
+                    <div class="campo col-4">
+                        <h:outputLabel for="questaoNivel" value="Nível Escolar/Acadêmico"/>
+                        <h:selectOneMenu id="questaoNivel" value="#{instrumentoDetalheBean.questaoEmEdicao.nivel}">
+                            <f:selectItem itemValue="#{null}" itemLabel="-- Não informado --"/>
+                            <f:selectItems value="#{instrumentoDetalheBean.niveisQuestao}" var="nv" itemValue="#{nv}"
+                                           itemLabel="#{nv.descricao}"/>
+                        </h:selectOneMenu>
+                    </div>
+
+                    <div class="campo col-4">
+                        <h:outputLabel for="questaoDificuldade" value="Dificuldade"/>
+                        <h:selectOneMenu id="questaoDificuldade" value="#{instrumentoDetalheBean.questaoEmEdicao.dificuldade}">
+                            <f:selectItem itemValue="#{null}" itemLabel="-- Não informada --"/>
+                            <f:selectItems value="#{instrumentoDetalheBean.dificuldadesQuestao}" var="df" itemValue="#{df}"
+                                           itemLabel="#{df.descricao}"/>
+                        </h:selectOneMenu>
+                    </div>
+
+                    <div class="campo col-12" style="margin-top: 0.5rem;">
+                        <label style="display: flex; align-items: center; cursor: pointer; gap: 0.4rem;">
+                            <h:selectBooleanCheckbox id="questaoObrigatoria" value="#{instrumentoDetalheBean.sessaoQuestaoEmEdicao.obrigatoria}"/>
+                            Obrigatória
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem;">
+                    <b:commandButton value="Cancelar"
+                                     variant="secondary"
+                                     onclick="Box.popup.close('popupQuestao'); return false;"/>
+                    <b:commandButton action="#{instrumentoDetalheBean.salvarQuestao}"
+                                     value="Salvar Questão"
+                                     icon="bi bi-check-lg"
+                                     render=":frmBuilder :growlGlobal"/>
+                </div>
+            </h:form>
+        </b:popup>
+
+        <!-- =================================================================
+             POPUP 3: Gerenciamento de Opções de Resposta
+             ================================================================= -->
+        <b:popup id="popupOpcoes"
+                 header="Opções de Resposta"
+                 style="max-width: 740px;">
+            <h:form id="frmPopupOpcoes">
+                <div style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 1rem;">
+                    <i class="bi bi-question-circle"/> #{instrumentoDetalheBean.sessaoQuestaoOpcoes.enunciado}
+                </div>
+
+                <!-- Barra de Templates Rápidos -->
+                <div class="templates-bar">
+                    <span><i class="bi bi-magic"/> Preenchimento Rápido com Templates:</span>
+                    <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateLikert5}"
+                                     value="Escala Likert (5 níveis)"
+                                     size="sm"
+                                     variant="secondary"
+                                     render=":frmPopupOpcoes :frmBuilder :growlGlobal"
+                                     title="Adiciona: Discordo totalmente a Concordo totalmente"/>
+
+                    <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateQualidade}"
+                                     value="Qualidade (4 níveis)"
+                                     size="sm"
+                                     variant="secondary"
+                                     render=":frmPopupOpcoes :frmBuilder :growlGlobal"
+                                     title="Adiciona: Insuficiente, Regular, Bom e Excelente"/>
+
+                    <b:commandButton action="#{instrumentoDetalheBean.aplicarTemplateSimNao}"
+                                     value="Sim / Não"
+                                     size="sm"
+                                     variant="secondary"
+                                     render=":frmPopupOpcoes :frmBuilder :growlGlobal"
+                                     title="Adiciona: Sim e Não"/>
+                </div>
+
+                <!-- Tabela de Opções Existentes -->
+                <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">Opções Cadastradas:</h4>
+                <h:panelGroup rendered="#{empty instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}">
+                    <div style="text-align: center; padding: 1rem; color: var(--color-text-muted); background: #f8fafc; border-radius: 6px; margin-bottom: 1rem;">
+                        Nenhuma opção cadastrada ainda. Utilize um template acima ou adicione manualmente abaixo.
+                    </div>
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{not empty instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}">
+                    <table class="grid" style="margin-bottom: 1.25rem;">
+                        <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Texto da Opção</th>
+                            <th style="width: 120px;">Valor / Peso</th>
+                            <th style="width: 60px; text-align: center;">Ação</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <ui:repeat value="#{instrumentoDetalheBean.sessaoQuestaoOpcoes.opcoes}" var="op">
+                            <tr>
+                                <td>#{op.ordem}</td>
+                                <td><strong>#{op.texto}</strong></td>
+                                <td>#{op.valor != null ? op.valor : '-'}</td>
+                                <td style="text-align: center;">
+                                    <b:commandButton action="#{instrumentoDetalheBean.excluirOpcao(op)}"
+                                                     icon="bi bi-trash"
+                                                     variant="danger"
+                                                     size="sm"
+                                                     render=":frmPopupOpcoes :frmBuilder :growlGlobal"
+                                                     title="Remover esta opção"/>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                        </tbody>
+                    </table>
+                </h:panelGroup>
+
+                <!-- Adicionar Nova Opção Manualmente -->
+                <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem;">
+                    <h4 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 0.75rem;"><i class="bi bi-plus-circle"/> Adicionar Nova Opção</h4>
+                    <div class="grid-12" style="margin-bottom: 0.5rem;">
+                        <div class="campo col-8">
+                            <h:outputLabel for="novaOpcaoTexto" value="Texto da Opção *"/>
+                            <h:inputText id="novaOpcaoTexto" value="#{instrumentoDetalheBean.novaOpcaoTexto}" placeholder="Ex.: Parcialmente satisfeito"/>
+                        </div>
+                        <div class="campo col-4">
+                            <h:outputLabel for="novaOpcaoValor" value="Valor / Peso (numérico)"/>
+                            <h:inputText id="novaOpcaoValor" value="#{instrumentoDetalheBean.novaOpcaoValor}" placeholder="Ex.: 3.00"/>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <b:commandButton action="#{instrumentoDetalheBean.adicionarOpcao}"
+                                         value="Adicionar Opção"
+                                         icon="bi bi-plus-lg"
+                                         size="sm"
+                                         render=":frmPopupOpcoes :frmBuilder :growlGlobal"/>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+                    <b:commandButton value="Concluir"
+                                     icon="bi bi-check-lg"
+                                     onclick="Box.popup.close('popupOpcoes'); return false;"/>
+                </div>
+            </h:form>
+        </b:popup>
 
     </ui:define>
 </ui:composition>
