@@ -53,6 +53,17 @@ public class Questao extends Model<UUID> implements Serializable {
     @Column(length = 100)
     private String assunto;
 
+    @Column
+    private Integer ano;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private NivelQuestao nivel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private DificuldadeQuestao dificuldade;
+
     @Column(name = "criado_por", nullable = false, length = 60)
     private String criadoPor;
 
@@ -115,6 +126,30 @@ public class Questao extends Model<UUID> implements Serializable {
 
     public void setAssunto(String assunto) {
         this.assunto = assunto;
+    }
+
+    public Integer getAno() {
+        return ano;
+    }
+
+    public void setAno(Integer ano) {
+        this.ano = ano;
+    }
+
+    public NivelQuestao getNivel() {
+        return nivel;
+    }
+
+    public void setNivel(NivelQuestao nivel) {
+        this.nivel = nivel;
+    }
+
+    public DificuldadeQuestao getDificuldade() {
+        return dificuldade;
+    }
+
+    public void setDificuldade(DificuldadeQuestao dificuldade) {
+        this.dificuldade = dificuldade;
     }
 
     public String getCriadoPor() {

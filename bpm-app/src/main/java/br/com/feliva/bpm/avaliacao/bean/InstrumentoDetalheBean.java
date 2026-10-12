@@ -1,8 +1,10 @@
 package br.com.feliva.bpm.avaliacao.bean;
 
 import br.com.feliva.bpm.avaliacao.model.AreaConhecimento;
+import br.com.feliva.bpm.avaliacao.model.DificuldadeQuestao;
 import br.com.feliva.bpm.avaliacao.model.InstrumentoAvaliativo;
 import br.com.feliva.bpm.avaliacao.model.InstrumentoSessao;
+import br.com.feliva.bpm.avaliacao.model.NivelQuestao;
 import br.com.feliva.bpm.avaliacao.model.OpcaoQuestao;
 import br.com.feliva.bpm.avaliacao.model.Questao;
 import br.com.feliva.bpm.avaliacao.model.SessaoQuestao;
@@ -18,6 +20,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.transaction.Transactional;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -33,6 +36,7 @@ import java.util.logging.Logger;
  */
 @Named
 @ViewScoped
+@Transactional
 public class InstrumentoDetalheBean implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(InstrumentoDetalheBean.class.getName());
@@ -434,6 +438,14 @@ public class InstrumentoDetalheBean implements Serializable {
 
     public TipoQuestao[] getTiposQuestao() {
         return TipoQuestao.values();
+    }
+
+    public NivelQuestao[] getNiveisQuestao() {
+        return NivelQuestao.values();
+    }
+
+    public DificuldadeQuestao[] getDificuldadesQuestao() {
+        return DificuldadeQuestao.values();
     }
 
     public TipoSessao[] getTiposSessao() {

@@ -14,7 +14,7 @@
     <ui:define name="conteudo">
 
         <h:form id="frmBuilder">
-            <h:messages id="msgs" errorClass="msg-error" infoClass="msg-info" style="margin-bottom: 1.25rem; list-style: none; padding: 0;"/>
+            <b:growl id="growl"/>
 
             <!-- =================================================================
                  Cabeçalho do Construtor de Instrumento
@@ -307,6 +307,21 @@
                                                 <i class="bi bi-mortarboard"/> #{sq.questao.areaConhecimento.rotuloExibicao}
                                             </span>
                                         </h:panelGroup>
+                                        <h:panelGroup rendered="#{sq.questao.ano != null}">
+                                            <span class="question-subject" style="background: #f8fafc; color: #475569;">
+                                                <i class="bi bi-calendar3"/> #{sq.questao.ano}
+                                            </span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{sq.questao.nivel != null}">
+                                            <span class="question-subject" style="background: #ecfdf5; color: #047857; border-color: #a7f3d0;">
+                                                <i class="bi bi-layers"/> #{sq.questao.nivel.descricao}
+                                            </span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{sq.questao.dificuldade != null}">
+                                            <span class="question-subject" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">
+                                                <i class="bi bi-speedometer2"/> #{sq.questao.dificuldade.descricao}
+                                            </span>
+                                        </h:panelGroup>
                                     </div>
 
                                     <!-- Pré-visualização realista no card -->
@@ -496,6 +511,29 @@
                                             <span>#{area.descricao}</span>
                                         </div>
                                     </b:autocomplete>
+                                </div>
+
+                                <div class="campo col-4">
+                                    <h:outputLabel for="questaoAno" value="Ano"/>
+                                    <h:inputText id="questaoAno" value="#{instrumentoDetalheBean.questaoEmEdicao.ano}" p:type="number" placeholder="Ex.: 2026"/>
+                                </div>
+
+                                <div class="campo col-4">
+                                    <h:outputLabel for="questaoNivel" value="Nível Escolar/Acadêmico"/>
+                                    <h:selectOneMenu id="questaoNivel" value="#{instrumentoDetalheBean.questaoEmEdicao.nivel}">
+                                        <f:selectItem itemValue="#{null}" itemLabel="-- Não informado --"/>
+                                        <f:selectItems value="#{instrumentoDetalheBean.niveisQuestao}" var="nv" itemValue="#{nv}"
+                                                       itemLabel="#{nv.descricao}"/>
+                                    </h:selectOneMenu>
+                                </div>
+
+                                <div class="campo col-4">
+                                    <h:outputLabel for="questaoDificuldade" value="Dificuldade"/>
+                                    <h:selectOneMenu id="questaoDificuldade" value="#{instrumentoDetalheBean.questaoEmEdicao.dificuldade}">
+                                        <f:selectItem itemValue="#{null}" itemLabel="-- Não informada --"/>
+                                        <f:selectItems value="#{instrumentoDetalheBean.dificuldadesQuestao}" var="df" itemValue="#{df}"
+                                                       itemLabel="#{df.descricao}"/>
+                                    </h:selectOneMenu>
                                 </div>
 
                                 <div class="campo col-12" style="margin-top: 0.5rem;">

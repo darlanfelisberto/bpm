@@ -13,11 +13,17 @@ CREATE TABLE avaliacao.area_conhecimento
 CREATE INDEX ix_area_conhecimento_cod ON avaliacao.area_conhecimento (cod);
 CREATE INDEX ix_area_conhecimento_descricao ON avaliacao.area_conhecimento (descricao);
 
--- Adicionar FK em avaliacao.questao
+-- Adicionar campos complementares em avaliacao.questao (area_conhecimento, ano, nivel, dificuldade)
 ALTER TABLE avaliacao.questao
-    ADD COLUMN area_conhecimento_id UUID REFERENCES avaliacao.area_conhecimento (area_conhecimento_id);
+    ADD COLUMN area_conhecimento_id UUID REFERENCES avaliacao.area_conhecimento (area_conhecimento_id),
+    ADD COLUMN ano                  INTEGER,
+    ADD COLUMN nivel                VARCHAR(30),
+    ADD COLUMN dificuldade          VARCHAR(20);
 
 CREATE INDEX ix_questao_area_conhecimento ON avaliacao.questao (area_conhecimento_id);
+CREATE INDEX ix_questao_ano ON avaliacao.questao (ano);
+CREATE INDEX ix_questao_nivel ON avaliacao.questao (nivel);
+CREATE INDEX ix_questao_dificuldade ON avaliacao.questao (dificuldade);
 
 -- Carga completa da Tabela de Áreas do Conhecimento (CAPES/CNPq 2022)
 INSERT INTO avaliacao.area_conhecimento (cod, descricao) VALUES

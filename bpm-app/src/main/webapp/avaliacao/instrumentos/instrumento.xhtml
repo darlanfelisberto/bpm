@@ -11,6 +11,7 @@
         <h2>Instrumentos avaliativos</h2>
 
         <h:form id="frmPrincipal">
+            <b:growl id="growl"/>
             <h:panelGroup id="pnlBuscaTabela" layout="block" rendered="#{!instrumentoAvaliacaoBean.editando}">
                 <b:panel header="Busca Instrumento">
                     <div class="grid-12">
@@ -153,7 +154,6 @@
                                          variant="secondary"
                                          render=":frmPrincipal" />
                     </div>
-                    <h:messages errorClass="msg-error" infoClass="msg-info" style="margin-top: 1rem;"/>
                 </b:panel>
             </h:panelGroup>
         </h:form>

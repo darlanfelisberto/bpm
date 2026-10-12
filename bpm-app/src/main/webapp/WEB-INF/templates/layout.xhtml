@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets">
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:b="http://iffar.edu.br/box">
 <h:head>
     <title><ui:insert name="titulo">BPM IFFar</ui:insert></title>
     <!-- Bootstrap Icons auto-hospedada (webapp/vendor/bootstrap-icons/), servida
@@ -21,6 +22,7 @@
     <ui:insert name="head-extra"/>
 </h:head>
 <h:body>
+    <b:growl id="growl"/>
     <header class="app-header">
         <h1><h:link outcome="/index" value="BPM IFFar" style="color: inherit; text-decoration: none;"/></h1>
         <nav>
