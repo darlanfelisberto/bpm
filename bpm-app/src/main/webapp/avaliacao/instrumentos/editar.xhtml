@@ -296,11 +296,18 @@
                                         </div>
                                     </div>
 
-                                    <!-- Enunciado e Assunto -->
+                                    <!-- Enunciado e Assunto / Área do Conhecimento -->
                                     <div class="question-prompt">#{sq.enunciado}</div>
-                                    <h:panelGroup rendered="#{not empty sq.questao.assunto}">
-                                        <span class="question-subject"><i class="bi bi-tag"/> #{sq.questao.assunto}</span>
-                                    </h:panelGroup>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+                                        <h:panelGroup rendered="#{not empty sq.questao.assunto}">
+                                            <span class="question-subject"><i class="bi bi-tag"/> #{sq.questao.assunto}</span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{not empty sq.questao.areaConhecimento}">
+                                            <span class="question-subject" style="background: #eef2ff; color: #4338ca; border-color: #c7d2fe;">
+                                                <i class="bi bi-mortarboard"/> #{sq.questao.areaConhecimento.rotuloExibicao}
+                                            </span>
+                                        </h:panelGroup>
+                                    </div>
 
                                     <!-- Pré-visualização realista no card -->
                                     <div class="question-preview-box">
@@ -468,13 +475,31 @@
                                     <h:inputText id="questaoPeso" value="#{instrumentoDetalheBean.sessaoQuestaoEmEdicao.peso}" placeholder="1.00"/>
                                 </div>
 
-                                <div class="campo col-8">
+                                <div class="campo col-6">
                                     <h:outputLabel for="questaoAssunto" value="Assunto / Categoria (opcional)"/>
                                     <h:inputText id="questaoAssunto" value="#{instrumentoDetalheBean.questaoEmEdicao.assunto}" placeholder="Ex.: Infraestrutura, Metodologia..."/>
                                 </div>
 
-                                <div class="campo col-4" style="margin-top: 1.5rem;">
-                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                <div class="campo col-6">
+                                    <h:outputLabel for="questaoAreaConhecimento_input" value="Área do Conhecimento (opcional)"/>
+                                    <b:autocomplete id="questaoAreaConhecimento"
+                                                    value="#{instrumentoDetalheBean.questaoEmEdicao.areaConhecimento}"
+                                                    completeMethod="#{instrumentoDetalheBean.completeAreaConhecimento}"
+                                                    var="area"
+                                                    itemLabel="#{area.rotuloExibicao}"
+                                                    itemValue="#{area}"
+                                                    converter="box.entityConverter"
+                                                    dropdown="true"
+                                                    placeholder="Digite o código ou nome da área...">
+                                        <div style="display: flex; gap: 0.5rem; align-items: baseline;">
+                                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-primary);">#{area.cod}</span>
+                                            <span>#{area.descricao}</span>
+                                        </div>
+                                    </b:autocomplete>
+                                </div>
+
+                                <div class="campo col-12" style="margin-top: 0.5rem;">
+                                    <label style="display: flex; align-items: center; cursor: pointer; gap: 0.4rem;">
                                         <h:selectBooleanCheckbox id="questaoObrigatoria" value="#{instrumentoDetalheBean.sessaoQuestaoEmEdicao.obrigatoria}"/>
                                         Obrigatória
                                     </label>

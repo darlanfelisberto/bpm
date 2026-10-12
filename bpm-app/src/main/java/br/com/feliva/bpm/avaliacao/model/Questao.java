@@ -39,6 +39,10 @@ public class Questao extends Model<UUID> implements Serializable {
     @JoinColumn(name = "conjunto_opcao_id")
     private ConjuntoOpcao conjuntoOpcao;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "area_conhecimento_id")
+    private AreaConhecimento areaConhecimento;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String enunciado;
 
@@ -79,6 +83,14 @@ public class Questao extends Model<UUID> implements Serializable {
 
     public void setConjuntoOpcao(ConjuntoOpcao conjuntoOpcao) {
         this.conjuntoOpcao = conjuntoOpcao;
+    }
+
+    public AreaConhecimento getAreaConhecimento() {
+        return areaConhecimento;
+    }
+
+    public void setAreaConhecimento(AreaConhecimento areaConhecimento) {
+        this.areaConhecimento = areaConhecimento;
     }
 
     public String getEnunciado() {

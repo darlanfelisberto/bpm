@@ -1,6 +1,6 @@
 package br.com.feliva.bpm.avaliacao.bean;
 
-import br.com.feliva.bpm.avaliacao.model.ConjuntoOpcao;
+import br.com.feliva.bpm.avaliacao.model.AreaConhecimento;
 import br.com.feliva.bpm.avaliacao.model.InstrumentoAvaliativo;
 import br.com.feliva.bpm.avaliacao.model.InstrumentoSessao;
 import br.com.feliva.bpm.avaliacao.model.OpcaoQuestao;
@@ -8,18 +8,20 @@ import br.com.feliva.bpm.avaliacao.model.Questao;
 import br.com.feliva.bpm.avaliacao.model.SessaoQuestao;
 import br.com.feliva.bpm.avaliacao.model.TipoQuestao;
 import br.com.feliva.bpm.avaliacao.model.TipoSessao;
+import br.com.feliva.bpm.avaliacao.dao.AreaConhecimentoDAO;
+import br.com.feliva.bpm.avaliacao.dao.InstrumentoAvaliacaoDAO;
+import br.com.feliva.bpm.avaliacao.dao.InstrumentoSessaoDAO;
+import br.com.feliva.bpm.avaliacao.dao.OpcaoQuestaoDAO;
+import br.com.feliva.bpm.avaliacao.dao.QuestaoDAO;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -31,13 +33,24 @@ import java.util.logging.Logger;
  */
 @Named
 @ViewScoped
-@Transactional
 public class InstrumentoDetalheBean implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(InstrumentoDetalheBean.class.getName());
 
     @Inject
-    private EntityManager em;
+    private InstrumentoAvaliacaoDAO instrumentoDAO;
+
+    @Inject
+    private InstrumentoSessaoDAO sessaoDAO;
+
+    @Inject
+    private QuestaoDAO questaoDAO;
+
+    @Inject
+    private OpcaoQuestaoDAO opcaoDAO;
+
+    @Inject
+    private AreaConhecimentoDAO areaConhecimentoDAO;
 
     private UUID instrumentoId;
     private InstrumentoAvaliativo instrumento;
@@ -64,29 +77,7 @@ public class InstrumentoDetalheBean implements Serializable {
             return;
         }
         try {
-            instrumento = em.find(InstrumentoAvaliativo.class, instrumentoId);
-            if (instrumento != null) {
-                List<InstrumentoSessao> sessoes = em.createQuery(
-                        "select distinct s from InstrumentoSessao s " +
-                        "left join fetch s.questoes sq " +
-                        "left join fetch sq.questao q " +
-                        "left join fetch q.conjuntoOpcao co " +
-                        "where s.instrumentoAvaliativo.instrumentoAvaliativoId = :id " +
-                        "order by s.ordem asc", InstrumentoSessao.class)
-                        .setParameter("id", instrumentoId)
-                        .getResultList();
-
-                for (InstrumentoSessao s : sessoes) {
-                    if (s.getQuestoes() != null) {
-                        for (SessaoQuestao sq : s.getQuestoes()) {
-                            if (sq.getQuestao() != null && sq.getQuestao().getConjuntoOpcao() != null) {
-                                sq.getQuestao().getConjuntoOpcao().getOpcoes().size();
-                            }
-                        }
-                    }
-                }
-                instrumento.setSessoes(sessoes);
-            }
+            instrumento = instrumentoDAO.buscarComEstruturaCompleta(instrumentoId);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro ao carregar instrumento " + instrumentoId, e);
             FacesContext.getCurrentInstance().addMessage(null,
@@ -162,12 +153,7 @@ public class InstrumentoDetalheBean implements Serializable {
                 return;
             }
             sessaoEmEdicao.setInstrumentoAvaliativo(instrumento);
-            if (sessaoEmEdicao.getId() == null) {
-                em.persist(sessaoEmEdicao);
-            } else {
-                sessaoEmEdicao = em.merge(sessaoEmEdicao);
-            }
-            em.flush();
+            sessaoDAO.salvar(sessaoEmEdicao);
             editandoSessao = false;
             carregar();
             FacesContext.getCurrentInstance().addMessage(null,
@@ -181,11 +167,7 @@ public class InstrumentoDetalheBean implements Serializable {
 
     public void excluirSessao(InstrumentoSessao s) {
         try {
-            InstrumentoSessao managed = em.contains(s) ? s : em.find(InstrumentoSessao.class, s.getId());
-            if (managed != null) {
-                em.remove(managed);
-            }
-            em.flush();
+            sessaoDAO.excluir(s);
             carregar();
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Sessão removida.", null));
@@ -205,18 +187,13 @@ public class InstrumentoDetalheBean implements Serializable {
     }
 
     private void ajustarOrdemSessao(InstrumentoSessao s, int delta) {
-        List<InstrumentoSessao> lista = instrumento.getSessoes();
-        int idx = lista.indexOf(s);
-        int targetIdx = idx + delta;
-        if (idx >= 0 && targetIdx >= 0 && targetIdx < lista.size()) {
-            InstrumentoSessao vizinho = lista.get(targetIdx);
-            short ordemOriginal = s.getOrdem();
-            s.setOrdem(vizinho.getOrdem());
-            vizinho.setOrdem(ordemOriginal);
-            em.merge(s);
-            em.merge(vizinho);
-            em.flush();
+        try {
+            sessaoDAO.reordenar(instrumento != null ? instrumento.getSessoes() : null, s, delta);
             carregar();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro ao ajustar ordem da sessao", e);
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao alterar ordem da sessão: " + e.getMessage(), null));
         }
     }
 
@@ -257,38 +234,7 @@ public class InstrumentoDetalheBean implements Serializable {
                 return;
             }
 
-            if (questaoEmEdicao.getId() == null) {
-                questaoEmEdicao.setCriadoPor("admin");
-                questaoEmEdicao.setCriadoEm(OffsetDateTime.now());
-
-                if (questaoEmEdicao.getTipo() != TipoQuestao.DESCRITIVA && questaoEmEdicao.getConjuntoOpcao() == null) {
-                    ConjuntoOpcao co = new ConjuntoOpcao();
-                    String prefixo = questaoEmEdicao.getEnunciado().length() > 30
-                            ? questaoEmEdicao.getEnunciado().substring(0, 30)
-                            : questaoEmEdicao.getEnunciado();
-                    co.setNome(prefixo.trim() + " (" + UUID.randomUUID().toString().substring(0, 8) + ")");
-                    em.persist(co);
-                    questaoEmEdicao.setConjuntoOpcao(co);
-                }
-                em.persist(questaoEmEdicao);
-
-                sessaoQuestaoEmEdicao.setQuestao(questaoEmEdicao);
-                sessaoQuestaoEmEdicao.setInstrumentoSessao(sessaoSelecionada);
-                em.persist(sessaoQuestaoEmEdicao);
-            } else {
-                if (questaoEmEdicao.getTipo() != TipoQuestao.DESCRITIVA && questaoEmEdicao.getConjuntoOpcao() == null) {
-                    ConjuntoOpcao co = new ConjuntoOpcao();
-                    co.setNome("Opções (" + UUID.randomUUID().toString().substring(0, 8) + ")");
-                    em.persist(co);
-                    questaoEmEdicao.setConjuntoOpcao(co);
-                } else if (questaoEmEdicao.getTipo() == TipoQuestao.DESCRITIVA) {
-                    questaoEmEdicao.setConjuntoOpcao(null);
-                }
-                questaoEmEdicao = em.merge(questaoEmEdicao);
-                sessaoQuestaoEmEdicao = em.merge(sessaoQuestaoEmEdicao);
-            }
-
-            em.flush();
+            questaoDAO.salvarQuestao(sessaoSelecionada, sessaoQuestaoEmEdicao, questaoEmEdicao);
             editandoQuestao = false;
             carregar();
             FacesContext.getCurrentInstance().addMessage(null,
@@ -307,21 +253,7 @@ public class InstrumentoDetalheBean implements Serializable {
                 return;
             }
             LOGGER.info("Excluindo questao: " + sq.getId());
-            SessaoQuestao managed = em.contains(sq) ? sq : em.find(SessaoQuestao.class, sq.getId());
-            if (managed != null) {
-                if (managed.getInstrumentoSessao() != null && managed.getInstrumentoSessao().getQuestoes() != null) {
-                    managed.getInstrumentoSessao().getQuestoes().remove(managed);
-                }
-                if (instrumento != null && instrumento.getSessoes() != null) {
-                    for (InstrumentoSessao s : instrumento.getSessoes()) {
-                        if (s.getQuestoes() != null) {
-                            s.getQuestoes().removeIf(q -> q.getId() != null && q.getId().equals(sq.getId()));
-                        }
-                    }
-                }
-                em.remove(managed);
-            }
-            em.flush();
+            questaoDAO.excluirSessaoQuestao(sq, instrumento);
             carregar();
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Questão removida.", null));
@@ -341,19 +273,14 @@ public class InstrumentoDetalheBean implements Serializable {
     }
 
     private void ajustarOrdemQuestao(SessaoQuestao sq, int delta) {
-        InstrumentoSessao s = sq.getInstrumentoSessao();
-        List<SessaoQuestao> lista = s.getQuestoes();
-        int idx = lista.indexOf(sq);
-        int targetIdx = idx + delta;
-        if (idx >= 0 && targetIdx >= 0 && targetIdx < lista.size()) {
-            SessaoQuestao vizinho = lista.get(targetIdx);
-            short ordemOriginal = sq.getOrdem();
-            sq.setOrdem(vizinho.getOrdem());
-            vizinho.setOrdem(ordemOriginal);
-            em.merge(sq);
-            em.merge(vizinho);
-            em.flush();
+        try {
+            InstrumentoSessao s = sq.getInstrumentoSessao();
+            questaoDAO.reordenar(s != null ? s.getQuestoes() : null, sq, delta);
             carregar();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro ao ajustar ordem da questao", e);
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao alterar ordem da questão: " + e.getMessage(), null));
         }
     }
 
@@ -378,22 +305,7 @@ public class InstrumentoDetalheBean implements Serializable {
                 return;
             }
             Questao q = sessaoQuestaoOpcoes.getQuestao();
-            ConjuntoOpcao conjunto = q.getConjuntoOpcao();
-            if (conjunto == null) {
-                conjunto = new ConjuntoOpcao();
-                conjunto.setNome("Opções (" + UUID.randomUUID().toString().substring(0, 8) + ")");
-                em.persist(conjunto);
-                q.setConjuntoOpcao(conjunto);
-                em.merge(q);
-            }
-            OpcaoQuestao op = new OpcaoQuestao();
-            op.setConjuntoOpcao(conjunto);
-            op.setTexto(novaOpcaoTexto.trim());
-            op.setValor(novaOpcaoValor);
-            short proximaOrdem = (short) (conjunto.getOpcoes() != null ? conjunto.getOpcoes().size() + 1 : 1);
-            op.setOrdem(proximaOrdem);
-            em.persist(op);
-            em.flush();
+            opcaoDAO.adicionarOpcao(q, novaOpcaoTexto, novaOpcaoValor);
 
             novaOpcaoTexto = null;
             novaOpcaoValor = null;
@@ -412,14 +324,7 @@ public class InstrumentoDetalheBean implements Serializable {
                 LOGGER.warning("excluirOpcao chamada com opcao nula");
                 return;
             }
-            OpcaoQuestao managed = em.contains(opcao) ? opcao : em.find(OpcaoQuestao.class, opcao.getId());
-            if (managed != null) {
-                if (managed.getConjuntoOpcao() != null && managed.getConjuntoOpcao().getOpcoes() != null) {
-                    managed.getConjuntoOpcao().getOpcoes().remove(managed);
-                }
-                em.remove(managed);
-            }
-            em.flush();
+            opcaoDAO.excluirOpcao(opcao);
             carregar();
             sincronizarSessaoQuestaoOpcoes();
         } catch (Exception e) {
@@ -475,22 +380,7 @@ public class InstrumentoDetalheBean implements Serializable {
                 return;
             }
             Questao q = sessaoQuestaoOpcoes.getQuestao();
-            ConjuntoOpcao conjunto = q.getConjuntoOpcao();
-            if (conjunto == null) {
-                conjunto = new ConjuntoOpcao();
-                conjunto.setNome("Opções (" + UUID.randomUUID().toString().substring(0, 8) + ")");
-                em.persist(conjunto);
-                q.setConjuntoOpcao(conjunto);
-                em.merge(q);
-            }
-            for (int i = 0; i < textos.length; i++) {
-                OpcaoQuestao op = new OpcaoQuestao();
-                op.setConjuntoOpcao(conjunto);
-                op.setTexto(textos[i]);
-                op.setValor(valores != null && i < valores.length ? valores[i] : null);
-                op.setOrdem((short) (i + 1));
-                em.persist(op);
-            }
+            opcaoDAO.aplicarTemplate(q, textos, valores);
             carregar();
             sincronizarSessaoQuestaoOpcoes();
             FacesContext.getCurrentInstance().addMessage(null,
@@ -531,6 +421,15 @@ public class InstrumentoDetalheBean implements Serializable {
         this.editandoSessao = false;
         this.editandoQuestao = false;
         this.gerenciandoOpcoes = false;
+    }
+
+    public List<AreaConhecimento> completeAreaConhecimento(String query) {
+        try {
+            return areaConhecimentoDAO.pesquisar(query, 20);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro ao autocompletar área do conhecimento com termo: " + query, e);
+            return Collections.emptyList();
+        }
     }
 
     public TipoQuestao[] getTiposQuestao() {

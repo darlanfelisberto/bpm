@@ -1,6 +1,8 @@
 package br.com.feliva.bpm.avaliacao.dao;
 
 import br.com.feliva.bpm.avaliacao.model.InstrumentoAvaliativo;
+import br.com.feliva.bpm.avaliacao.model.InstrumentoSessao;
+import br.com.feliva.bpm.avaliacao.model.SessaoQuestao;
 //import br.com.feliva.bpm.avaliacao.model.StatusInstrumento;
 import br.com.feliva.bpm.avaliacao.model.TipoStatus;
 import br.com.feliva.sharedClass.db.InjectEntityManagerDAO;
@@ -8,6 +10,7 @@ import br.edu.iffar.box.component.datatable.DatatablePage;
 import br.edu.iffar.box.component.datatable.DatatableQuery;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +22,37 @@ public class InstrumentoAvaliacaoDAO extends InjectEntityManagerDAO<InstrumentoA
 
     public InstrumentoAvaliativo buscarPorId(UUID id) {
         return em.find(InstrumentoAvaliativo.class, id);
+    }
+
+    public InstrumentoAvaliativo buscarComEstruturaCompleta(UUID id) {
+        if (id == null) {
+            return null;
+        }
+        InstrumentoAvaliativo instrumento = em.find(InstrumentoAvaliativo.class, id);
+        if (instrumento != null) {
+            List<InstrumentoSessao> sessoes = em.createQuery(
+                    "select distinct s from InstrumentoSessao s " +
+                    "left join fetch s.questoes sq " +
+                    "left join fetch sq.questao q " +
+                    "left join fetch q.conjuntoOpcao co " +
+                    "left join fetch q.areaConhecimento ac " +
+                    "where s.instrumentoAvaliativo.instrumentoAvaliativoId = :id " +
+                    "order by s.ordem asc", InstrumentoSessao.class)
+                    .setParameter("id", id)
+                    .getResultList();
+
+            for (InstrumentoSessao s : sessoes) {
+                if (s.getQuestoes() != null) {
+                    for (SessaoQuestao sq : s.getQuestoes()) {
+                        if (sq.getQuestao() != null && sq.getQuestao().getConjuntoOpcao() != null) {
+                            sq.getQuestao().getConjuntoOpcao().getOpcoes().size();
+                        }
+                    }
+                }
+            }
+            instrumento.setSessoes(sessoes);
+        }
+        return instrumento;
     }
 
     public List<TipoStatus> getTiposStatus() {

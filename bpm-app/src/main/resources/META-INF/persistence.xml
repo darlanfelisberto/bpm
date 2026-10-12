@@ -20,6 +20,7 @@
         <class>br.com.feliva.bpm.avaliacao.model.Participacao</class>
         <class>br.com.feliva.bpm.avaliacao.model.RespostaInstrumento</class>
         <class>br.com.feliva.bpm.avaliacao.model.RespostaQuestao</class>
+        <class>br.com.feliva.bpm.avaliacao.model.AreaConhecimento</class>
         <class>br.com.feliva.bpm.avaliacao.model.Encaminhamento</class>
 
         <properties>
