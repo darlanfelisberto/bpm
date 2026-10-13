@@ -37,12 +37,13 @@ public class InstrumentoAvaliacaoDAO extends InjectEntityManagerDAO<InstrumentoA
                     "left join fetch q.conjuntoOpcao co " +
                     "left join fetch q.areaConhecimento ac " +
                     "where s.instrumentoAvaliativo.instrumentoAvaliativoId = :id " +
-                    "order by s.ordem asc", InstrumentoSessao.class)
+                    "order by s.ordem asc, s.instumentoSessaoId asc", InstrumentoSessao.class)
                     .setParameter("id", id)
                     .getResultList();
 
             for (InstrumentoSessao s : sessoes) {
                 if (s.getQuestoes() != null) {
+                    s.getQuestoes().sort(java.util.Comparator.comparingInt(SessaoQuestao::getOrdem));
                     for (SessaoQuestao sq : s.getQuestoes()) {
                         if (sq.getQuestao() != null && sq.getQuestao().getConjuntoOpcao() != null) {
                             sq.getQuestao().getConjuntoOpcao().getOpcoes().size();

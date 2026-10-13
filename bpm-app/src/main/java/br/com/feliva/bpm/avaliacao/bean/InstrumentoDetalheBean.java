@@ -225,6 +225,7 @@ public class InstrumentoDetalheBean implements Serializable {
 
     private void ajustarOrdemSessao(InstrumentoSessao s, int delta) {
         try {
+            LOGGER.info("ajustarOrdemSessao: sessao=" + (s != null ? s.getId() : "null") + " delta=" + delta);
             sessaoDAO.reordenar(instrumento != null ? instrumento.getSessoes() : null, s, delta);
             carregar();
         } catch (Exception e) {
@@ -317,8 +318,30 @@ public class InstrumentoDetalheBean implements Serializable {
 
     private void ajustarOrdemQuestao(SessaoQuestao sq, int delta) {
         try {
-            InstrumentoSessao s = sq.getInstrumentoSessao();
-            questaoDAO.reordenar(s != null ? s.getQuestoes() : null, sq, delta);
+            LOGGER.info("ajustarOrdemQuestao: sq=" + (sq != null ? sq.getId() : "null") + " delta=" + delta);
+            if (sq == null) {
+                return;
+            }
+            List<SessaoQuestao> listaQuestoes = null;
+            if (instrumento != null && instrumento.getSessoes() != null) {
+                for (InstrumentoSessao s : instrumento.getSessoes()) {
+                    if (s.getQuestoes() != null) {
+                        for (SessaoQuestao q : s.getQuestoes()) {
+                            if (q.getId() != null && q.getId().equals(sq.getId())) {
+                                listaQuestoes = s.getQuestoes();
+                                break;
+                            }
+                        }
+                    }
+                    if (listaQuestoes != null) {
+                        break;
+                    }
+                }
+            }
+            if (listaQuestoes == null && sq.getInstrumentoSessao() != null) {
+                listaQuestoes = sq.getInstrumentoSessao().getQuestoes();
+            }
+            questaoDAO.reordenar(listaQuestoes, sq, delta);
             carregar();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro ao ajustar ordem da questao", e);

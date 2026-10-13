@@ -144,7 +144,7 @@
                 </h:panelGroup>
 
                 <!-- Lista de Sessões e Questões -->
-                <ui:repeat value="#{instrumentoDetalheBean.instrumento.sessoes}" var="sessao">
+                <ui:repeat value="#{instrumentoDetalheBean.instrumento.sessoes}" var="sessao" varStatus="sessaoStatus">
                     <div class="session-card">
                         <!-- Cabeçalho da Sessão -->
                         <div class="session-header">
@@ -183,6 +183,7 @@
                                                  icon="bi bi-arrow-up"
                                                  variant="secondary"
                                                  size="sm"
+                                                 disabled="#{sessaoStatus.first}"
                                                  render=":frmBuilder"
                                                  title="Mover sessão para cima"/>
 
@@ -190,6 +191,7 @@
                                                  icon="bi bi-arrow-down"
                                                  variant="secondary"
                                                  size="sm"
+                                                 disabled="#{sessaoStatus.last}"
                                                  render=":frmBuilder"
                                                  title="Mover sessão para baixo"/>
 
@@ -221,7 +223,7 @@
                                 </div>
                             </h:panelGroup>
 
-                            <ui:repeat value="#{sessao.questoes}" var="sq">
+                            <ui:repeat value="#{sessao.questoes}" var="sq" varStatus="sqStatus">
                                 <div class="question-card">
                                     <!-- Cabeçalho do Card da Questão -->
                                     <div class="question-card-header">
@@ -275,6 +277,7 @@
                                                              icon="bi bi-arrow-up"
                                                              variant="secondary"
                                                              size="sm"
+                                                             disabled="#{sqStatus.first}"
                                                              render=":frmBuilder"
                                                              title="Mover questão para cima"/>
 
@@ -282,6 +285,7 @@
                                                              icon="bi bi-arrow-down"
                                                              variant="secondary"
                                                              size="sm"
+                                                             disabled="#{sqStatus.last}"
                                                              render=":frmBuilder"
                                                              title="Mover questão para baixo"/>
 

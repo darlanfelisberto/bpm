@@ -86,20 +86,38 @@ public class QuestaoDAO extends InjectEntityManagerDAO<Questao> {
         }
     }
 
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(QuestaoDAO.class.getName());
+
     @Transactional
     public void reordenar(List<SessaoQuestao> questoes, SessaoQuestao sq, int delta) {
         if (questoes == null || sq == null) {
+            LOGGER.warning("reordenar questao: lista ou sq nulos");
             return;
         }
-        int idx = questoes.indexOf(sq);
+        int idx = -1;
+        for (int i = 0; i < questoes.size(); i++) {
+            if (questoes.get(i).getId() != null && questoes.get(i).getId().equals(sq.getId())) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx < 0) {
+            idx = questoes.indexOf(sq);
+        }
         int targetIdx = idx + delta;
+        LOGGER.info("reordenar questao: id=" + sq.getId() + " idx=" + idx + " targetIdx=" + targetIdx + " total=" + questoes.size());
         if (idx >= 0 && targetIdx >= 0 && targetIdx < questoes.size()) {
-            SessaoQuestao vizinho = questoes.get(targetIdx);
-            short ordemOriginal = sq.getOrdem();
-            sq.setOrdem(vizinho.getOrdem());
-            vizinho.setOrdem(ordemOriginal);
-            em.merge(sq);
-            em.merge(vizinho);
+            java.util.Collections.swap(questoes, idx, targetIdx);
+            for (short i = 0; i < questoes.size(); i++) {
+                SessaoQuestao item = questoes.get(i);
+                item.setOrdem((short) (i + 1));
+                SessaoQuestao managed = em.find(SessaoQuestao.class, item.getId());
+                if (managed != null) {
+                    managed.setOrdem((short) (i + 1));
+                } else {
+                    em.merge(item);
+                }
+            }
             em.flush();
         }
     }

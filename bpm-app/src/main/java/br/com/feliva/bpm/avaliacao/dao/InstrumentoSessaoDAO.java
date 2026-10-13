@@ -11,6 +11,8 @@ import java.util.UUID;
 @RequestScoped
 public class InstrumentoSessaoDAO extends InjectEntityManagerDAO<InstrumentoSessao> {
 
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(InstrumentoSessaoDAO.class.getName());
+
     public InstrumentoSessao buscarPorId(UUID id) {
         return em.find(InstrumentoSessao.class, id);
     }
@@ -46,17 +48,33 @@ public class InstrumentoSessaoDAO extends InjectEntityManagerDAO<InstrumentoSess
     @Transactional
     public void reordenar(List<InstrumentoSessao> sessoes, InstrumentoSessao sessao, int delta) {
         if (sessoes == null || sessao == null) {
+            LOGGER.warning("reordenar: lista de sessoes ou sessao nula");
             return;
         }
-        int idx = sessoes.indexOf(sessao);
+        int idx = -1;
+        for (int i = 0; i < sessoes.size(); i++) {
+            if (sessoes.get(i).getId() != null && sessoes.get(i).getId().equals(sessao.getId())) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx < 0) {
+            idx = sessoes.indexOf(sessao);
+        }
         int targetIdx = idx + delta;
+        LOGGER.info("reordenar sessao: id=" + sessao.getId() + " idx=" + idx + " targetIdx=" + targetIdx + " total=" + sessoes.size());
         if (idx >= 0 && targetIdx >= 0 && targetIdx < sessoes.size()) {
-            InstrumentoSessao vizinho = sessoes.get(targetIdx);
-            short ordemOriginal = sessao.getOrdem();
-            sessao.setOrdem(vizinho.getOrdem());
-            vizinho.setOrdem(ordemOriginal);
-            em.merge(sessao);
-            em.merge(vizinho);
+            java.util.Collections.swap(sessoes, idx, targetIdx);
+            for (short i = 0; i < sessoes.size(); i++) {
+                InstrumentoSessao item = sessoes.get(i);
+                item.setOrdem((short) (i + 1));
+                InstrumentoSessao managed = em.find(InstrumentoSessao.class, item.getId());
+                if (managed != null) {
+                    managed.setOrdem((short) (i + 1));
+                } else {
+                    em.merge(item);
+                }
+            }
             em.flush();
         }
     }
