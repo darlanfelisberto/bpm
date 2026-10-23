@@ -19,6 +19,7 @@
          depender de box-core.js (só usa ele de forma oportunista pra
          tradução, quando outro componente do box já carregou). -->
     <h:outputScript library="box" name="confirm/confirm.js"/>
+    <h:outputScript library="js" name="navegacao.js" target="body"/>
     <ui:insert name="head-extra"/>
 </h:head>
 <h:body>
@@ -35,15 +36,18 @@
 
             <nav class="app-nav" aria-label="Menu principal">
                 <span class="app-nav-title">NAVEGAÇÃO</span>
-                <h:link outcome="/index" styleClass="app-nav-link #{facesContext.viewRoot.viewId eq '/index.xhtml' ? 'is-active' : ''}">
+                <a href="#{request.contextPath}/index.xhtml" class="app-nav-link" data-section="inicio">
                     <i class="bi bi-house-door" aria-hidden="true"/><span>Início</span>
-                </h:link>
-                <h:link outcome="/macroprocessos/list" styleClass="app-nav-link #{facesContext.viewRoot.viewId.startsWith('/macroprocessos/') or facesContext.viewRoot.viewId.startsWith('/processos/') ? 'is-active' : ''}">
+                </a>
+                <a href="#{request.contextPath}/macroprocessos/list.xhtml" class="app-nav-link" data-section="macroprocessos">
                     <i class="bi bi-diagram-2" aria-hidden="true"/><span>Macroprocessos</span>
-                </h:link>
-                <h:link outcome="/avaliacao/instrumentos/list" styleClass="app-nav-link #{facesContext.viewRoot.viewId.startsWith('/avaliacao/') ? 'is-active' : ''}">
+                </a>
+                <a href="#{request.contextPath}/avaliacao/instrumentos/list.xhtml" class="app-nav-link" data-section="avaliacoes">
                     <i class="bi bi-clipboard-check" aria-hidden="true"/><span>Avaliações</span>
-                </h:link>
+                </a>
+                <a href="#{request.contextPath}/avaliacao/instrumentos/instrumento.xhtml" class="app-nav-link" data-section="instrumentos">
+                    <i class="bi bi-ui-checks-grid" aria-hidden="true"/><span>Instrumentos</span>
+                </a>
             </nav>
 
             <div class="app-sidebar-footer">Instituto Federal Farroupilha</div>
