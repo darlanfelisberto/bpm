@@ -1171,8 +1171,9 @@ a.link-danger:hover {
     background: #ffffff;
     box-shadow: 0 1px 2px #0f172a0f;
 }
-.app-header-context, .app-header-labels, .app-header-institution { display: flex; align-items: center; }
+.app-header-context, .app-header-labels, .app-header-institution, .app-header-actions { display: flex; align-items: center; }
 .app-header-context { gap: 0.75rem; min-width: 0; }
+.app-header-actions { gap: 0.75rem; flex: none; }
 .app-header-labels { gap: 0.5rem; }
 .app-header-category {
     padding: 0.125rem 0.5rem;
@@ -1187,6 +1188,23 @@ a.link-danger:hover {
 .app-header-title { margin-top: 0.15rem; color: #0f172a; font-size: 1.1rem; font-weight: 700; }
 .app-header-menu { display: none; padding: 0.35rem 0.6rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; cursor: pointer; }
 .app-header-institution { gap: 0.55rem; padding: 0.3rem 0.65rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 700; }
+.app-logout-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    color: #334155;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.app-logout-button:hover, .app-logout-button:focus-visible {
+    border-color: #059669;
+    color: #047857;
+    background: #ecfdf5;
+}
 .app-content { flex: 1; width: 100%; padding: 2rem 1.5rem; }
 .app-content-inner { max-width: 1260px; }
 .app-footer { padding: 1.1rem 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; }
