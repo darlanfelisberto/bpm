@@ -70,7 +70,14 @@
                         <div class="app-header-title"><ui:insert name="titulo">Início</ui:insert></div>
                     </div>
                 </div>
-                <div class="app-header-institution"><span class="app-header-institution-mark">IF</span><span>IFFar</span></div>
+                <div class="app-header-actions">
+                    <div class="app-header-institution"><span class="app-header-institution-mark">IF</span><span>IFFar</span></div>
+                    <h:form styleClass="app-logout-form">
+                        <h:commandLink action="#{sessaoBean.sair}" styleClass="app-logout-button">
+                            <i class="bi bi-box-arrow-right" aria-hidden="true"/><span>Sair</span>
+                        </h:commandLink>
+                    </h:form>
+                </div>
             </header>
 
             <main class="app-content" id="conteudo">
