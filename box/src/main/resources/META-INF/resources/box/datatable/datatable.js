@@ -43,10 +43,10 @@
     // decides the next state (none -> asc -> desc -> none), so this rule
     // is not duplicated here (see Datatable.nextSort, tested separately).
     function onSortableHeaderClick(event) {
-        var th = event.currentTarget;
-        var wrapper = th.closest('.box-datatable');
+        var button = event.currentTarget;
+        var wrapper = button.closest('.box-datatable');
         var data = {};
-        data[wrapper.id + '_sortBy'] = th.dataset.field;
+        data[wrapper.id + '_sortBy'] = button.dataset.field;
         window.Box.trigger(wrapper, 'sort', data);
     }
 
@@ -91,12 +91,17 @@
         }
         wrapper.dataset.boxDatatableInitialized = 'true';
 
-        wrapper.querySelectorAll('.box-datatable-header-sortable').forEach(function (th) {
-            th.addEventListener('click', onSortableHeaderClick);
+        wrapper.querySelectorAll('.box-datatable-header-sortable').forEach(function (button) {
+            button.addEventListener('click', onSortableHeaderClick);
         });
         wrapper.querySelectorAll('.box-datatable-pagination-button').forEach(function (button) {
+            button.setAttribute('aria-label', window.Box.t('datatable.' + button.dataset.action + 'Page'));
             button.addEventListener('click', onPaginationButtonClick);
         });
+        var pagination = wrapper.querySelector('.box-datatable-pagination');
+        if (pagination) {
+            pagination.setAttribute('aria-label', window.Box.t('datatable.pagination'));
+        }
         wrapper.querySelectorAll('.box-datatable-filter-input').forEach(function (input) {
             input.placeholder = window.Box.t('datatable.filterPlaceholder');
             input.setAttribute('aria-label', window.Box.t('datatable.filterBy', input.dataset.fieldLabel));
@@ -109,13 +114,15 @@
 
         var info = wrapper.querySelector('.box-datatable-pagination-info');
         if (info) {
-            var pagination = info.closest('.box-datatable-pagination');
             var total = parseInt(pagination.dataset.totalRecords, 10) || 0;
             info.textContent = total === 0
                 ? window.Box.t('datatable.noRecords')
                 : window.Box.t('datatable.paginationInfo',
                     pagination.dataset.firstRecord, pagination.dataset.lastRecord, total);
         }
+        wrapper.querySelectorAll('.box-datatable-empty-default').forEach(function (empty) {
+            empty.textContent = window.Box.t('datatable.noRecords');
+        });
     }
 
     function initAll(root) {

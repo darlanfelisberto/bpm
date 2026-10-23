@@ -5,6 +5,14 @@
     font-family: inherit;
 }
 
+.box-datatable-scroll {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--color-border, #dfe4ea);
+    border-radius: var(--radius, 8px);
+    background: var(--color-surface, #fff);
+}
+
 .box-datatable-top {
     display: flex;
     align-items: center;
@@ -19,60 +27,88 @@
 
 .box-datatable-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .box-datatable-table th,
 .box-datatable-table td {
-    padding: 0.55rem 0.75rem;
+    padding: 0.8rem 0.9rem;
     text-align: left;
+    vertical-align: middle;
 }
 
 .box-datatable-table tbody td {
     border-bottom: 1px solid var(--color-border, #dfe4ea);
 }
 
-/* The border that separates the header/filter row from the table body
-   stays only on the last row of thead (header alone, or the filter row
-   when it exists) - avoids two borders stacked together (one from the
-   header, another from the filter row right below) visually squeezing
-   the filter row. */
+.box-datatable-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
 .box-datatable-table thead tr:last-child th,
 .box-datatable-table thead tr:last-child td {
-    border-bottom: 2px solid var(--color-border, #dfe4ea);
+    border-bottom: 1px solid var(--color-border, #dfe4ea);
 }
 
 .box-datatable-header th {
-    font-weight: 600;
+    background: var(--color-bg, #f4f6f8);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: var(--color-text-muted, #616e7c);
     white-space: nowrap;
 }
 
 .box-datatable-filters td {
-    padding-top: 0;
-    padding-bottom: 0.6rem;
+    padding-top: 0.45rem;
+    padding-bottom: 0.7rem;
+    background: var(--color-bg, #f4f6f8);
 }
 
 .box-datatable-header-sortable {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
     cursor: pointer;
-    user-select: none;
 }
 
 .box-datatable-header-sortable:hover {
-    color: var(--color-text, #1f2933);
+    color: var(--color-primary, #2f6f4f);
+}
+
+.box-datatable-header-sortable:focus-visible,
+.box-datatable-pagination-button:focus-visible {
+    outline: 2px solid var(--color-primary, #2f6f4f);
+    outline-offset: 3px;
 }
 
 .box-datatable-sort-indicator {
-    font-size: 0.75em;
+    color: var(--color-text-muted, #616e7c);
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.box-datatable-header-sortable[data-sort-direction] .box-datatable-sort-indicator {
+    color: var(--color-primary, #2f6f4f);
 }
 
 .box-datatable-filter-input {
     width: 100%;
     box-sizing: border-box;
     padding: 0.35rem 0.6rem;
-    border: 1px solid transparent;
+    border: 1px solid var(--color-border, #dfe4ea);
     border-radius: 6px;
-    background: var(--color-bg, #f4f6f8);
+    background: var(--color-surface, #fff);
     color: inherit;
     font: inherit;
     font-size: 0.9em;
@@ -98,7 +134,7 @@
 }
 
 .box-datatable-empty-row td {
-    padding: 1.5rem 0.75rem;
+    padding: 2.5rem 1rem;
     text-align: center;
     color: var(--color-text-muted, #616e7c);
 }
@@ -111,31 +147,58 @@
     background: var(--color-bg, #f4f6f8);
 }
 
+.box-datatable-row:focus-within {
+    background: var(--color-bg, #f4f6f8);
+}
+
 .box-datatable-pagination {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 0.5rem;
-    padding: 0.75rem 0;
+    padding: 0.9rem 0 0;
+    flex-wrap: wrap;
 }
 
 .box-datatable-pagination-info {
     color: var(--color-text-muted, #616e7c);
     margin: 0 0.5rem;
+    font-size: 0.87rem;
 }
 
 .box-datatable-pagination-button {
-    background: none;
+    min-width: 2.1rem;
+    min-height: 2.1rem;
+    background: var(--color-surface, #fff);
     border: 1px solid var(--color-border, #dfe4ea);
-    border-radius: 4px;
+    border-radius: 6px;
     color: var(--color-text, #1f2933);
     cursor: pointer;
-    padding: 0.3rem 0.6rem;
+    padding: 0.3rem 0.55rem;
     line-height: 1;
+}
+
+.box-datatable-pagination-button:hover:not(:disabled) {
+    background: var(--color-bg, #f4f6f8);
+    border-color: var(--color-primary, #2f6f4f);
+    color: var(--color-primary, #2f6f4f);
 }
 
 .box-datatable-pagination-button:disabled {
     color: var(--color-text-muted, #616e7c);
     cursor: default;
     opacity: 0.5;
+}
+
+@media (max-width: 600px) {
+    .box-datatable-pagination {
+        justify-content: center;
+    }
+
+    .box-datatable-pagination-info {
+        order: -1;
+        flex-basis: 100%;
+        margin-bottom: 0.25rem;
+        text-align: center;
+    }
 }

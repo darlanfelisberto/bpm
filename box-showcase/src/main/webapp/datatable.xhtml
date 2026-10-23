@@ -17,6 +17,11 @@
             (page, sort field/direction, typed filters) go into the view
             state, which lets the component work well even with datasets too
             large to load in full.</p>
+        <p>Wide tables scroll horizontally within their own border. Sortable
+            headers are buttons, so they can be reached with Tab and activated
+            with Enter or Space. The active column exposes its direction to
+            assistive technology, and pagination buttons have descriptive
+            labels.</p>
 
         <h4>Data source</h4>
         <p>The <code>value</code> attribute points to an object that
@@ -57,7 +62,7 @@
             <tr><th>Facet</th><th>Description</th></tr>
             <tr><td><code>header</code></td><td>Block above the table — title, counter, action bar.</td></tr>
             <tr><td><code>footer</code></td><td>Block below pagination — usually bulk actions.</td></tr>
-            <tr><td><code>empty</code></td><td>Replaces the table body when the current page has no rows (typically because of a filter). Without this facet, the table just keeps the header, and pagination shows "No records".</td></tr>
+            <tr><td><code>empty</code></td><td>Replaces the table body when the current page has no rows (typically because of a filter). Without this facet, the table shows the translated "No records" message.</td></tr>
         </table>
 
         <h4>Client behaviors (nested f:ajax)</h4>

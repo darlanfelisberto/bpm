@@ -70,6 +70,11 @@
             'datatable.filterBy': 'Filter by {0}',
             'datatable.noRecords': 'No records',
             'datatable.paginationInfo': '{0}–{1} of {2}',
+            'datatable.pagination': 'Table pagination',
+            'datatable.firstPage': 'First page',
+            'datatable.previousPage': 'Previous page',
+            'datatable.nextPage': 'Next page',
+            'datatable.lastPage': 'Last page',
             'autocomplete.noResults': 'No results found',
             'autocomplete.clear': 'Clear selection',
             'autocomplete.loading': 'Loading…'

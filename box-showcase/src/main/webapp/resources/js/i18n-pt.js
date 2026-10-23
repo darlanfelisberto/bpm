@@ -18,6 +18,11 @@ document.addEventListener('DOMContentLoaded', function () {
         'datatable.filterBy': 'Filtrar por {0}',
         'datatable.noRecords': 'Nenhum registro',
         'datatable.paginationInfo': '{0}–{1} de {2}',
+        'datatable.pagination': 'Paginação da tabela',
+        'datatable.firstPage': 'Primeira página',
+        'datatable.previousPage': 'Página anterior',
+        'datatable.nextPage': 'Próxima página',
+        'datatable.lastPage': 'Última página',
         'autocomplete.noResults': 'Nenhum resultado encontrado',
         'autocomplete.clear': 'Limpar seleção',
         'autocomplete.loading': 'Carregando…'

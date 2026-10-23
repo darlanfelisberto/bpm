@@ -412,6 +412,8 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
 
         boolean anyFilterable = columns.stream().anyMatch(Column::isFilterable);
 
+        writer.startElement("div", this);
+        writer.writeAttribute("class", "box-datatable-scroll", null);
         writer.startElement("table", this);
         writer.writeAttribute("class", "box-datatable-table", null);
 
@@ -420,21 +422,28 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         writer.writeAttribute("class", "box-datatable-header", null);
         for (Column column : columns) {
             writer.startElement("th", this);
+            writer.writeAttribute("scope", "col", null);
             String field = column.getField();
+            String label = column.getHeader() != null ? column.getHeader() : field;
             if (column.isSortable() && field != null) {
+                writer.writeAttribute("aria-sort", field.equals(sortBy)
+                        ? (sortAscending ? "ascending" : "descending") : "none", null);
+                writer.startElement("button", this);
+                writer.writeAttribute("type", "button", null);
                 writer.writeAttribute("class", "box-datatable-header-sortable", null);
                 writer.writeAttribute("data-field", field, null);
                 if (field.equals(sortBy)) {
                     writer.writeAttribute("data-sort-direction", sortAscending ? "asc" : "desc", null);
                 }
-            }
-            String label = column.getHeader() != null ? column.getHeader() : field;
-            writer.writeText(label != null ? label : "", "header");
-            if (column.isSortable() && field != null && field.equals(sortBy)) {
+                writer.writeText(label != null ? label : "", "header");
                 writer.startElement("span", this);
                 writer.writeAttribute("class", "box-datatable-sort-indicator", null);
-                writer.writeText(sortAscending ? " ▲" : " ▼", null);
+                writer.writeAttribute("aria-hidden", "true", null);
+                writer.writeText(field.equals(sortBy) ? (sortAscending ? "↑" : "↓") : "↕", null);
                 writer.endElement("span");
+                writer.endElement("button");
+            } else {
+                writer.writeText(label != null ? label : "", "header");
             }
             writer.endElement("th");
         }
@@ -510,18 +519,22 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
 
         writer.endElement("tbody");
         writer.endElement("table");
+        writer.endElement("div");
     }
 
     private void writeEmptyRow(FacesContext context, ResponseWriter writer, int colspan) throws IOException {
         UIComponent empty = getFacet("empty");
-        if (empty == null || !empty.isRendered()) {
-            return;
-        }
         writer.startElement("tr", this);
         writer.writeAttribute("class", "box-datatable-empty-row", null);
         writer.startElement("td", this);
         writer.writeAttribute("colspan", String.valueOf(colspan), null);
-        empty.encodeAll(context);
+        if (empty != null && empty.isRendered()) {
+            empty.encodeAll(context);
+        } else {
+            writer.startElement("span", this);
+            writer.writeAttribute("class", "box-datatable-empty-default", null);
+            writer.endElement("span");
+        }
         writer.endElement("td");
         writer.endElement("tr");
     }
@@ -540,6 +553,7 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
 
         writer.startElement("div", this);
         writer.writeAttribute("class", "box-datatable-pagination", null);
+        writer.writeAttribute("role", "navigation", null);
         writer.writeAttribute("data-current-page", String.valueOf(page), null);
         writer.writeAttribute("data-total-pages", String.valueOf(totalPages), null);
         writer.writeAttribute("data-first-record", String.valueOf(firstRecord), null);
@@ -554,6 +568,7 @@ public class Datatable extends UIComponentBase implements ClientBehaviorHolder {
         // markup on purpose (see Box.t in box-core.js).
         writer.startElement("span", this);
         writer.writeAttribute("class", "box-datatable-pagination-info", null);
+        writer.writeAttribute("aria-live", "polite", null);
         writer.endElement("span");
 
         writePaginationButton(writer, "next", "›", page + 1 >= totalPages);
