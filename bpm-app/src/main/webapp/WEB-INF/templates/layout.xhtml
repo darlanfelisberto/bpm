@@ -1,64 +1,89 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
-      xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets"
-      xmlns:b="http://iffar.edu.br/box">
+      xmlns:b="http://iffar.edu.br/box"
+      xmlns:p="jakarta.faces.passthrough" lang="pt-BR">
 <h:head>
-    <title><ui:insert name="titulo">BPM IFFar</ui:insert></title>
-    <!-- Bootstrap Icons auto-hospedada (webapp/vendor/bootstrap-icons/), servida
-         como arquivo estatico comum (fora do resource handler do JSF) para as
-         referencias relativas a fonts/ dentro do CSS funcionarem sem ajuste. -->
+    <title><ui:insert name="titulo">BPM IFFar</ui:insert> · BPM IFFar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <h:outputStylesheet library="css" name="app.css"/>
     <h:outputScript library="box" name="core/box-core.js"/>
-    <!-- confirm.js/css (lib box): <box-confirm> é um custom element puro,
-         não um componente Faces, então ninguém pede o recurso pra JSF
-         incluir automaticamente - por isso inclui aqui manualmente, uma
-         vez, pra toda a aplicacao. confirm.js funciona standalone, sem
-         depender de box-core.js (só usa ele de forma oportunista pra
-         tradução, quando outro componente do box já carregou). -->
     <h:outputScript library="box" name="confirm/confirm.js"/>
     <h:outputScript library="js" name="navegacao.js" target="body"/>
     <ui:insert name="head-extra"/>
 </h:head>
 <h:body>
     <b:growl id="growl"/>
+    <a class="app-skip-link" href="#conteudo">Ir para o conteúdo</a>
+    <input id="menu-toggle" class="app-menu-toggle" type="checkbox" aria-label="Abrir menu lateral"/>
     <div class="app-shell">
-        <aside class="app-sidebar">
-            <div class="app-brand">
-                <span class="app-brand-mark" aria-hidden="true"><i class="bi bi-diagram-3-fill"/></span>
-                <div>
-                    <span class="app-brand-name">BPM IFFar</span>
-                    <span class="app-brand-caption">Gestão de processos</span>
+        <label for="menu-toggle" class="app-sidebar-backdrop" aria-hidden="true"></label>
+        <aside class="app-sidebar" aria-label="Menu principal">
+            <div class="app-brand-row">
+                <div class="app-brand">
+                    <span class="app-brand-mark" aria-hidden="true"><i class="bi bi-diagram-3-fill"/></span>
+                    <div>
+                        <span class="app-brand-name">BPM IFFar</span>
+                        <span class="app-brand-caption">Gestão de processos</span>
+                    </div>
                 </div>
+                <label for="menu-toggle" class="app-sidebar-close" aria-label="Fechar menu"><i class="bi bi-x-lg" aria-hidden="true"/></label>
             </div>
 
-            <nav class="app-nav" aria-label="Menu principal">
-                <span class="app-nav-title">NAVEGAÇÃO</span>
-                <a href="#{request.contextPath}/index.xhtml" class="app-nav-link" data-section="inicio">
+            <nav class="app-nav" aria-label="Navegação">
+                <span class="app-nav-title">Visão geral</span>
+                <h:link outcome="/index" styleClass="app-nav-link" p:data-section="inicio">
                     <i class="bi bi-house-door" aria-hidden="true"/><span>Início</span>
-                </a>
-                <a href="#{request.contextPath}/macroprocessos/list.xhtml" class="app-nav-link" data-section="macroprocessos">
+                </h:link>
+
+                <span class="app-nav-title">Processos</span>
+                <h:link outcome="/macroprocessos/list" styleClass="app-nav-link" p:data-section="macroprocessos">
                     <i class="bi bi-diagram-2" aria-hidden="true"/><span>Macroprocessos</span>
-                </a>
-                <a href="#{request.contextPath}/avaliacao/instrumentos/list.xhtml" class="app-nav-link" data-section="avaliacoes">
-                    <i class="bi bi-clipboard-check" aria-hidden="true"/><span>Avaliações</span>
-                </a>
-                <a href="#{request.contextPath}/avaliacao/instrumentos/instrumento.xhtml" class="app-nav-link" data-section="instrumentos">
+                </h:link>
+                <h:link outcome="/processos/list" styleClass="app-nav-link" p:data-section="processos">
+                    <i class="bi bi-bezier2" aria-hidden="true"/><span>Processos</span>
+                </h:link>
+
+                <span class="app-nav-title">Avaliação</span>
+                <h:link outcome="/avaliacao/instrumentos/instrumento" styleClass="app-nav-link" p:data-section="instrumentos">
                     <i class="bi bi-ui-checks-grid" aria-hidden="true"/><span>Instrumentos</span>
-                </a>
+                </h:link>
+                <h:link outcome="/avaliacao/instrumentos/list" styleClass="app-nav-link" p:data-section="avaliacoes">
+                    <i class="bi bi-clipboard-check" aria-hidden="true"/><span>Avaliações</span>
+                </h:link>
             </nav>
 
-            <div class="app-sidebar-footer">Instituto Federal Farroupilha</div>
+            <div class="app-sidebar-footer">
+                <span class="app-sidebar-footer-mark" aria-hidden="true">IF</span>
+                <span>Instituto Federal Farroupilha</span>
+            </div>
         </aside>
 
-        <main class="app-content" id="conteudo">
-            <div class="app-content-inner">
-                <div class="app-page-context">IFFar <span aria-hidden="true">/</span> BPM</div>
-                <ui:insert name="conteudo"/>
-            </div>
-        </main>
+        <div class="app-workspace">
+            <header class="app-header">
+                <div class="app-header-context">
+                    <label for="menu-toggle" class="app-header-menu" aria-label="Abrir menu"><i class="bi bi-list" aria-hidden="true"/></label>
+                    <div>
+                        <div class="app-header-labels"><span class="app-header-category">BPM</span><span class="app-header-code">Gestão de processos · IFFar</span></div>
+                        <div class="app-header-title"><ui:insert name="titulo">Início</ui:insert></div>
+                    </div>
+                </div>
+                <div class="app-header-institution"><span class="app-header-institution-mark">IF</span><span>IFFar</span></div>
+            </header>
+
+            <main class="app-content" id="conteudo">
+                <div class="app-content-inner">
+                    <div class="app-page-context">IFFar <span aria-hidden="true">/</span> BPM</div>
+                    <ui:insert name="conteudo"/>
+                </div>
+            </main>
+
+            <footer class="app-footer">
+                <div class="app-footer-inner"><span>BPM IFFar</span><span>Instituto Federal Farroupilha</span></div>
+            </footer>
+        </div>
     </div>
 </h:body>
 </html>

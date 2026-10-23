@@ -13,6 +13,7 @@
         <feature>validation-3.1</feature>
         <feature>jdbc-4.3</feature>
         <feature>persistence-3.2</feature>
+        <feature>openidConnectClient-1.0</feature>
 
         <!-- Para usar o Hibernate 7 -->
         <feature>xmlBinding-4.0</feature>
@@ -24,8 +25,25 @@
                   httpsPort="${default.https.port}"/>
 
     <webApplication location="bpm.war" contextRoot="/">
+        <application-bnd>
+            <security-role name="usuarioAutenticado">
+                <special-subject type="ALL_AUTHENTICATED_USERS"/>
+            </security-role>
+        </application-bnd>
 <!--        <classloader delegation="parentLast" />-->
     </webApplication>
+
+    <openidConnectClient id="bpm"
+                       clientId="${OIDC_CLIENT_ID}"
+                       clientSecret="${OIDC_CLIENT_SECRET}"
+                       authorizationEndpointUrl="${OIDC_PROVIDER_BASE_URL}/protocol/openid-connect/auth"
+                       tokenEndpointUrl="${OIDC_PROVIDER_BASE_URL}/protocol/openid-connect/token"
+                       jwkEndpointUrl="${OIDC_PROVIDER_BASE_URL}/protocol/openid-connect/certs"
+                       issuerIdentifier="${OIDC_ISSUER}"
+                       signatureAlgorithm="RS256"
+                       scope="openid"
+                       redirectToRPHostAndPort="${OIDC_REDIRECT_BASE_URL}"
+                       httpsRequired="false"/>
 
     <!-- Driver JDBC copiado para cá pelo liberty-maven-plugin (dependency com scope adequado) -->
     <library id="postgresqlLib">

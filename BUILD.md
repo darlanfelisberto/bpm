@@ -60,14 +60,46 @@ cp bpm-app/.env.example bpm-app/.env
 # edite bpm-app/.env com as credenciais do seu Postgres local
 ```
 
-`bpm-app/.env` **não é versionado** (está no `.gitignore`). Antes de
-qualquer comando Maven que precise do banco (`liberty:run`,
-`flyway:migrate`, etc.), exporte essas variáveis a partir do arquivo:
+`bpm-app/.env` **não é versionado** (está no `.gitignore`). Use `dev.sh`
+para carregar as variáveis e iniciar o Liberty em modo de desenvolvimento:
 
 ```bash
 cd bpm-app
-set -a && source .env && set +a
+./dev.sh
 ```
+
+Depois de alterar o `.env`, pare e inicie o Liberty novamente; um processo
+já iniciado não recebe as novas variáveis de ambiente.
+
+### Autenticação OpenID Connect
+
+O `bpm-app` usa o Open Liberty como cliente OIDC. Todas as URLs da aplicação,
+inclusive `/api` e `/responder`, exigem autenticação. O `box-showcase` não é
+afetado. Configure no mesmo `.env`:
+
+| Variável | Uso |
+|---|---|
+| `OIDC_CLIENT_ID` | Cliente confidencial no Keycloak; localmente, `bpm` |
+| `OIDC_CLIENT_SECRET` | Mesmo valor de `BPM_CLIENT_SECRET` em `spi-keyclok/local.env` |
+| `OIDC_PROVIDER_BASE_URL` | URL do realm do Keycloak; localmente, `http://localhost:8081/realms/bpm` |
+| `OIDC_ISSUER` | Valor exato de `issuer` publicado pelo Keycloak; localmente, igual à URL do realm |
+| `OIDC_REDIRECT_BASE_URL` | Origem pública do BPM; localmente, `http://localhost:9080` |
+
+O realm, a federação de usuários SIG e o cliente `bpm` são preparados por
+`spi-keyclok/configure.sh`. Instale e inicie o Keycloak local conforme
+`spi-keyclok/README.md` antes de iniciar o BPM. A conexão com a base externa
+usa um usuário PostgreSQL somente para leitura. O callback do cliente é
+`http://localhost:9080/oidcclient/redirect/bpm`.
+
+Para conferir o emissor local:
+
+```bash
+curl http://localhost:8081/realms/bpm/.well-known/openid-configuration
+```
+
+O HTTP está liberado apenas para desenvolvimento local. Em produção,
+configure HTTPS nas origens públicas, ajuste as variáveis OIDC e exija HTTPS
+no `server.xml`.
 
 ## 3. Build
 
@@ -101,15 +133,13 @@ Para atualizar uma dessas libs: mude `version.quill` ou
 
 ```bash
 cd bpm-app
-set -a && source .env && set +a
-mvn -o liberty:run
+./dev.sh
 ```
 
 - Aplicação: http://localhost:9080
 - HTTPS: porta 9443 (ver `liberty.var.default.https.port` em `bpm-app/pom.xml`)
-- `liberty:run` roda em primeiro plano (Ctrl+C para parar). Para
-  desenvolvimento com hot-reload de código Java/Facelets, use
-  `mvn -o liberty:dev` no lugar de `liberty:run`.
+- `dev.sh` executa `liberty:dev` em primeiro plano, com hot-reload de código
+  Java/Facelets. Use Ctrl+C para parar.
 
 O driver JDBC do PostgreSQL é copiado automaticamente para
 `lib/global` do servidor Liberty pelo próprio `liberty-maven-plugin`
@@ -199,10 +229,8 @@ manual.
 ## Resumo rápido (depois do primeiro setup)
 
 ```bash
-cd bpm-app
-set -a && source .env && set +a
-cd ..
+cd /opt/git/iffar/bpm
 mvn -q -o clean install -DskipTests
 cd bpm-app
-mvn -o liberty:run
+./dev.sh
 ```

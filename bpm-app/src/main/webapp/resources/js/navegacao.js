@@ -12,8 +12,10 @@
         let secao;
         if (caminhoPagina === '/' || caminhoPagina === '/index' || caminhoPagina === '/index.xhtml') {
             secao = 'inicio';
-        } else if (caminhoPagina.startsWith('/macroprocessos/') || caminhoPagina.startsWith('/processos/')) {
+        } else if (caminhoPagina.startsWith('/macroprocessos/')) {
             secao = 'macroprocessos';
+        } else if (caminhoPagina.startsWith('/processos/')) {
+            secao = 'processos';
         } else if (caminhoPagina === '/avaliacao/instrumentos/instrumento.xhtml'
                 || caminhoPagina === '/avaliacao/instrumentos/instrumento') {
             secao = 'instrumentos';

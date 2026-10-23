@@ -1078,3 +1078,132 @@ a.link-danger:hover {
     background: #e2e8f0;
     border-color: #94a3b8;
 }
+
+/* Estrutura compartilhada das páginas JSF */
+.app-menu-toggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.app-skip-link {
+    position: fixed;
+    z-index: 100;
+    top: -4rem;
+    left: 1rem;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+    background: #ffffff;
+}
+
+.app-skip-link:focus { top: 1rem; }
+
+.app-shell { display: block; }
+.app-sidebar {
+    position: fixed;
+    z-index: 50;
+    inset: 0 auto 0 0;
+    width: 18rem;
+    height: 100vh;
+    padding: 0;
+    overflow-y: auto;
+    background: #0f172a;
+    border-right: 1px solid #1e293b;
+}
+
+.app-brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem;
+    border-bottom: 1px solid #1e293b;
+}
+
+.app-brand { padding: 0; }
+.app-brand-mark { background: #059669; }
+.app-brand-caption { color: #6ee7b7; }
+.app-sidebar-close { display: none; color: #cbd5e1; cursor: pointer; }
+.app-nav { display: flex; flex: 1; flex-direction: column; gap: 0.25rem; padding: 1.25rem 1rem; }
+.app-nav-title {
+    display: block;
+    margin: 0.8rem 0 0.2rem;
+    padding: 0 0.85rem;
+    color: #94a3b8;
+}
+.app-nav-title:first-child { margin-top: 0; }
+.app-nav-link { color: #cbd5e1; border-radius: 0.75rem; }
+.app-nav-link:hover, .app-nav-link:focus-visible { background: #1e293b; color: #ffffff; }
+.app-nav-link.is-active { background: #059669; color: #ffffff; }
+.app-sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: auto;
+    padding: 1.2rem;
+    border-top: 1px solid #1e293b;
+    color: #94a3b8;
+}
+.app-sidebar-footer-mark, .app-header-institution-mark {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: #047857;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.app-workspace { display: flex; flex-direction: column; min-height: 100vh; margin-left: 18rem; }
+.app-header {
+    position: sticky;
+    z-index: 30;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4.5rem;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 1px 2px #0f172a0f;
+}
+.app-header-context, .app-header-labels, .app-header-institution { display: flex; align-items: center; }
+.app-header-context { gap: 0.75rem; min-width: 0; }
+.app-header-labels { gap: 0.5rem; }
+.app-header-category {
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+.app-header-code { color: #94a3b8; font-size: 0.72rem; }
+.app-header-title { margin-top: 0.15rem; color: #0f172a; font-size: 1.1rem; font-weight: 700; }
+.app-header-menu { display: none; padding: 0.35rem 0.6rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; cursor: pointer; }
+.app-header-institution { gap: 0.55rem; padding: 0.3rem 0.65rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 700; }
+.app-content { flex: 1; width: 100%; padding: 2rem 1.5rem; }
+.app-content-inner { max-width: 1260px; }
+.app-footer { padding: 1.1rem 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; }
+.app-footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; max-width: 1260px; margin: auto; color: #64748b; font-size: 0.75rem; }
+.app-sidebar-backdrop { display: none; }
+
+@media (max-width: 1023px) {
+    .app-sidebar { transform: translateX(-100%); transition: transform 0.2s ease; }
+    .app-workspace { margin-left: 0; }
+    .app-header-menu, .app-sidebar-close { display: inline-flex; align-items: center; justify-content: center; }
+    .app-menu-toggle:checked + .app-shell .app-sidebar { transform: translateX(0); }
+    .app-menu-toggle:checked + .app-shell .app-sidebar-backdrop { position: fixed; z-index: 40; inset: 0; display: block; background: #0f172a80; }
+}
+
+@media (max-width: 600px) {
+    .app-header { padding: 0.75rem 1rem; }
+    .app-header-code, .app-header-institution { display: none; }
+    .app-content { padding: 1.25rem 1rem 2rem; }
+    .app-footer { padding: 1rem; }
+}
