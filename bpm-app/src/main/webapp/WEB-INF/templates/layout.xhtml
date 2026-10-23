@@ -23,16 +23,38 @@
 </h:head>
 <h:body>
     <b:growl id="growl"/>
-    <header class="app-header">
-        <h1><h:link outcome="/index" value="BPM IFFar" style="color: inherit; text-decoration: none;"/></h1>
-        <nav>
-            <h:link outcome="/index" value="Início"/>
-            <h:link outcome="/macroprocessos/list" value="Macroprocessos"/>
-            <h:link outcome="/avaliacao/instrumentos/list" value="Avaliações"/>
-        </nav>
-    </header>
-    <main class="app-content">
-        <ui:insert name="conteudo"/>
-    </main>
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <div class="app-brand">
+                <span class="app-brand-mark" aria-hidden="true"><i class="bi bi-diagram-3-fill"/></span>
+                <div>
+                    <span class="app-brand-name">BPM IFFar</span>
+                    <span class="app-brand-caption">Gestão de processos</span>
+                </div>
+            </div>
+
+            <nav class="app-nav" aria-label="Menu principal">
+                <span class="app-nav-title">NAVEGAÇÃO</span>
+                <h:link outcome="/index" styleClass="app-nav-link #{facesContext.viewRoot.viewId eq '/index.xhtml' ? 'is-active' : ''}">
+                    <i class="bi bi-house-door" aria-hidden="true"/><span>Início</span>
+                </h:link>
+                <h:link outcome="/macroprocessos/list" styleClass="app-nav-link #{facesContext.viewRoot.viewId.startsWith('/macroprocessos/') or facesContext.viewRoot.viewId.startsWith('/processos/') ? 'is-active' : ''}">
+                    <i class="bi bi-diagram-2" aria-hidden="true"/><span>Macroprocessos</span>
+                </h:link>
+                <h:link outcome="/avaliacao/instrumentos/list" styleClass="app-nav-link #{facesContext.viewRoot.viewId.startsWith('/avaliacao/') ? 'is-active' : ''}">
+                    <i class="bi bi-clipboard-check" aria-hidden="true"/><span>Avaliações</span>
+                </h:link>
+            </nav>
+
+            <div class="app-sidebar-footer">Instituto Federal Farroupilha</div>
+        </aside>
+
+        <main class="app-content" id="conteudo">
+            <div class="app-content-inner">
+                <div class="app-page-context">IFFar <span aria-hidden="true">/</span> BPM</div>
+                <ui:insert name="conteudo"/>
+            </div>
+        </main>
+    </div>
 </h:body>
 </html>
